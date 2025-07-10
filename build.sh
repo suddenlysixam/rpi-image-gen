@@ -17,7 +17,6 @@ EXT_META=
 EXT_NS=
 EXT_NSDIR=
 EXT_NSMETA=
-INOPTIONS=
 INCONFIG=generic64-apt-simple
 ONLY_ROOTFS=0
 ONLY_IMAGE=0
@@ -40,10 +39,6 @@ Options:
   [-N <namespace>] Optional namespace to specify an additional sub-directory
                    hierarchy within the directory provided by -D of where to
                    search for meta layers.
-  [-o <file>]      Path to shell-style fragment specifying variables as
-                   key=value. These variables can override the defaults, those
-                   set by the config file, or provide completely new variables
-                   available to both rootfs and image generation stages.
   Developer Options
   [-r]             Establish configuration, build rootfs, exit after post-build.
   [-i]             Establish configuration, skip rootfs, run hooks, generate image.
@@ -51,7 +46,7 @@ EOF
 }
 
 
-while getopts "c:D:hiN:o:r" flag ; do
+while getopts "c:D:hiN:r" flag ; do
    case "$flag" in
       c)
          INCONFIG="$OPTARG"
@@ -68,10 +63,6 @@ while getopts "c:D:hiN:o:r" flag ; do
          ;;
       N)
          EXT_NS="$OPTARG"
-         ;;
-      o)
-         INOPTIONS=$(realpath -m "$OPTARG")
-         [[ -f $INOPTIONS ]] || { usage ; die "Invalid options file: $INOPTIONS" ; }
          ;;
       r)
          ONLY_ROOTFS=1
@@ -131,10 +122,7 @@ CFG=$(realpath -e "${IGTOP_CONFIG}/${INCONFIG}" 2>/dev/null) || \
 [[ -d $EXT_NSDIR ]] && IGconf_ext_nsdir="$EXT_NSDIR"
 
 
-msg "Reading $CFG with options [$INOPTIONS]"
-
-# Load options(1) to perform explicit set/unset
-[[ -s "$INOPTIONS" ]] && apply_options "$INOPTIONS"
+msg "Reading $CFG"
 
 
 # Merge config
@@ -183,10 +171,6 @@ aggregate_options "image" ${IGTOP_IMAGE}/provision.defaults
 aggregate_options "sys" ${IGTOP}/sys-build.defaults
 aggregate_options "sbom" ${IGTOP_SBOM}/defaults
 aggregate_options "meta" ${META}/defaults
-
-
-# Load options(2) for final overrides
-[[ -s "$INOPTIONS" ]] && apply_options "$INOPTIONS"
 
 
 # Assemble APT keys
