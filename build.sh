@@ -23,7 +23,7 @@ usage()
 {
 cat <<-EOF >&2
 Usage
-  $(basename "$0") [options]
+  $(basename "$0") [options] [-- IGconf_key=value ...]
 
 Root filesystem and image generation utility.
 
@@ -35,6 +35,10 @@ Options:
   Developer Options
   [-r]             Establish configuration, build rootfs, exit after post-build.
   [-i]             Establish configuration, skip rootfs, run hooks, generate image.
+
+  IGconf Variable Overrides:
+    Use -- to separate options from IGconf variable overrides.
+    Any number of IGconf_key=value pairs can be provided.
 EOF
 }
 
@@ -62,6 +66,23 @@ while getopts "c:D:hir" flag ; do
          ;;
    esac
 done
+
+
+shift $((OPTIND-1))
+
+# Process remaining IGconf_* key=value ..
+declare -A IGOVERRIDES
+for arg in "$@"; do
+    if [[ "$arg" =~ ^IGconf_[a-zA-Z_][a-zA-Z0-9_]*=.* ]]; then
+        key="${arg%%=*}"
+        value="${arg#*=}"
+        IGOVERRIDES["$key"]="$value"
+        msg "Override: $key=$value"
+    else
+        die "Invalid argument format: $arg (expected IGconf_key=value)"
+    fi
+done
+
 
 
 # Constants
