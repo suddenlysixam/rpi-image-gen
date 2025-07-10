@@ -14,7 +14,7 @@ source "${IGTOP}/bin/igconf"
 # Defaults
 EXT_DIR=
 EXT_META=
-INCONFIG=generic64-apt-simple
+INCONFIG=
 ONLY_ROOTFS=0
 ONLY_IMAGE=0
 
@@ -29,7 +29,6 @@ Root filesystem and image generation utility.
 
 Options:
   [-c <config>]    Name of config file, location defaults to config/
-                   Default: $INCONFIG
   [-D <directory>] Directory that takes precedence over the default in-tree
                    hierarchy when searching for config files, profiles, meta
                    layers and image layouts.
@@ -82,7 +81,7 @@ RPI_TEMPLATES="${IGTOP}/templates/rpi"
 
 
 # Establish the top level directory hierarchy by detecting the config file
-INCONFIG="${INCONFIG%.cfg}.cfg"
+[[ -n "${INCONFIG}" ]] || die "No config file specified"
 if [[ -d ${EXT_DIR} ]] && \
    [[ -f $(realpath -e ${EXT_DIR}/config/${INCONFIG} 2>/dev/null) ]] ; then
    IGTOP_CONFIG="${EXT_DIR}/config"
