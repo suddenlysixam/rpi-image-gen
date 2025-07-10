@@ -49,7 +49,7 @@ while getopts "c:D:hir" flag ; do
          ;;
       D)
          EXT_DIR=$(realpath -m "$OPTARG")
-         [[ -d $EXT_DIR ]] || { usage ; die "Invalid external directory: $EXT_DIR" ; }
+         [[ -d "$EXT_DIR" ]] || { usage ; die "Invalid external directory: $EXT_DIR" ; }
          ;;
       i)
          ONLY_IMAGE=1
@@ -64,11 +64,6 @@ while getopts "c:D:hir" flag ; do
 done
 
 
-if [[ -d ${EXT_DIR} ]] && [[ -d ${EXT_DIR}/meta ]] ; then
-   EXT_META=$(realpath -e ${EXT_DIR}/meta)
-fi
-
-
 # Constants
 IGTOP_CONFIG="${IGTOP}/config"
 IGTOP_DEVICE="${IGTOP}/device"
@@ -80,31 +75,51 @@ META_HOOKS="${IGTOP}/meta-hooks"
 RPI_TEMPLATES="${IGTOP}/templates/rpi"
 
 
-# Establish the top level directory hierarchy by detecting the config file
+# Establish directory hierarchy by detecting the config file
 [[ -n "${INCONFIG}" ]] || die "No config file specified"
-if [[ -d ${EXT_DIR} ]] && \
-   [[ -f $(realpath -e ${EXT_DIR}/config/${INCONFIG} 2>/dev/null) ]] ; then
-   IGTOP_CONFIG="${EXT_DIR}/config"
+
+if [[ -n "${EXT_DIR}" ]]; then
+    IGTOP_CONFIG="${EXT_DIR}/config"
+    [[ -f "${IGTOP_CONFIG}/${INCONFIG}" ]] || \
+        die "Config file '$INCONFIG' not found in $IGTOP_CONFIG"
 else
-   __IC=$(basename "$INCONFIG")
-   if realpath -e "${IGTOP_CONFIG}/${__IC}" > /dev/null 2>&1  ; then
-      INCONFIG="$__IC"
-   else
-      die "Can't resolve config file path for '${INCONFIG}'. Need -D?"
+    [[ -f "$INCONFIG" ]] || die "Config file not found: $INCONFIG"
+
+    abs_config=$(realpath -e "$INCONFIG")
+    config_dir=$(dirname "$abs_config")
+
+    if [[ $(basename "$config_dir") != "config" ]]; then
+        die "Config file must be in a 'config' directory: $INCONFIG"
+    fi
+
+    IGTOP_CONFIG="$config_dir"
+    INCONFIG=$(basename "$abs_config")
+
+    # Auto-detect EXT_DIR
+    maybe_ext_dir=$(dirname "$config_dir")
+    if [[ "$maybe_ext_dir" != "$IGTOP" ]]; then
+        EXT_DIR="$maybe_ext_dir"
+        msg "Auto-detected external directory: $EXT_DIR"
+    fi
+fi
+
+
+# Resolve config
+CFG=$(realpath -e "${IGTOP_CONFIG}/${INCONFIG}" 2>/dev/null) || \
+    die "Bad config spec: $IGTOP_CONFIG : $INCONFIG"
+
+
+# Propagate external directories
+if [[ -d "${EXT_DIR}" ]] ; then
+   IGconf_ext_dir="${EXT_DIR}"
+   if [[ -d "${EXT_DIR}/meta" ]] ; then
+      EXT_META=$(realpath -e "${EXT_DIR}/meta")
+      IGconf_extmeta_dir="${EXT_META}"
    fi
 fi
-CFG=$(realpath -e "${IGTOP_CONFIG}/${INCONFIG}" 2>/dev/null) || \
-   die "Bad config spec: $IGTOP_CONFIG : $INCONFIG"
-
-
-# Set via cmdline only
-[[ -d $EXT_DIR ]] && IGconf_ext_dir="$EXT_DIR"
 
 
 msg "Reading $CFG"
-
-
-# Merge config
 aggregate_config "$CFG"
 
 
