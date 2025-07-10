@@ -14,9 +14,6 @@ source "${IGTOP}/bin/igconf"
 # Defaults
 EXT_DIR=
 EXT_META=
-EXT_NS=
-EXT_NSDIR=
-EXT_NSMETA=
 INCONFIG=generic64-apt-simple
 ONLY_ROOTFS=0
 ONLY_IMAGE=0
@@ -36,9 +33,6 @@ Options:
   [-D <directory>] Directory that takes precedence over the default in-tree
                    hierarchy when searching for config files, profiles, meta
                    layers and image layouts.
-  [-N <namespace>] Optional namespace to specify an additional sub-directory
-                   hierarchy within the directory provided by -D of where to
-                   search for meta layers.
   Developer Options
   [-r]             Establish configuration, build rootfs, exit after post-build.
   [-i]             Establish configuration, skip rootfs, run hooks, generate image.
@@ -46,7 +40,7 @@ EOF
 }
 
 
-while getopts "c:D:hiN:r" flag ; do
+while getopts "c:D:hir" flag ; do
    case "$flag" in
       c)
          INCONFIG="$OPTARG"
@@ -61,9 +55,6 @@ while getopts "c:D:hiN:r" flag ; do
       i)
          ONLY_IMAGE=1
          ;;
-      N)
-         EXT_NS="$OPTARG"
-         ;;
       r)
          ONLY_ROOTFS=1
          ;;
@@ -74,14 +65,8 @@ while getopts "c:D:hiN:r" flag ; do
 done
 
 
-[[ -d $EXT_DIR ]] && EXT_META=$(realpath -e "${EXT_DIR}/meta" 2>/dev/null)
-
-[[ -n $EXT_NS && ! -d $EXT_DIR ]] && die "External namespace supplied without external dir"
-
-if [[ -d $EXT_DIR && -n $EXT_NS ]] ; then
-   EXT_NSDIR=$(realpath -e "${EXT_DIR}/$EXT_NS" 2>/dev/null)
-   [[ -d $EXT_NSDIR ]] || die "External namespace dir $EXT_NS does not exist in $EXT_DIR"
-   EXT_NSMETA=$(realpath -e "${EXT_DIR}/$EXT_NS/meta" 2>/dev/null)
+if [[ -d ${EXT_DIR} ]] && [[ -d ${EXT_DIR}/meta ]] ; then
+   EXT_META=$(realpath -e ${EXT_DIR}/meta)
 fi
 
 
@@ -113,13 +98,8 @@ CFG=$(realpath -e "${IGTOP_CONFIG}/${INCONFIG}" 2>/dev/null) || \
    die "Bad config spec: $IGTOP_CONFIG : $INCONFIG"
 
 
-[[ -d $EXT_META ]] && msg "External meta at $EXT_META"
-[[ -d $EXT_NSMETA ]] && msg "External [$EXT_NS] meta at $EXT_NSMETA"
-
-
 # Set via cmdline only
 [[ -d $EXT_DIR ]] && IGconf_ext_dir="$EXT_DIR"
-[[ -d $EXT_NSDIR ]] && IGconf_ext_nsdir="$EXT_NSDIR"
 
 
 msg "Reading $CFG"
@@ -259,12 +239,7 @@ layer_push()
          ;& # image layer can pull in core layers, but not vice versa
 
       main|auto)
-         if [[ -n $EXT_NSMETA && -s "${EXT_NSMETA}/$2.yaml" ]] ; then
-            [[ -f "${EXT_NSMETA}/$2.defaults" ]] && \
-               aggregate_options "meta" "${EXT_NSMETA}/$2.defaults"
-            ARGS_LAYERS+=('--config' "${EXT_NSMETA}/$2.yaml")
-
-         elif [[ -n $EXT_META && -s "${EXT_META}/$2.yaml" ]] ; then
+         if [[ -d $EXT_META && -s "${EXT_META}/$2.yaml" ]] ; then
             [[ -f "${EXT_META}/$2.defaults" ]] && \
                aggregate_options "meta" "${EXT_META}/$2.defaults"
             ARGS_LAYERS+=('--config' "${EXT_META}/$2.yaml")
