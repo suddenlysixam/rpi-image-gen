@@ -1,0 +1,9 @@
+# METABEGIN
+# X-Env-VarPrefix: test
+#
+# X-Env-Var-pmap:
+# X-Env-Var-pmap-Desc: Allow empty string by default
+# X-Env-Var-pmap-Required: n
+# X-Env-Var-pmap-Valid: string-or-empty
+# X-Env-Var-pmap-Set: lazy
+# METAEND 

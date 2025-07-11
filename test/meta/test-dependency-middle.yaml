@@ -1,0 +1,18 @@
+# METABEGIN
+# X-Env-Layer-Name: test-dependency-middle
+# X-Env-Layer-Desc: Middle layer that depends on bottom
+# X-Env-Layer-Version: 1.0.0
+# X-Env-Layer-Category: test
+# X-Env-Layer-Requires: test-dependency-bottom
+# X-Env-VarPrefix: dep
+# X-Env-VarRequires: IGconf_dep_component,IGconf_dep_base
+# X-Env-Var-Service: ${IGconf_dep_component}-service
+# X-Env-Var-Service-Set: immediate
+# X-Env-Var-Service-Desc: Service name constructed from component
+# X-Env-Var-ConfigPath: ${IGconf_dep_base}/config
+# X-Env-Var-ConfigPath-Set: immediate  
+# X-Env-Var-ConfigPath-Desc: Configuration directory
+# METAEND
+
+config:
+  middle_layer: true 

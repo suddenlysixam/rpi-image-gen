@@ -1,0 +1,8 @@
+# METABEGIN
+# X-Env-Layer-Name: test-provider-consumer
+# X-Env-Layer-Version: 1.0.0
+# X-Env-Layer-Requires: test-provider-base
+# X-Env-Layer-RequiresProvider: base-os
+# X-Env-Layer-Category: test
+# METAEND
+--- 
