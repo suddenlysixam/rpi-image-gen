@@ -1,5 +1,10 @@
+# METABEGIN
+# X-Env-Layer-Name: rpi-debian-bookworm
+# X-Env-Layer-Provides: rpi-debian
+# X-Env-Layer-Desc: Raspberry Pi Debian Bookworm APT repository
+# X-Env-Layer-Version: 1.0.0
+# METAEND
 ---
-name: debian-bookworm-rpi
 mmdebstrap:
   mirrors:
     - deb http://archive.raspberrypi.com/debian bookworm main

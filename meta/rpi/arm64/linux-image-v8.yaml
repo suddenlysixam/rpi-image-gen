@@ -1,5 +1,10 @@
+# METABEGIN
+# X-Env-Layer-Name: rpi-linux-v8
+# X-Env-Layer-Category: kernel
+# X-Env-Layer-Desc: Raspberry Pi v8 kernel
+# X-Env-Layer-Version: 1.0.0
+# METAEND
 ---
-name: rpi-linux-v8
 env:
   INITRD: "No"
 mmdebstrap:

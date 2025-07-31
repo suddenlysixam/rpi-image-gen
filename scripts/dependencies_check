@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # dependencies_check
 # $@	Dependency files to check
 #
@@ -14,7 +16,7 @@ dependencies_check()
 
 	for depfile in "$@"; do
 		if [[ -e "$depfile" ]]; then
-			deps="$(sed -f "${IGTOP}/scripts/remove-comments.sed" < "$depfile")"
+			deps="$(sed -f "$(rootpath)/scripts/remove-comments.sed" < "$depfile")"
 		fi
 		for dep in $deps; do
 			if ! hash "${dep%:*}" 2>/dev/null; then
@@ -25,7 +27,7 @@ dependencies_check()
 		done
 	done
 
-	if [[ "${missing[@]}" ]]; then
+	if [[ "${missing[*]}" ]]; then
 		echo "Required dependencies not installed"
 		echo
 		echo "This can be resolved on Debian/Raspbian systems by installing:"

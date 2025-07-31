@@ -88,6 +88,15 @@ igconf_isval()
     return 0
 }
 
+igconf_getval()
+{
+   igconf_isval "$@" || return 1
+   local v values=()
+   for v in $(igconf_tr "" "$@"); do
+      values+=("${!v}")
+   done
+   printf '%s\n' "${values[*]}"
+}
 
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]] ; then
    set -u
@@ -98,7 +107,7 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]] ; then
    shift 1
 
    case "$op" in
-      isy|isn|isset|isnset|isval)
+      isy|isn|isset|isnset|isval|getval)
          igconf_"$op" "$@"
          exit $?
          ;;

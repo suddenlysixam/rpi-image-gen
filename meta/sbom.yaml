@@ -1,0 +1,34 @@
+# METABEGIN
+# X-Env-Layer-Name: sbom-base
+# X-Env-Layer-Category: audit
+# X-Env-Layer-Desc: SBOM provider and settings.
+# X-Env-Layer-Version: 1.0.0
+#
+# X-Env-VarPrefix: sbom
+#
+# X-Env-Var-enable: y
+# X-Env-Var-enable-Desc: Enable SBOM generation
+# X-Env-Var-enable-Required: n
+# X-Env-Var-enable-Valid: bool
+# X-Env-Var-enable-Set: y
+#
+# X-Env-Var-provider: syft
+# X-Env-Var-provider-Desc: SBOM provider
+# X-Env-Var-provider-Required: n
+# X-Env-Var-provider-Valid: keywords:syft
+# X-Env-Var-provider-Set: lazy
+#
+# X-Env-Var-syft_config: syft.yaml
+# X-Env-Var-syft_config-Desc: Configuration file containing the settings syft
+# will use to scan and output the SBOM. The following parameters are explicitly
+# specified by rpi-image-gen when syft is invoked:
+# source:
+#   name
+#   version
+#   base-path
+# For further information, refer to
+# https://github.com/anchore/syft/wiki/Configuration
+# X-Env-Var-syft_config-Required: n
+# X-Env-Var-syft_config-Valid: string
+# X-Env-Var-syft_config-Set: lazy
+---

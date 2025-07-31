@@ -10,7 +10,6 @@ mtools
 mmdebstrap
 bdebstrap
 podman
-crudini
 zstd
 pv
 newuidmap:uidmap
@@ -20,3 +19,4 @@ btrfs-progs
 dctrl-tools
 uuidgen:uuid-runtime
 fdisk
+python3-yaml

@@ -9,7 +9,7 @@ import sys
 import subprocess
 
 
-VERSION = "2.0.0"
+VERSION = "2.1.0"
 
 
 IMAGE_KEYS = {"IGconf_device_class",
@@ -17,7 +17,7 @@ IMAGE_KEYS = {"IGconf_device_class",
               "IGconf_device_storage_type",
               "IGconf_device_sector_size",
               "IGconf_image_version",
-              "IGconf_sys_outputdir"}
+              "IGconf_image_outputdir"}
 
 
 IMAGE_KEY_TYPES = {
@@ -216,7 +216,7 @@ def get_artefact_path(file, dir_evar):
 
 # Returns the size of a build artefact file.
 def get_artefact_size(file):
-    f = get_artefact_path(file, "IGconf_sys_outputdir")
+    f = get_artefact_path(file, "IGconf_image_outputdir")
     if f:
         return os.stat(f).st_size
     return None
@@ -319,7 +319,7 @@ def parse_genimage_config(config_path):
                         partitions[pname]["simage"] = sname
 
     # Read the partition table from the image
-    img_path = get_artefact_path(img_name, "IGconf_sys_outputdir")
+    img_path = get_artefact_path(img_name, "IGconf_image_outputdir")
     try:
         res = subprocess.run(
                 ["sfdisk", "--verify", "--json", img_path],

@@ -1,5 +1,9 @@
+# METABEGIN
+# X-Env-Layer-Name: rpi-essential-base
+# X-Env-Layer-Desc: Raspberry Pi essential basic system packages
+# X-Env-Layer-Version: 1.0.0
+# METAEND
 ---
-name: rpi-essential-base
 mmdebstrap:
   packages:
     - cryptsetup

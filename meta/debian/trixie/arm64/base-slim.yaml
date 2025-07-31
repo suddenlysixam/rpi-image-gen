@@ -1,5 +1,15 @@
+# METABEGIN
+# X-Env-Layer-Name: debian-trixie-arm64-slim
+# X-Env-Layer-Desc: Debian Trixie custom layer for arm64 providing
+# a usable and practical base.
+# X-Env-Layer-Version: 1.0.0
+#
+# X-Env-VarRequires: IGconf_device_timezone,
+# IGconf_device_locale1,
+# IGconf_device_keyboard_layout,
+# IGconf_device_keyboard_keymap
+# METAEND
 ---
-name: trixie-arm64-slim
 mmdebstrap:
   architectures:
     - arm64
@@ -25,15 +35,14 @@ mmdebstrap:
     - gzip
     - udev
     - e2fsprogs
-    - login
     - linux-sysctl-defaults
   setup-hooks:
     - mkdir -p $1/usr/bin
     - ln -s bash $1/usr/bin/sh
   essential-hooks:
-    - echo tzdata tzdata/Areas select "$IGconf_device_timezone_area"
+    - echo tzdata tzdata/Areas select "${IGconf_device_timezone%%/*}"
         | chroot $1 debconf-set-selections
-    - echo tzdata tzdata/Zones/$IGconf_device_timezone_area select "$IGconf_device_timezone_city"
+    - echo tzdata tzdata/Zones/$IGconf_device_timezone_area select "${IGconf_device_timezone#*/}"
         | chroot $1 debconf-set-selections
     - echo locales locales/locales_to_be_generated multiselect "$IGconf_device_locale1"
         | chroot $1 debconf-set-selections

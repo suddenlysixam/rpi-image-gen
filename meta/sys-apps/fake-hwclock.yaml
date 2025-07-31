@@ -1,5 +1,9 @@
+# METABEGIN
+# X-Env-Layer-Name: fake-hwclock
+# X-Env-Layer-Desc: Persistent time management for non-RTC systems.
+# X-Env-Layer-Version: 1.0.0
+# METAEND
 ---
-name: fake-hwclock
 mmdebstrap:
   packages:
     - fake-hwclock

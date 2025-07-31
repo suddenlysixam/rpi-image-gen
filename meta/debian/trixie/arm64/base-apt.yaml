@@ -1,5 +1,14 @@
+# METABEGIN
+# X-Env-Layer-Name: debian-trixie-arm64
+# X-Env-Layer-Desc: Debian Trixie apt base for arm64.
+# X-Env-Layer-Version: 1.0.0
+#
+# X-Env-VarRequires: IGconf_device_timezone,
+# IGconf_device_locale1,
+# IGconf_device_keyboard_layout,
+# IGconf_device_keyboard_keymap
+# METAEND
 ---
-name: trixie-arm64
 mmdebstrap:
   architectures:
     - arm64
@@ -11,12 +20,11 @@ mmdebstrap:
     - deb http://deb.debian.org/debian-security trixie-security main contrib non-free non-free-firmware
     - deb http://deb.debian.org/debian trixie-updates main contrib non-free non-free-firmware
   packages:
-    - login
     - linux-sysctl-defaults
   essential-hooks:
-    - echo tzdata tzdata/Areas select "$IGconf_device_timezone_area"
+    - echo tzdata tzdata/Areas select "${IGconf_device_timezone%%/*}"
         | chroot $1 debconf-set-selections
-    - echo tzdata tzdata/Zones/$IGconf_device_timezone_area select "$IGconf_device_timezone_city"
+    - echo tzdata tzdata/Zones/$IGconf_device_timezone_area select "${IGconf_device_timezone#*/}"
         | chroot $1 debconf-set-selections
     - echo locales locales/locales_to_be_generated multiselect "$IGconf_device_locale1"
         | chroot $1 debconf-set-selections
