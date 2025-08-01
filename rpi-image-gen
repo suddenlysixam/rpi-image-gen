@@ -20,8 +20,12 @@ Usage:
   $(basename $(readlink -f "$0")) -h|--help
 
 Supported commands:
-  build [options]    Build filesystem and image
   help               Show this help message
+  build [options]    Filesystem and image construction
+  layer [options]    Layer operations (delegated)
+  meta  [options]    Metadata operations (delegated)
+
+Delegated commands are processed by the core engine helper (bin/ig).
 
 For command-specific help, use: $(basename $(readlink -f "$0")) <cmd> -h
 EOF
@@ -89,6 +93,16 @@ parse_build()
 }
 
 
+# Root path resolver
+rootpath() {
+   if [[ -d /usr/share/rpi-image-gen ]] ; then
+      readlink -f /usr/share/rpi-image-gen
+   else
+      readlink -f "$(dirname "$0")"
+   fi
+}
+
+
 if [[ "$IGCMD" == "help" ]]; then
     help ; exit 0
 elif [[ -z "$IGCMD" ]]; then
@@ -100,22 +114,16 @@ else
          parse_$IGCMD "$@"
          shift $((OPTIND-1))
          ;;
+      layer|meta)
+         $(rootpath)/bin/ig $IGCMD "$@"
+         exit $?
+         ;;
       *)
          echo "Unknown command: $IGCMD" >&2
          help ; exit 1
          ;;
    esac
 fi
-
-
-# Root path resolver
-rootpath() {
-   if [[ -d /usr/share/rpi-image-gen ]] ; then
-      readlink -f /usr/share/rpi-image-gen
-   else
-      readlink -f "$(dirname "$0")"
-   fi
-}
 
 
 # Load helpers
