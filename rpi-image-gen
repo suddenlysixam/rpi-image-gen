@@ -3,28 +3,27 @@
 set -uo pipefail
 
 
-rootpath() {
-   if [[ -d /usr/share/rpi-image-gen ]] ; then
-      readlink -f /usr/share/rpi-image-gen
-   else
-      readlink -f "$(dirname "$0")"
-   fi
-}
-
-
-IGCMD=build
+# Command is required
+IGCMD=${1:-}
+[[ $# -eq 0 || "${IGCMD}" == -* ]] && IGCMD=""
+[[ -n "$IGCMD" ]] && shift
 
 
 help()
 {
 cat <<-EOF >&2
-Filesystem and image generation utility.
+
+Raspberry Pi filesystem and image generation utility.
 
 Usage:
   $(basename $(readlink -f "$0")) [cmd] [options]
+  $(basename $(readlink -f "$0")) -h|--help
 
 Supported commands:
-  build [options]
+  build [options]    Build filesystem and image
+  help               Show this help message
+
+For command-specific help, use: $(basename $(readlink -f "$0")) <cmd> -h
 EOF
 }
 
@@ -33,7 +32,7 @@ help_build()
 {
 cat <<-EOF >&2
 Usage
-  $(basename $(readlink -f "$0")) [options] [-- IGconf_key=value ...]
+  $(basename $(readlink -f "$0")) build [options] [-- IGconf_key=value ...]
 
 Options:
   [-c <config>]    Path to config file.
@@ -90,13 +89,33 @@ parse_build()
 }
 
 
-case $IGCMD in
-   build)
-      parse_$IGCMD "$@"
-      shift $((OPTIND-1))
-      ;;
-   ""|"-h"|"--help"|*) help ; exit 1 ;;
-esac
+if [[ "$IGCMD" == "help" ]]; then
+    help ; exit 0
+elif [[ -z "$IGCMD" ]]; then
+    echo "Error: Command required" >&2
+    help ; exit 1
+else
+   case $IGCMD in
+      build)
+         parse_$IGCMD "$@"
+         shift $((OPTIND-1))
+         ;;
+      *)
+         echo "Unknown command: $IGCMD" >&2
+         help ; exit 1
+         ;;
+   esac
+fi
+
+
+# Root path resolver
+rootpath() {
+   if [[ -d /usr/share/rpi-image-gen ]] ; then
+      readlink -f /usr/share/rpi-image-gen
+   else
+      readlink -f "$(dirname "$0")"
+   fi
+}
 
 
 # Load helpers
