@@ -1,6 +1,5 @@
 #!/bin/bash
 
-# Functions available to the rpi-image-gen core and wider system
 
 msg() {
    echo -e "$*"
@@ -174,6 +173,7 @@ runhook() {
 
    local ret=$?
    [[ $ret -ne 0 ]] && die "Hook [$hook_dir/$hook_name] ($ret)"
+   return $ret
 }
 
 

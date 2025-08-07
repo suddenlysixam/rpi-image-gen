@@ -34,8 +34,8 @@
 # that is not otherwise populated during chroot creation (for example by
 # installing a keyring package).
 # X-Env-Var-apt_keydir-Required: n
-# X-Env-Var-apt_keydir-Valid: string
-# X-Env-Var-apt_keydir-Set: n
+# X-Env-Var-apt_keydir-Valid: string-or-empty
+# X-Env-Var-apt_keydir-Set: y
 #
 # X-Env-Var-apt_cachedir:
 # X-Env-Var-apt_cachedir-Desc: Cache directory for APT operations.

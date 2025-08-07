@@ -16,7 +16,8 @@ dependencies_check()
 
 	for depfile in "$@"; do
 		if [[ -e "$depfile" ]]; then
-			deps="$(sed -f "$(rootpath)/scripts/remove-comments.sed" < "$depfile")"
+			mapfile -t dep_lines < <(grep -v '^[[:space:]]*#' "$depfile" | grep -v '^[[:space:]]*$')
+			deps="${dep_lines[*]}"
 		fi
 		for dep in $deps; do
 			if ! hash "${dep%:*}" 2>/dev/null; then
@@ -30,7 +31,7 @@ dependencies_check()
 	if [[ "${missing[*]}" ]]; then
 		echo "Required dependencies not installed"
 		echo
-		echo "This can be resolved on Debian/Raspbian systems by installing:"
+		echo "This can be resolved on Debian systems by installing:"
 		echo "${missing[@]}"
 		echo
 		echo "Script install_deps.sh can be used for this purpose."

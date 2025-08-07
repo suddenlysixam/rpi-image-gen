@@ -2,8 +2,18 @@
 
 set -eu
 
-IGTOP=$(readlink -f "$(dirname "$0")")
-source "${IGTOP}/scripts/dependencies_check"
+rootpath() {
+   local dir=$(dirname "$(readlink -e "${BASH_SOURCE[0]}")")
+   if [[ -f "${dir}/LICENSE" ]] ; then
+      echo "$dir"
+   elif [[ -d /usr/share/rpi-image-gen ]] ; then
+      echo /usr/share/rpi-image-gen
+   else
+      >&2 echo "FATAL: cannot locate project root" ; exit 1
+   fi
+}
+IGTOP=$(rootpath)
+source "${IGTOP}/lib/dependencies.sh"
 depf=("${IGTOP}/depends")
 for f in "$@" ; do
    depf+=($(realpath -e "$f"))

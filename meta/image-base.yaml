@@ -62,11 +62,9 @@
 # X-Env-Var-target-Desc: The type of target created by bdebstrap to hold the
 # filesystem. This argument is passed straight to bdebstrap via --target and
 # can be the path to a directory, the path to a tarball filename, etc. See
-# bdebstrap(1) for further details.
-# If not a directory, rpi-image-gen will terminate immediately after bdebstrap
-# execution completes for the sole reason that subsequent stages (eg post-build
-# hooks and genimage) do not support operating on anything except a directory.
-# Custom bdebstrap hooks are unaffected by different target types because they
+# bdebstrap(1) for further details. Post-build and Pre-image hooks should
+# cater for this being a file rather than assuming it will be a directory.
+# All bdebstrap hooks are unaffected by different target types because they
 # execute in bdebstrap context and always operate on the chroot regardless if
 # the target is a file or a directory.
 # Note that it's possible to specify a directory here and use a post-build hook
@@ -75,5 +73,10 @@
 # X-Env-Var-target-Valid: string
 # X-Env-Var-target-Set: y
 #
+# X-Env-Var-provider: genimage
+# X-Env-Var-provider-Desc: Image generation provider
+# X-Env-Var-provider-Required: n
+# X-Env-Var-provider-Valid: keywords:genimage,custom
+# X-Env-Var-provider-Set: lazy
 # METAEND
 ---

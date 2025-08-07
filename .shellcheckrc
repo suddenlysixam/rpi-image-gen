@@ -1,0 +1,16 @@
+# Enable most checks but disable some overly pedantic ones
+enable=all
+
+# Disable these checks as they're often impractical
+disable=SC2034   # Variable appears unused (often false positives)
+disable=SC2086   # Double quote to prevent globbing (sometimes we want word splitting)
+disable=SC2154   # Silence referenced but not assigned
+disable=SC2181   # Check exit code directly ([ $? -eq 0 ] instead of if command)
+disable=SC2207   # Prefer mapfile for arrays (mapfile isn't always available)
+disable=SC2249   # Case statements don't always need defaults
+
+# Style issues are non-fatal
+severity=style
+disable=SC2250   # Don't always want braces around variables
+
+shell=bash
