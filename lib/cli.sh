@@ -1,6 +1,10 @@
 #!/bin/bash
 
 
+isdir() { [[ $# -eq 1 && -d "$1" ]] || { >&2 echo "${1:-}: invalid directory" ; return 1; } }
+isfile() { [[ $# -eq 1 && -f "$1" ]] || { >&2 echo "${1:-}: invalid file" ; return 1; } }
+
+
 cli_help()
 {
 cat <<-EOF >&2
@@ -40,8 +44,8 @@ Options:
   [-I]             Interactive. Prompt at different stages.
 
   Developer Options
-  [-f]             Run setup, build filesystem, skip image generation.
-  [-i]             Run setup, skip filesystem, generate image(s).
+  [-f]             setup, build filesystem, skip image generation.
+  [-i]             setup, skip building filesystem, generate image(s).
 
   IGconf Variable Overrides:
     Use -- to separate options from overrides.
@@ -60,12 +64,15 @@ cli_parse_build() {
    local OPTIND flag
    while getopts "B:c:fhiIS:" flag; do
       case $flag in
-         B)  __ctx[BUILD_DIR]=$(realpath --canonicalize-missing "$OPTARG") ;;
-         c)  __ctx[INCONFIG]=$OPTARG                                     ;;
-         f)  __ctx[ONLY_FS]=1                                        ;;
-         i)  __ctx[ONLY_IMAGE]=1                                         ;;
-         I)  __ctx[INTERACTIVE]=y                                        ;;
-         S)  __ctx[SRC_DIR]=$(realpath --canonicalize-missing "$OPTARG") ;;
+         B)  isdir "$OPTARG" || { cli_help_build; exit 1; } ; \
+             __ctx[BUILD_DIR]="$OPTARG" ;;
+         c)  isfile "$OPTARG" || { cli_help_build; exit 1; }; \
+             __ctx[INCONFIG]=$OPTARG                        ;;
+         f)  __ctx[ONLY_FS]=1                               ;;
+         i)  __ctx[ONLY_IMAGE]=1                            ;;
+         I)  __ctx[INTERACTIVE]=y                           ;;
+         S)  isdir "$OPTARG" || { cli_help_build; exit 1; } ; \
+             __ctx[SRC_DIR]="$OPTARG"   ;;
          h)  cli_help_build ; exit 0 ;;
          *)  cli_help_build ; exit 1 ;;
       esac
@@ -83,8 +90,7 @@ Usage
 
 Options:
   [-c <config>]    Path to config file.
-  [-B <build dir>] Use this as the root directory for generation and build.
-                   Sets IGconf_sys_workroot.
+  [-B <build dir>] The top level build dir to run clean operations in.
 EOF
 }
 
@@ -98,8 +104,10 @@ cli_parse_clean() {
    local OPTIND flag
    while getopts "B:c:h" flag; do
       case $flag in
-         B)  __ctx[BUILD_DIR]=$(realpath --canonicalize-missing "$OPTARG") ;;
-         c)  __ctx[INCONFIG]=$OPTARG                                     ;;
+         B)  isdir "$OPTARG" || { cli_help_build; exit 1; } ; \
+             __ctx[BUILD_DIR]="$OPTARG" ;;
+         c)  isfile "$OPTARG" || { cli_help_build; exit 1; }; \
+             __ctx[INCONFIG]=$OPTARG                        ;;
          h)  cli_help_clean ; exit 0 ;;
          *)  cli_help_clean ; exit 1 ;;
       esac
@@ -107,8 +115,6 @@ cli_parse_clean() {
 
    return $((OPTIND-1))
 }
-
-
 
 
 cli_help_layer()
@@ -134,19 +140,63 @@ EOF
 # Arguments: 1 = nameref to a context array ; remaining = CLI args.
 cli_parse_layer() {
    local -n _ctx=$1; shift
+   local processed=0
 
-   OPTERR=0
-   local OPTIND flag
-   while getopts ':S:h' flag; do
-      case $flag in
-         S) _ctx[SRC_DIR]=$(realpath --canonicalize-existing "$OPTARG") ;;
-         h) cli_help_layer
-            OPTIND=$((OPTIND- 1))
-            break ;;
-         \?)break ;;  # pass through
-         :) printf 'option -%s needs an argument\n' "$OPTARG" >&2
-            cli_help_layer ;;
+   # We consume some args and pass through others
+   while [[ $# -gt 0 ]]; do
+      case $1 in
+         -S)
+            if [[ $# -lt 2 ]]; then
+               printf 'option -S needs an argument\n' >&2
+               cli_help_layer ; exit 1
+            fi
+            if ! isdir "$2" ; then
+               printf 'option -S requires a directory\n' >&2
+               cli_help_layer ; exit 1
+            fi
+            _ctx[SRC_DIR]=$(realpath --canonicalize-existing "$2") || { cli_help_layer ; exit 1 ; }
+            shift 2
+            processed=2 # consumed opt + path
+            ;;
+         -h)
+            cli_help_layer
+            # Don't consume -h, pass through
+            break
+            ;;
+         *)
+            # Don't care. Pass through
+            break
+            ;;
       esac
    done
-   return $((OPTIND-1))
+
+   return $processed
+}
+
+
+
+cli_help_meta()
+{
+cat <<-EOF >&2
+Usage
+  $(basename $(readlink -f "$0")) meta [options] ...
+
+  This is a delegated command, meaning that it passes all args straight
+  through to the engine for processing. Use -h to see available options.
+
+EOF
+}
+
+
+# Handler for meta command options
+# Arguments: 1 = nameref to a context array ; remaining = CLI args.
+cli_parse_meta() {
+   local -n _ctx=$1 # unused
+   shift
+
+   # Only need to support -h
+   if [[ $# -gt 0 && "$1" == "-h" ]]; then
+      cli_help_meta
+   fi
+   return 0 # Pass through everything without consuming
 }

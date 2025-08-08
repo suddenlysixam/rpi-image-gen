@@ -82,10 +82,7 @@ parameter_assembly()
    # Config file is mandatory
    [[ -z ${ctx[INCONFIG]:-} ]] && die "No config file specified"
 
-   ctx[CFG]=$(realpath -e "${ctx[INCONFIG]}") \
-      || die "Bad config spec: ${ctx[INCONFIG]}"
-
-   msg "CONFIG ${ctx[CFG]}"
+   msg "CONFIG ${ctx[INCONFIG]}"
 
    ctx[OVRF]="${ctx[TMPDIR]}/overrides.env"
    : > "${ctx[OVRF]}"
@@ -115,7 +112,7 @@ parameter_assembly()
 
    ig config             \
       --path "${ctx[CONFIG_PATH]}" \
-      "${ctx[CFG]}"     \
+      "${ctx[INCONFIG]}"     \
       --overrides "${ctx[OVRF]}" \
       --write-to "${ctx[IGENVF]}" \
       || die "Config parse failed"
@@ -518,6 +515,8 @@ main() {
          ;;
 
       meta)
+         cli_parse_meta ctx "$@"
+         shift $?
          dependencies_check "$IGTOP/depends" || exit 1
          exec "$IGTOP/bin/ig" meta "$@"
          ;;
