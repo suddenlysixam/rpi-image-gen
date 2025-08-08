@@ -1,15 +1,18 @@
 import configparser
 import os
+import sys
 import yaml
 from pathlib import Path
 from typing import Optional, Dict, Any, Tuple
 
 
 class ConfigLoader:
-    def __init__(self, cfg_path: str, expand_vars: bool = True, overrides_path: Optional[str] = None):
+    def __init__(self, cfg_path: str, *, expand_vars: bool = True, overrides_path: Optional[str] = None, search_paths: Optional[list[str]] = None):
         self.cfg_path = cfg_path
         self.overrides_path = overrides_path
         self.expand_vars = expand_vars
+        # Support additional include search path
+        self.search_paths = [Path(p).resolve() for p in (search_paths or ["./config"])]
         self.file_format = self._detect_format()
 
         # Data will be stored as Dict[str, Dict[str, str]] regardless of source format
@@ -18,7 +21,7 @@ class ConfigLoader:
         # Track which values are overridden
         self.overrides: Dict[str, str] = {}
 
-        # For backward compatibility, maintain config attribute for INI files
+        # For backward compat - maintain config attribute for INI files
         if self.file_format == 'ini':
             # Disable interpolation to allow literal % chars
             self.config = configparser.ConfigParser(interpolation=None)
@@ -28,15 +31,31 @@ class ConfigLoader:
             self._load_overrides()
 
     def _detect_format(self) -> str:
-        """Detect file format based on extension"""
         suffix = Path(self.cfg_path).suffix.lower()
         if suffix in ['.yaml', '.yml']:
             return 'yaml'
         elif suffix in ['.ini', '.cfg', '.conf']:
             return 'ini'
         else:
-            # Default to INI for backward compatibility
+            # Backward compat
             return 'ini'
+
+    def _resolve_include(self, inc_name: str, parent_dir: Path) -> Path:
+        """Resolve include file by trying parent dir then configured search paths."""
+        # prevent absolute
+        inc_rel = Path(inc_name)
+        if inc_rel.is_absolute():
+            raise ValueError(f"Absolute include paths not allowed (found {inc_name})")
+        # 1. parent directory
+        cand = (parent_dir / inc_rel).resolve()
+        if cand.exists():
+            return cand
+        # 2. search additional include paths
+        for base in self.search_paths:
+            cand2 = (base / inc_rel).resolve()
+            if cand2.exists():
+                return cand2
+        raise FileNotFoundError(f"Included file '{inc_name}' not found (searched parent dir and {self.search_paths})")
 
     def _load(self):
         if not os.path.exists(self.cfg_path):
@@ -69,9 +88,7 @@ class ConfigLoader:
                 inc_file = yaml_data['include'].get('file')
                 if not inc_file:
                     raise ValueError(f"YAML include directive in {path} missing 'file' key")
-                if Path(inc_file).is_absolute():
-                    raise ValueError(f"Absolute include paths not allowed in YAML include (found {inc_file})")
-                inc_path = (path.parent / inc_file).resolve()
+                inc_path = self._resolve_include(inc_file, path.parent)
                 included_sections = _load_yaml_recursive(inc_path, visited)
                 # Remove include key before merging
                 yaml_data.pop('include', None)
@@ -107,9 +124,7 @@ class ConfigLoader:
                         if len(parts) != 2:
                             raise ValueError(f"Invalid !include directive in {path}: {line}")
                         inc_name = parts[1].strip()
-                        if Path(inc_name).is_absolute():
-                            raise ValueError(f"Absolute include paths not allowed in INI include (found {inc_name})")
-                        inc_path = (path.parent / inc_name).resolve()
+                        inc_path = self._resolve_include(inc_name, path.parent)
                         _load_ini_recursive(inc_path, visited, cfg)
                     else:
                         buffer_lines.append(line)
@@ -143,11 +158,10 @@ class ConfigLoader:
                 for line_num, line in enumerate(f, 1):
                     line = line.strip()
 
-                    # Skip empty lines and comments
                     if not line or line.startswith('#'):
                         continue
 
-                    # Parse key=value format
+                    # key=value only
                     if '=' not in line:
                         raise ValueError(f"Invalid format at line {line_num}: {line}")
 
@@ -173,11 +187,11 @@ class ConfigLoader:
                     # Update context with expanded value
                     expansion_context[key] = self.overrides[key]
                 except ValueError as ve:
-                    # Re-raise variable expansion errors with cleaner message including file context
+                    # Re-raise variable expansion errors
                     raise ValueError(f"{ve} in override file {self.overrides_path}") from None
 
         except ValueError:
-            # Re-raise ValueError (including variable expansion errors) without wrapping
+            # Re-raise ValueError (including variable expansion errors) without wrap
             raise
         except Exception as e:
             raise ValueError(f"Failed to load override file {self.overrides_path}: {e}")
@@ -187,10 +201,10 @@ class ConfigLoader:
         if not self.expand_vars:
             return value
 
-        # First expand using environment variables (standard behavior)
+        # First expand using environment variables
         expanded = os.path.expandvars(value)
 
-        # Then expand using our context (for variables not in environment)
+        # Now expand using our context (for variables not in environment)
         import re
         def replace_var(match):
             var_name = match.group(1)
@@ -218,7 +232,7 @@ class ConfigLoader:
         if not env_key.startswith("IGconf_"):
             return None
 
-        # Remove the IGconf_ prefix
+        # Remove our prefix
         remaining = env_key[7:]  # len("IGconf_") = 7
 
         # Split on underscores and try to find a valid section_key combination
@@ -369,12 +383,14 @@ class ConfigLoader:
 
 def ConfigLoader_register_parser(subparsers):
     parser = subparsers.add_parser("config", help="Config utilities (.ini/.yaml)")
-    parser.add_argument("cfg_path", nargs="?", help="Path to config file (.ini/.yaml) – omit when using --gen")
+    parser.add_argument("cfg_path", nargs="?", help="Path to config file (.ini/.yaml) (required unless using --gen)")
     parser.add_argument("--section", help="Section to load (load all if omitted)")
+    parser.add_argument("--path", metavar="DIRS", help="Colon-separated search path for included files")
     parser.add_argument("--no-expand", action="store_true", help="Disable $VAR expansion")
     parser.add_argument("--write-to", metavar="FILE", help="Write variables to file instead of env load")
     parser.add_argument("--overrides", metavar="FILE", help="Override file with key=value pairs")
     parser.add_argument("--gen", action="store_true", help="Generate example .ini and .yaml with include syntax")
+    parser.add_argument("--migrate", action="store_true", help="Convert INI to YAML and write to stdout")
     parser.set_defaults(func=_main)
 
 
@@ -387,7 +403,16 @@ def _main(args):
         print("Error: cfg_path is required unless --gen is used", file=sys.stderr)
         return
 
-    loader = ConfigLoader(args.cfg_path, expand_vars=not args.no_expand, overrides_path=args.overrides)
+    if args.migrate:
+        _migrate_to_yaml(args.cfg_path, args)
+        return
+
+    loader = ConfigLoader(
+        args.cfg_path,
+        expand_vars=not args.no_expand,
+        overrides_path=args.overrides,
+        search_paths=(args.path.split(":") if args.path else ["./config"]),
+    )
     if args.write_to:
         loader.write_file(args.write_to, args.section)
     else:
@@ -395,6 +420,54 @@ def _main(args):
             loader.load_section(args.section)
         else:
             loader.load_all()
+
+
+def _migrate_to_yaml(ini_path: str, args):
+    """Migrate INI syntax file to YAML and write to stdout"""
+    from pathlib import Path
+
+    yaml_data = {}
+    includes = []
+
+    # Parse the original file to extract includes and sections
+    ini_file = Path(ini_path)
+    current_section = None
+
+    with open(ini_file, 'r') as f:
+        for line in f:
+            stripped = line.strip()
+            if stripped.startswith('!include'):
+                parts = stripped.split(maxsplit=1)
+                if len(parts) == 2:
+                    inc_name = parts[1].strip()
+                    # Convert .cfg to .yaml extension for the include
+                    if inc_name.endswith('.cfg'):
+                        inc_name = inc_name[:-4] + '.yaml'
+                    includes.append(inc_name)
+            elif stripped.startswith('[') and stripped.endswith(']'):
+                current_section = stripped[1:-1]
+            elif stripped and not stripped.startswith('#') and '=' in stripped and current_section:
+                key, value = stripped.split('=', 1)
+                key = key.strip()
+                value = value.strip()
+                if current_section not in yaml_data:
+                    yaml_data[current_section] = {}
+                yaml_data[current_section][key] = value
+
+    # Write the YAML output
+    print("# Generated by rpi-image-gen config --migrate")
+    print()
+
+    # includes at the top
+    if includes:
+        for inc in includes:
+            print(f"include:")
+            print(f"  file: {inc}")
+            print()
+
+    # sections
+    if yaml_data:
+        yaml.dump(yaml_data, sys.stdout, default_flow_style=False, sort_keys=False, indent=2)
 
 
 def _generate_boilerplate():
