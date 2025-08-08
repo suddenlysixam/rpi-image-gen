@@ -114,6 +114,7 @@ parameter_assembly()
    : > "${ctx[IGENVF]}"
 
    ig config             \
+      --path "${ctx[CONFIG_PATH]}" \
       "${ctx[CFG]}"     \
       --overrides "${ctx[OVRF]}" \
       --write-to "${ctx[IGENVF]}" \
