@@ -76,7 +76,7 @@
 # X-Env-Var-provider: genimage
 # X-Env-Var-provider-Desc: Image generation provider
 # X-Env-Var-provider-Required: n
-# X-Env-Var-provider-Valid: keywords:genimage,custom
+# X-Env-Var-provider-Valid: keywords:genimage
 # X-Env-Var-provider-Set: lazy
 # METAEND
 ---
