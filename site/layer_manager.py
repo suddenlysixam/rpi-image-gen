@@ -805,6 +805,12 @@ def _layer_main(args):
         _show_layer_fields_help()
         return
 
+    # Check if any action argument was provided
+    action_args = ['list', 'describe', 'validate', 'check', 'rdep', 'build_order', 'show_paths', 'apply_env']
+    if not any(getattr(args, arg, None) for arg in action_args):
+        print("Error: No action specified. Use -h or --help for available options.")
+        exit(1)
+
     # Create manager with specified paths and patterns
     search_paths = [p.strip() for p in args.path.split(':') if p.strip()]
     manager = LayerManager(search_paths, args.patterns, show_loaded=bool(args.list))

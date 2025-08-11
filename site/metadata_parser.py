@@ -855,7 +855,7 @@ def _main(args):
         command = "lint"
         path = args.lint
     else:
-        print("Error: Please specify a command (--parse, --validate, --describe, --gen, or --help-validation)")
+        print("Error: No command specified. Use -h or --help for available options.")
         exit(1)
 
     try:
