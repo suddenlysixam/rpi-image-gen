@@ -1,5 +1,6 @@
 # METABEGIN
 # X-Env-Layer-Name: rpi-generic64
+# X-Env-Layer-Category: device
 # X-Env-Layer-Desc: Generic Raspberry Pi device common with v8 kernel, boot
 # firmware supporting all devices, and wlan/BT firmware.
 # X-Env-Layer-Version: 1.0.0
