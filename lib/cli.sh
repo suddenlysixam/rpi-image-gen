@@ -1,8 +1,18 @@
 #!/bin/bash
 
 
-isdir() { [[ $# -eq 1 && -d "$1" ]] || { >&2 echo "${1:-}: invalid directory" ; return 1; } }
-isfile() { [[ $# -eq 1 && -f "$1" ]] || { >&2 echo "${1:-}: invalid file" ; return 1; } }
+validate_dir() {
+   [[ $# -eq 1 ]] || { >&2 echo "missing dir argument" ; return 1; }
+   [[ -d "$1" ]] || { >&2 echo "${1:-}: not a directory" ; return 1; }
+   realpath -e "$1" 2>/dev/null || { >&2 echo "${1:-}: cannot resolve dpath" ; return 1; }
+}
+
+
+validate_file() {
+   [[ $# -eq 1 ]] || { >&2 echo "missing file argument" ; return 1; }
+   [[ -f "$1" ]] || { >&2 echo "${1:-}: not a file" ; return 1; }
+   realpath -e "$1" 2>/dev/null || { >&2 echo "${1:-}: cannot resolve fpath" ; return 1; }
+}
 
 
 cli_help()
@@ -64,15 +74,12 @@ cli_parse_build() {
    local OPTIND flag
    while getopts "B:c:fhiIS:" flag; do
       case $flag in
-         B)  isdir "$OPTARG" || { cli_help_build; exit 1; } ; \
-             __ctx[BUILD_DIR]="$OPTARG" ;;
-         c)  isfile "$OPTARG" || { cli_help_build; exit 1; }; \
-             __ctx[INCONFIG]=$OPTARG                        ;;
-         f)  __ctx[ONLY_FS]=1                               ;;
-         i)  __ctx[ONLY_IMAGE]=1                            ;;
-         I)  __ctx[INTERACTIVE]=y                           ;;
-         S)  isdir "$OPTARG" || { cli_help_build; exit 1; } ; \
-             __ctx[SRC_DIR]="$OPTARG"   ;;
+         B)  __ctx[BUILD_DIR]=$(validate_dir "$OPTARG") || { cli_help_build; exit 1; } ;;
+         c)  __ctx[INCONFIG]=$(validate_file "$OPTARG") || { cli_help_build; exit 1; } ;;
+         f)  __ctx[ONLY_FS]=1     ;;
+         i)  __ctx[ONLY_IMAGE]=1  ;;
+         I)  __ctx[INTERACTIVE]=y ;;
+         S)  __ctx[SRC_DIR]=$(validate_dir "$OPTARG") || { cli_help_build; exit 1; } ;;
          h)  cli_help_build ; exit 0 ;;
          *)  cli_help_build ; exit 1 ;;
       esac
@@ -104,10 +111,8 @@ cli_parse_clean() {
    local OPTIND flag
    while getopts "B:c:h" flag; do
       case $flag in
-         B)  isdir "$OPTARG" || { cli_help_build; exit 1; } ; \
-             __ctx[BUILD_DIR]="$OPTARG" ;;
-         c)  isfile "$OPTARG" || { cli_help_build; exit 1; }; \
-             __ctx[INCONFIG]=$OPTARG                        ;;
+         B)  __ctx[BUILD_DIR]=$(validate_dir "$OPTARG") || { cli_help_build; exit 1; } ;;
+         c)  __ctx[INCONFIG]=$(validate_file "$OPTARG") || { cli_help_build; exit 1; } ;;
          h)  cli_help_clean ; exit 0 ;;
          *)  cli_help_clean ; exit 1 ;;
       esac
@@ -150,11 +155,7 @@ cli_parse_layer() {
                printf 'option -S needs an argument\n' >&2
                cli_help_layer ; exit 1
             fi
-            if ! isdir "$2" ; then
-               printf 'option -S requires a directory\n' >&2
-               cli_help_layer ; exit 1
-            fi
-            _ctx[SRC_DIR]=$(realpath --canonicalize-existing "$2") || { cli_help_layer ; exit 1 ; }
+            _ctx[SRC_DIR]=$(validate_dir "$2") || { cli_help_layer ; exit 1 ; }
             shift 2
             processed=2 # consumed opt + path
             ;;

@@ -31,7 +31,7 @@ source "$IGTOP/lib/dependencies.sh"
 # Global context
 declare -A ctx=(
    [INTERACTIVE]=n
-   [SRC_DIR]="$(readlink -f .)"
+   [SRC_DIR]="$(readlink -e .)"
    [ONLY_FS]=0
    [ONLY_IMAGE]=0
    [BUILD_DIR]="${BUILD_DIR:-}"
@@ -245,7 +245,8 @@ prepare_build_config()
    # Build initial bdebstrap env
    _bdebstrap=( --force
                 --env PATH="$PATH"
-                --env IGTOP="$IGTOP" )
+                --env IGTOP="$IGTOP"
+                --env SRC_DIR="${ctx[SRC_DIR]}" )
 
    process_conf_opt() {
       local key=$1 value=$2
@@ -360,12 +361,12 @@ generate_filesystem()
 
    local -n _benv="${ctx[ENV_BDEBSTRAP]}" # via nameref
 
-   rund "$IGTOP" podman unshare bdebstrap \
+   rund "${ctx[SRC_DIR]}" podman unshare bdebstrap \
       "${_benv[@]}" \
-      --setup-hook     'bin/runner setup "$@"' \
-      --essential-hook 'bin/runner essential "$@"' \
-      --customize-hook 'bin/runner customize "$@"' \
-      --cleanup-hook   'bin/runner cleanup "$@"'
+      --setup-hook     '${IGTOP}/bin/runner setup "$@"' \
+      --essential-hook '${IGTOP}/bin/runner essential "$@"' \
+      --customize-hook '${IGTOP}/bin/runner customize "$@"' \
+      --cleanup-hook   '${IGTOP}/bin/runner cleanup "$@"'
 
    [[ ${ctx[INTERACTIVE]} == y ]] && \
       { ask "Filesystem complete. Apply overlays and run post-build?" y || exit 0 ; }

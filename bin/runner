@@ -9,7 +9,7 @@ shift 1
 dirs=()
 [[ -n ${IGconf_device_assetdir+x} ]] && dirs+=("${IGconf_device_assetdir}/bdebstrap")
 [[ -n ${IGconf_image_assetdir+x} ]] && dirs+=("${IGconf_image_assetdir}/bdebstrap")
-[[ -n ${IGconf_ext_dir+x} ]] && dirs+=("${IGconf_ext_dir}/bdebstrap")
+dirs+=("${SRC_DIR}/bdebstrap")
 dirs+=("${IGTOP}/scripts/bdebstrap")
 
 case "$op" in
@@ -21,6 +21,7 @@ case "$op" in
             if [ -x "$script" ] ; then
                s=$(basename "$script")
                if [[ $s =~ ^[a-zA-Z0-9-]+$ ]] ; then
+                  echo "runner: $dir [$s]"
                   env -C "$dir" bash "$s" "$@"
                   err=$?
                   if [ $err -ne 0 ] ; then
