@@ -465,6 +465,7 @@ clean_worktree() {
       val=$(get_var $key "${ctx[FINALENV]}") || continue
       [[ -e "$val" ]] || continue
       msg "Remove  $key  [$val]"
+      ask "Continue with removal?" y || { echo "Skipping.." ; continue ; }
       case $key in
          IGconf_image_target)
             run podman unshare rm -rf -- "$val" ;;

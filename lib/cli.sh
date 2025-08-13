@@ -109,10 +109,11 @@ cli_parse_clean() {
    shift
 
    local OPTIND flag
-   while getopts "B:c:h" flag; do
+   while getopts "B:c:hI" flag; do
       case $flag in
          B)  __ctx[BUILD_DIR]=$(validate_dir "$OPTARG") || { cli_help_build; exit 1; } ;;
          c)  __ctx[INCONFIG]=$(validate_file "$OPTARG") || { cli_help_build; exit 1; } ;;
+         I)  __ctx[INTERACTIVE]=y ;;
          h)  cli_help_clean ; exit 0 ;;
          *)  cli_help_clean ; exit 1 ;;
       esac
