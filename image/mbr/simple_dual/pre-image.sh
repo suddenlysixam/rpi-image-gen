@@ -1,9 +1,11 @@
-#!/bin/sh
+#!/bin/bash
 
 set -eu
 
-rootfs=$1
+fs=$1
 genimg_in=$2
+
+[[ -d "$fs" ]] || exit 0
 
 
 # Generate pre-defined UUIDs

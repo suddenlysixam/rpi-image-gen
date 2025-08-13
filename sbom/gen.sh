@@ -3,8 +3,8 @@
 
 set -eu
 
-rootfs=$1
-outdir=$2
+src=$(realpath -e "$1") || die "sbom: invalid src"
+outdir=$(realpath -e "$2") || die "sbom: invalid outdir"
 
 igconf isy sbom_enable || exit 0
 
@@ -22,10 +22,19 @@ fi
 
 SYFT=$(syft --version 2>/dev/null) || die "syft is unusable"
 
-msg "SBOM: $SYFT scanning $rootfs"
+# Set properties based on scan target.
+if [[ -f "$src" ]]; then
+   scan_target="file:$src"
+elif [[ -d "$src" ]]; then
+   scan_target="dir:$src"
+else
+   die "sbom: '$src' is neither a file nor a directory"
+fi
 
-syft -c "$SYFTCFG"  scan dir:"$rootfs" \
-   --base-path "$rootfs" \
+msg "SBOM: $SYFT scanning $scan_target"
+
+syft -c "$SYFTCFG" "$scan_target" \
+   --base-path "$src" \
    --source-name "$IGconf_image_name" \
    --source-version "${IGconf_image_version}" \
    > "${outdir}/${IGconf_image_name}.sbom"

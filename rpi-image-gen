@@ -98,12 +98,17 @@ parameter_assembly()
 
    # Remaining cmdline overrides
    for arg in "$@"; do
+      key="${arg%%=*}"
+      value="${arg#*=}"
       if [[ $arg =~ ^IGconf_[A-Za-z_][A-Za-z0-9_]*=.* ]]; then
          printf '%s\n' "$arg" >> "${ctx[OVRF]}"
          msg "Override: $arg"
       else
          die "Invalid argument: $arg  (expected IGconf_key=value)"
       fi
+      case $key in
+         IGconf_sys_workroot) die "Set IGconf_sys_workroot via build dir" ;;
+      esac
    done
 
    # Initialise and read config
@@ -412,7 +417,7 @@ generate_images() {
 
    local provider=$(get_var IGconf_image_provider "${ctx[FINALENV]}")
 
-   if [[ "$provider" == genimage ]] ; then
+   if [[ "$provider" == genimage && -d "$IGconf_image_target" ]] ; then
       local cfg
       for cfg in "${IGconf_image_outputdir}"/genimage*.cfg; do
          [[ -f $cfg ]] || continue
@@ -451,15 +456,17 @@ clean_worktree() {
       IGconf_image_target
       IGconf_image_outputdir
       IGconf_image_deploydir
-      IGconf_sys_workroot
    )
+
+   # TODO handle cleaning IGconf_sys_workroot safely - could have been
+   # specified as . via CLI/config.
 
    for key in "${keys[@]}" ; do
       val=$(get_var $key "${ctx[FINALENV]}") || continue
       [[ -e "$val" ]] || continue
       msg "Remove  $key  [$val]"
       case $key in
-         IGconf_image_target|IGconf_sys_workroot)
+         IGconf_image_target)
             run podman unshare rm -rf -- "$val" ;;
          *)
             rm -rf -- "$val" ;;
