@@ -12,7 +12,7 @@ igconf isy sbom_enable || exit 0
 
 SYFTCFG=$(realpath -e $(igconf getval sbom_syft_config)) || die "Invalid syft config"
 
-SYFT_VER=v1.27.1
+SYFT_VER=v1.30.0
 
 # If host has syft, use it
 if ! hash syft 2>/dev/null; then
