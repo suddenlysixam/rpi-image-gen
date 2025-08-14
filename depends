@@ -20,3 +20,6 @@ dctrl-tools
 uuidgen:uuid-runtime
 fdisk
 python3-yaml
+# doc gen only
+# python3-markdown
+# python3-jinja2
