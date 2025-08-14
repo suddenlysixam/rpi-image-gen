@@ -7,6 +7,7 @@ from typing import Dict, List, Optional, Set, Tuple
 from collections import OrderedDict
 import yaml
 
+
 from metadata_parser import Metadata
 from metadata_parser import print_env_var_descriptions
 
@@ -116,6 +117,8 @@ class LayerManager:
         if layer_name not in self.layers:
             return None
         return self.layers[layer_name].get_layer_info()
+
+
 
     def get_dependencies(self, layer_name: str) -> List[str]:
         """Get hard deps"""
@@ -642,6 +645,153 @@ class LayerManager:
 
         else:
             raise ValueError(f"Unknown operation: {operation}")
+
+    def get_layer_documentation_data(self, layer_name: str):
+        """Extract structured layer data for documentation generation"""
+        if layer_name not in self.layers:
+            return None
+
+        meta = self.layers[layer_name]
+
+        # Get detailed variable information from validators
+        variables = {}
+
+        # Read raw (unexpanded) metadata values from file
+        raw_field_values = self._get_raw_metadata_fields(layer_name)
+
+        if hasattr(meta, '_container') and meta._container.variables:
+            for var_name, var_obj in meta._container.variables.items():
+                # Extract the original variable name from the IGconf_prefix_varname format
+                # var_name is like "IGconf_test_directory", we need "DIRECTORY" for "X-Env-Var-DIRECTORY"
+                parts = var_name.split('_')
+                if len(parts) >= 3 and parts[0] == 'IGconf':
+                    # Remove IGconf and prefix, keep original case to match the file
+                    base_var_name = '_'.join(parts[2:])
+                    var_key = f"X-Env-Var-{base_var_name}"
+                    # Get original (unexpanded) value from raw metadata
+                    original_value = raw_field_values.get(var_key, var_obj.value)
+                else:
+                    # Fallback for variables that don't follow the expected pattern
+                    original_value = var_obj.value
+
+                variables[var_name] = {
+                    'name': var_obj.name,
+                    'value': var_obj.value,  # Expanded/processed value
+                    'original_value': original_value,  # Original value with placeholders
+                    'description': var_obj.description,
+                    'validation_rule': var_obj.validation_rule,
+                    'required': var_obj.required,
+                    'set_policy': var_obj.set_policy,
+                    'validation_description': var_obj.get_validation_description()
+                }
+
+        # Get mmdebstrap configuration
+        mmdebstrap_config = self._get_mmdebstrap_config(layer_name) or {}
+
+        # Make file path relative to search paths
+        file_path = self.layer_files.get(layer_name)
+        relative_path = file_path
+        if file_path:
+            for search_path in self.search_paths:
+                try:
+                    from pathlib import Path
+                    abs_search = Path(search_path).resolve()
+                    abs_file = Path(file_path).resolve()
+                    if abs_file.is_relative_to(abs_search):
+                        relative_path = str(abs_file.relative_to(abs_search))
+                        break
+                except (ValueError, AttributeError):
+                    continue
+
+        # Parse metadata for documentation using processed metadata
+        raw_metadata = meta.get_metadata()
+        required_variables = []
+        if 'X-Env-VarRequires' in raw_metadata:
+            var_requires = raw_metadata['X-Env-VarRequires'].split(',')
+            required_variables = [var.strip() for var in var_requires if var.strip()]
+
+        variable_prefix = raw_metadata.get('X-Env-VarPrefix', '')
+
+        # Check for companion doc
+        companion_doc = self._get_companion_doc(layer_name)
+
+        return {
+            'layer_info': meta.get_layer_info(),
+            'variables': variables,
+            'required_variables': required_variables,
+            'variable_prefix': variable_prefix,
+            'mmdebstrap': mmdebstrap_config,
+            'file_path': relative_path,
+            'companion_doc': companion_doc,
+            'dependencies': self.get_dependencies(layer_name),
+            'reverse_dependencies': self.get_reverse_dependencies(layer_name)
+        }
+
+    def _get_companion_doc(self, layer_name: str, format: str = 'markdown') -> str:
+        if layer_name not in self.layer_files:
+            return ""
+
+        yaml_file_path = self.layer_files[layer_name]
+
+        # Convert .yaml/.yml extension to appropriate format extension
+        from pathlib import Path
+        yaml_path = Path(yaml_file_path)
+
+        # Map format to file extension
+        format_extensions = {
+            'markdown': '.md',
+            'rst': '.rst',
+            'asciidoc': '.adoc'
+        }
+
+        extension = format_extensions.get(format, '.md')
+        companion_path = yaml_path.with_suffix(extension)
+
+        try:
+            if companion_path.exists():
+                with open(companion_path, 'r', encoding='utf-8') as f:
+                    return f.read()
+
+        except Exception as e:
+            log_warning(f"[WARN] Could not read companion documentation file {companion_path}: {e}")
+
+        return ""
+
+    def _get_raw_metadata_fields(self, layer_name: str) -> dict:
+        """Get all raw (unexpanded) metadata field values from the layer file."""
+        if layer_name not in self.layer_files:
+            return {}
+
+        file_path = self.layer_files[layer_name]
+        raw_fields = {}
+
+        try:
+            with open(file_path, 'r') as f:
+                content = f.read()
+
+            # Parse the commented metadata section
+            in_meta_section = False
+
+            for line in content.splitlines():
+                line_stripped = line.strip()
+
+                if line_stripped == '# METABEGIN':
+                    in_meta_section = True
+                    continue
+                elif line_stripped == '# METAEND':
+                    in_meta_section = False
+                    break
+
+                if in_meta_section and ':' in line_stripped and line_stripped.startswith('# '):
+                    # Parse field: value pairs
+                    line_content = line_stripped[2:]  # Remove '# '
+                    if ':' in line_content:
+                        field_name, field_value = line_content.split(':', 1)
+                        raw_fields[field_name.strip()] = field_value.strip()
+
+            return raw_fields
+        except Exception:
+            return {}
 
 
 def _generate_layer_boilerplate():

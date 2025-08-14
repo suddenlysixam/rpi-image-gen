@@ -232,6 +232,61 @@ def parse_validator(rule_str: str) -> BaseValidator:
         raise ValueError(f"Unknown validation rule: {rule_str}")
 
 
+def get_validator_documentation_data() -> dict:
+    """Extract structured validator data for documentation generation"""
+    import inspect
+
+    validator_classes = []
+    for name, obj in globals().items():
+        if (inspect.isclass(obj) and
+            issubclass(obj, BaseValidator) and
+            obj != BaseValidator and
+            hasattr(obj, 'get_help_text')):
+            validator_classes.append(obj)
+
+    # Sort by class name for consistent output
+    validator_classes.sort(key=lambda cls: cls.__name__)
+
+    # Extract structured data
+    basic_types = []
+    advanced_types = []
+
+    for validator_class in validator_classes:
+        if hasattr(validator_class, 'get_help_text'):
+            help_text = validator_class.get_help_text()
+
+            if '\n' in help_text:
+                # Multi-line = advanced type
+                lines = help_text.split('\n')
+                advanced_types.append({
+                    'name': validator_class.__name__.replace('Validator', '').lower(),
+                    'title': lines[0],
+                    'details': lines[1:] if len(lines) > 1 else []
+                })
+            else:
+                # Single line = basic type
+                basic_types.append({
+                    'name': validator_class.__name__.replace('Validator', '').lower(),
+                    'description': help_text
+                })
+
+    return {
+        'basic_types': basic_types,
+        'advanced_types': advanced_types,
+        'set_policies': [
+            {'name': 'force', 'class': 'force', 'description': 'Always overwrite existing environment value, regardless of what was set before.'},
+            {'name': 'immediate', 'class': 'immediate', 'description': 'Set the variable if it is currently unset (first-wins strategy). This is the default behavior.'},
+            {'name': 'lazy', 'class': 'lazy', 'description': 'Applied after all layers are processed (last-wins strategy). Useful for defaults that can be overridden.'},
+            {'name': 'skip', 'class': 'skip', 'description': 'Never set the variable. Useful for optional variables or when you want to disable a variable.'}
+        ],
+        'placeholders': [
+            {'name': '${FILENAME}', 'description': 'metadata file name'},
+            {'name': '${DIRECTORY}', 'description': 'directory containing the file'},
+            {'name': '${FILEPATH}', 'description': 'absolute path to the file'}
+        ]
+    }
+
+
 def get_validation_help() -> str:
     """Generate comprehensive validation help by discovering all validator classes"""
     import inspect
