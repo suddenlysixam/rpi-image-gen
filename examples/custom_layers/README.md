@@ -1,29 +1,18 @@
-Build a system with a custom config, meta layers and provide a directory namespace to identify additional meta assets.
+Build a system with a custom config and multiple layers, declaring dependencies between layers and defining variables.
 
-The custom config specifies system ```profile=deb12-acme```. This profile includes in-tree layers plus custom layers to demonstrate how to:
-* Install a list of packages (example-developer/essential.yaml)
-* Install a third-party repo key which could be used to authenticate and install packages from that repo (acme-sdk-v1.yaml)
-* Install a script from the host which may have sensitive info, run it to simulate pseudo auto-installation, then securely clean up.
-
-Usage of the options file injects additional variables into the build to be picked up by operations in acme-sdk-v1.yaml.
+The config file used by this example specifies a custom layer to build a system from, which uses built-in and custom layers as dependencies. The custom layers declare additional variables to the config system which are used in the layers.
 
 ```text
-examples/custom_layers/
-|-- acme
-|   |-- meta
-|   |   `-- acme-sdk-v1.yaml
-|   `-- setup-functions
-|-- acme.options
 |-- config
 |   `-- acme-integration.cfg
 |-- meta
-|   `-- example-developer
-|       `-- essential.yaml
-|-- profile
-|   `-- deb12-acme
-`-- README.md
+|   |-- acme-developer.yaml
+|   |-- acme-sdk-v1.yaml
+|   `-- essential.yaml
+|-- README.md
+`-- setup-functions
 ```
 
 ```bash
-./build.sh -c acme-integration -D examples/custom_layers/ -N acme -o examples/custom_layers/acme.options
+rpi-image-gen build -S ./examples/custom_layers/ -c ./examples/custom_layers/config/acme-integration.cfg
 ```
