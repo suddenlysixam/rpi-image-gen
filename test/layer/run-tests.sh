@@ -4,7 +4,7 @@
 # Usage: just run it
 
 IGTOP=$(readlink -f "$(dirname "$0")/../../")
-META="${IGTOP}/test/meta"
+LAYERS="${IGTOP}/test/layer"
 
 PATH="$IGTOP/bin:$PATH"
 
@@ -112,22 +112,22 @@ setup_test_env() {
 print_header "VALID METADATA TESTS"
 
 run_test "valid-basic-parse" \
-    "ig meta --parse ${META}/valid-basic.yaml" \
+    "ig metadata --parse ${LAYERS}/valid-basic.yaml" \
     0 \
     "Valid basic metadata should parse successfully"
 
 run_test "valid-basic-validate" \
-    "ig meta --validate ${META}/valid-basic.yaml" \
+    "ig metadata --validate ${LAYERS}/valid-basic.yaml" \
     0 \
     "Valid basic metadata should parse successfully"
 
 run_test "valid-string-or-empty" \
-    "ig meta --validate ${META}/string-or-empty.yaml" \
+    "ig metadata --validate ${LAYERS}/string-or-empty.yaml" \
     0 \
     "Empty string is valid when using string-or-empty validation rule"
 
 run_test "valid-basic-describe" \
-    "ig meta --describe ${META}/valid-basic.yaml" \
+    "ig metadata --describe ${LAYERS}/valid-basic.yaml" \
     0 \
     "Valid basic metadata should describe successfully"
 
@@ -135,29 +135,29 @@ run_test "valid-basic-describe" \
 # Valid all-types metadata
 setup_test_env
 run_test "valid-all-types-parse" \
-    "ig meta --parse ${META}/valid-all-types.yaml" \
+    "ig metadata --parse ${LAYERS}/valid-all-types.yaml" \
     0 \
     "Valid all-types metadata should parse successfully"
 
 run_test "valid-all-types-validate" \
-    "ig meta --validate ${META}/valid-all-types.yaml" \
+    "ig metadata --validate ${LAYERS}/valid-all-types.yaml" \
     0 \
     "Valid all-types metadata should validate successfully"
 
 run_test "valid-all-types-parse" \
-    "ig meta --parse ${META}/valid-all-types.yaml" \
+    "ig metadata --parse ${LAYERS}/valid-all-types.yaml" \
     0 \
     "Valid all-types metadata should parse and set variables successfully"
 
 
 # Valid requirements-only metadata
 run_test "valid-requirements-only-parse" \
-    "ig meta --parse ${META}/valid-requirements-only.yaml" \
+    "ig metadata --parse ${LAYERS}/valid-requirements-only.yaml" \
     0 \
     "Valid requirements-only metadata should parse successfully (no output expected)"
 
 run_test "valid-requirements-only-validate" \
-    "ig meta --validate ${META}/valid-requirements-only.yaml" \
+    "ig metadata --validate ${LAYERS}/valid-requirements-only.yaml" \
     0 \
     "Valid requirements-only metadata should validate successfully"
 
@@ -165,7 +165,7 @@ run_test "valid-requirements-only-validate" \
 # Set policies
 cleanup_env
 run_test "set-policies-parse" \
-    "ig meta --parse ${META}/set-policies.yaml" \
+    "ig metadata --parse ${LAYERS}/set-policies.yaml" \
     0 \
     "Set policies should work correctly"
 
@@ -176,50 +176,50 @@ print_header "INVALID METADATA TESTS"
 # Invalid - no prefix
 cleanup_env
 run_test "invalid-no-prefix-parse" \
-    "ig meta --parse ${META}/invalid-no-prefix.yaml" \
+    "ig metadata --parse ${LAYERS}/invalid-no-prefix.yaml" \
     1 \
     "Metadata with variables but no prefix should fail to parse"
 
 run_test "invalid-no-prefix-validate" \
-    "ig meta --validate ${META}/invalid-no-prefix.yaml" \
+    "ig metadata --validate ${LAYERS}/invalid-no-prefix.yaml" \
     1 \
     "Metadata with variables but no prefix should fail to validate"
 
 
 # Invalid - malformed syntax
 run_test "invalid-malformed-parse" \
-    "ig meta --parse ${META}/invalid-malformed.yaml" \
+    "ig metadata --parse ${LAYERS}/invalid-malformed.yaml" \
     1 \
     "Malformed metadata should fail to parse"
 
 run_test "invalid-malformed-validate" \
-    "ig meta --validate ${META}/invalid-malformed.yaml" \
+    "ig metadata --validate ${LAYERS}/invalid-malformed.yaml" \
     1 \
     "Malformed metadata should fail to validate"
 
 
 # Invalid - unsupported fields
 run_test "invalid-unsupported-parse" \
-    "ig meta --parse ${META}/invalid-unsupported-fields.yaml" \
+    "ig metadata --parse ${LAYERS}/invalid-unsupported-fields.yaml" \
     1 \
     "Metadata with unsupported fields should fail to parse"
 
 run_test "invalid-unsupported-validate" \
-    "ig meta --validate ${META}/invalid-unsupported-fields.yaml" \
+    "ig metadata --validate ${LAYERS}/invalid-unsupported-fields.yaml" \
     1 \
     "Metadata with unsupported fields should fail to validate"
 
 
 # Invalid - YAML syntax
 run_test "invalid-yaml-syntax-layer-validate" \
-    "ig layer --validate ${META}/invalid-yaml-syntax.yaml" \
+    "ig layer --validate ${LAYERS}/invalid-yaml-syntax.yaml" \
     1 \
     "Invalid YAML syntax should fail layer validation"
 
 
 # Invalid - bad validation type
 run_test "invalid-validation-type" \
-    "ig meta --validate ${META}/invalid-validation-type.yaml" \
+    "ig metadata --validate ${LAYERS}/invalid-validation-type.yaml" \
     1 \
     "Invalid variable validation type should fail validation"
 
@@ -228,12 +228,12 @@ run_test "invalid-validation-type" \
 cleanup_env
 setup_test_env
 run_test "validation-failures-parse" \
-    "ig meta --parse ${META}/validation-failures.yaml" \
+    "ig metadata --parse ${LAYERS}/validation-failures.yaml" \
     1 \
     "Metadata with validation failures should fail to parse"
 
 run_test "validation-failures-validate" \
-    "ig meta --validate ${META}/validation-failures.yaml" \
+    "ig metadata --validate ${LAYERS}/validation-failures.yaml" \
     1 \
     "Metadata with validation failures should fail to validate"
 
@@ -245,54 +245,54 @@ print_header "LAYER FUNCTIONALITY TESTS"
 setup_test_env
 
 run_test "meta-validate-rejects-invalid-dependency-declaration" \
-    "ig meta --validate ${META}/invalid-layer-dep-fmt.yaml" \
+    "ig metadata --validate ${LAYERS}/invalid-layer-dep-fmt.yaml" \
     1 \
     "Meta validate should reject invalid declaration of dependencies"
 
 run_test "meta-parse-rejects-invalid-dependency-declaration" \
-    "ig meta --parse ${META}/invalid-layer-dep-fmt.yaml" \
+    "ig metadata --parse ${LAYERS}/invalid-layer-dep-fmt.yaml" \
     1 \
     "Meta parse should perform validation of dependency declaration"
 
 run_test "layer-with-deps-info" \
-    "ig layer --path ${META} --describe test-with-deps" \
+    "ig layer --path ${LAYERS} --describe test-with-deps" \
     0 \
     "Layer with dependencies should show info successfully"
 
 run_test "layer-with-deps-validate" \
-    "ig layer --path ${META} --validate test-with-deps" \
+    "ig layer --path ${LAYERS} --validate test-with-deps" \
     0 \
     "Layer with dependencies should validate successfully"
 
 
 # Layer with missing dependencies
 run_test "layer-missing-dep-validate" \
-    "ig layer --path ${META} --validate test-missing-dep" \
+    "ig layer --path ${LAYERS} --validate test-missing-dep" \
     1 \
     "Layer with missing dependencies should fail validation"
 
 run_test "layer-missing-dep-check" \
-    "ig layer --path ${META} --check test-missing-dep" \
+    "ig layer --path ${LAYERS} --check test-missing-dep" \
     1 \
     "Layer dependency check should fail for missing dependencies"
 
 
 # Circular dependencies
 run_test "layer-circular-deps-check" \
-    "ig layer --path ${META} --check test-circular-a" \
+    "ig layer --path ${LAYERS} --check test-circular-a" \
     1 \
     "Circular dependency check should fail"
 
 run_test "layer-build-order-circular" \
-    "ig layer --path ${META} --build-order test-circular-a" \
+    "ig layer --path ${LAYERS} --build-order test-circular-a" \
     1 \
     "Build order should fail for circular dependencies"
 
 
 # Duplicate layer name detection uses a temp dir to avoid side effects
 tmp_dup_dir=$(mktemp -d)
-cp "${META}/valid-basic.yaml" "$tmp_dup_dir/layer1.yaml"
-cp "${META}/valid-basic.yaml" "$tmp_dup_dir/layer2.yaml"
+cp "${LAYERS}/valid-basic.yaml" "$tmp_dup_dir/layer1.yaml"
+cp "${LAYERS}/valid-basic.yaml" "$tmp_dup_dir/layer2.yaml"
 
 run_test "layer-duplicate-name-detection" \
     "ig layer --path $tmp_dup_dir --list >/dev/null 2>&1" \
@@ -308,26 +308,26 @@ print_header "OTHER TESTS"
 
 # Help commands
 run_test "meta-help-validation" \
-    "ig meta --help-validation" \
+    "ig metadata --help-validation" \
     0 \
     "Help validation should work"
 
 run_test "meta-gen" \
-    "ig meta --gen" \
+    "ig metadata --gen" \
     0 \
     "Metadata generation should work"
 
 
 # Layer build order (valid case)
 run_test "layer-build-order-valid" \
-    "ig layer --path ${META} --build-order test-with-deps" \
+    "ig layer --path ${LAYERS} --build-order test-with-deps" \
     0 \
     "Build order should work for valid dependencies"
 
 
 # Layer management discovery
 run_test "layer-discovery" \
-    "ig layer --path ${META} --describe test-basic" \
+    "ig layer --path ${LAYERS} --describe test-basic" \
     0 \
     "Layer discovery should find test layers"
 
@@ -339,26 +339,26 @@ print_header "AUTO-SET AND APPLY-ENV TESTS"
 cleanup_env
 unset IGconf_net_interface
 # Temporarily change Set policy to y for this test
-sed -i 's/X-Env-Var-INTERFACE-Set: n/X-Env-Var-INTERFACE-Set: y/' ${META}/network-x-env.yaml
+sed -i 's/X-Env-Var-INTERFACE-Set: n/X-Env-Var-INTERFACE-Set: y/' ${LAYERS}/network-x-env.yaml
 run_test "meta-parse-auto-set" \
-    "ig meta --parse ${META}/network-x-env.yaml" \
+    "ig metadata --parse ${LAYERS}/network-x-env.yaml" \
     0 \
     "Meta parse should auto-set variables with Set: y policy"
 # Restore original setting
-sed -i 's/X-Env-Var-INTERFACE-Set: y/X-Env-Var-INTERFACE-Set: n/' ${META}/network-x-env.yaml
+sed -i 's/X-Env-Var-INTERFACE-Set: y/X-Env-Var-INTERFACE-Set: n/' ${LAYERS}/network-x-env.yaml
 
 
 # Layer apply-env with valid metadata
 cleanup_env
 run_test "layer-apply-env-valid" \
-    "ig layer --path ${META} --apply-env test-set-policies" \
+    "ig layer --path ${LAYERS} --apply-env test-set-policies" \
     0 \
     "Layer apply-env should work with valid metadata"
 
 
 # Layer apply-env with invalid metadata
 run_test "layer-apply-env-invalid" \
-    "ig layer --path ${META} --apply-env test-unsupported" \
+    "ig layer --path ${LAYERS} --apply-env test-unsupported" \
     1 \
     "Layer apply-env should fail with invalid metadata"
 
@@ -368,13 +368,13 @@ cleanup_env
 unset IGconf_net_interface
 IGconf_net_interface_before=$(env | grep IGconf_net_interface || echo "UNSET")
 # Temporarily change Set policy to y for this test
-sed -i 's/X-Env-Var-INTERFACE-Set: n/X-Env-Var-INTERFACE-Set: y/' ${META}/network-x-env.yaml
+sed -i 's/X-Env-Var-INTERFACE-Set: n/X-Env-Var-INTERFACE-Set: y/' ${LAYERS}/network-x-env.yaml
 run_test "meta-parse-sets-required-vars" \
-    "test \"\$IGconf_net_interface_before\" = \"UNSET\" && ig meta --parse ${META}/network-x-env.yaml | grep 'IGconf_net_interface=eth0'" \
+    "test \"\$IGconf_net_interface_before\" = \"UNSET\" && ig metadata --parse ${LAYERS}/network-x-env.yaml | grep 'IGconf_net_interface=eth0'" \
     0 \
     "Meta parse should set required variables from defaults when Set: y"
 # Restore original setting
-sed -i 's/X-Env-Var-INTERFACE-Set: y/X-Env-Var-INTERFACE-Set: n/' ${META}/network-x-env.yaml
+sed -i 's/X-Env-Var-INTERFACE-Set: y/X-Env-Var-INTERFACE-Set: n/' ${LAYERS}/network-x-env.yaml
 
 
 
@@ -382,46 +382,46 @@ sed -i 's/X-Env-Var-INTERFACE-Set: y/X-Env-Var-INTERFACE-Set: n/' ${META}/networ
 cleanup_env
 unset IGconf_net_interface IGconf_net_ip IGconf_net_dns
 # Temporarily change Set policy to y for this test
-sed -i 's/X-Env-Var-INTERFACE-Set: n/X-Env-Var-INTERFACE-Set: y/' ${META}/network-x-env.yaml
+sed -i 's/X-Env-Var-INTERFACE-Set: n/X-Env-Var-INTERFACE-Set: y/' ${LAYERS}/network-x-env.yaml
 run_test "layer-apply-env-sets-vars" \
-    "ig layer --path ${META} --apply-env network-setup | grep -E '\\[SET\\].*IGconf_net_interface=eth0'" \
+    "ig layer --path ${LAYERS} --apply-env network-setup | grep -E '\\[SET\\].*IGconf_net_interface=eth0'" \
     0 \
     "Layer apply-env should SET variables, not skip them when they are unset"
 # Restore original setting
-sed -i 's/X-Env-Var-INTERFACE-Set: y/X-Env-Var-INTERFACE-Set: n/' ${META}/network-x-env.yaml
+sed -i 's/X-Env-Var-INTERFACE-Set: y/X-Env-Var-INTERFACE-Set: n/' ${LAYERS}/network-x-env.yaml
 
 
 # Test metadata parse with required+auto-set variables works
 cleanup_env
 unset IGconf_net_interface IGconf_net_ip IGconf_net_dns
 # Temporarily change Set policy to y for this test
-sed -i 's/X-Env-Var-INTERFACE-Set: n/X-Env-Var-INTERFACE-Set: y/' ${META}/network-x-env.yaml
+sed -i 's/X-Env-Var-INTERFACE-Set: n/X-Env-Var-INTERFACE-Set: y/' ${LAYERS}/network-x-env.yaml
 run_test "meta-parse-required-auto-set-regression" \
-    "ig meta --parse ${META}/network-x-env.yaml | grep 'IGconf_net_interface=eth0'" \
+    "ig metadata --parse ${LAYERS}/network-x-env.yaml | grep 'IGconf_net_interface=eth0'" \
     0 \
     "Meta parse should work with required variables that have Set: y (regression test)"
 # Restore original setting
-sed -i 's/X-Env-Var-INTERFACE-Set: y/X-Env-Var-INTERFACE-Set: n/' ${META}/network-x-env.yaml
+sed -i 's/X-Env-Var-INTERFACE-Set: y/X-Env-Var-INTERFACE-Set: n/' ${LAYERS}/network-x-env.yaml
 
 
 # Test both meta parse and layer apply-env work
 cleanup_env
 unset IGconf_net_interface IGconf_net_ip IGconf_net_dns
 # Temporarily change Set policy to y for this test
-sed -i 's/X-Env-Var-INTERFACE-Set: n/X-Env-Var-INTERFACE-Set: y/' ${META}/network-x-env.yaml
+sed -i 's/X-Env-Var-INTERFACE-Set: n/X-Env-Var-INTERFACE-Set: y/' ${LAYERS}/network-x-env.yaml
 run_test "meta-parse-layer-apply-env-consistency" \
-    "ig meta --parse ${META}/network-x-env.yaml >/dev/null && ig layer --path ${META} --apply-env network-setup | grep -E '\\[SET\\].*IGconf_net_interface=eth0'" \
+    "ig metadata --parse ${LAYERS}/network-x-env.yaml >/dev/null && ig layer --path ${LAYERS} --apply-env network-setup | grep -E '\\[SET\\].*IGconf_net_interface=eth0'" \
     0 \
     "Both meta parse and layer apply-env should work consistently with required+auto-set variables"
 # Restore original setting
-sed -i 's/X-Env-Var-INTERFACE-Set: y/X-Env-Var-INTERFACE-Set: n/' ${META}/network-x-env.yaml
+sed -i 's/X-Env-Var-INTERFACE-Set: y/X-Env-Var-INTERFACE-Set: n/' ${LAYERS}/network-x-env.yaml
 
 
 # Test layer apply-env fails when required variable has Set: n and is not provided
 cleanup_env
 unset IGconf_net_interface IGconf_net_ip IGconf_net_dns
 run_test "layer-apply-env-fails-required-no-set" \
-    "ig layer --path ${META} --apply-env network-setup" \
+    "ig layer --path ${LAYERS} --apply-env network-setup" \
     1 \
     "Layer apply-env should fail when required variables have Set: n and are not provided in environment"
 
@@ -431,7 +431,7 @@ cleanup_env
 unset IGconf_net_interface IGconf_net_ip IGconf_net_dns
 export IGconf_net_interface=wlan0
 run_test "layer-apply-env-succeeds-required-manually-set" \
-    "ig layer --path ${META} --apply-env network-setup | grep -E '\\[SKIP\\].*IGconf_net_interface.*already set'" \
+    "ig layer --path ${LAYERS} --apply-env network-setup | grep -E '\\[SKIP\\].*IGconf_net_interface.*already set'" \
     0 \
     "Layer apply-env should succeed when required variables have Set: n but are manually provided"
 
@@ -440,7 +440,7 @@ run_test "layer-apply-env-succeeds-required-manually-set" \
 cleanup_env
 unset IGconf_net_interface IGconf_net_ip IGconf_net_dns
 run_test "meta-parse-fails-required-no-set" \
-    "ig meta --parse ${META}/network-x-env.yaml" \
+    "ig metadata --parse ${LAYERS}/network-x-env.yaml" \
     1 \
     "Meta parse should fail when required variables have Set: n and are not provided in environment"
 
@@ -450,7 +450,7 @@ cleanup_env
 unset IGconf_net_interface IGconf_net_ip IGconf_net_dns
 export IGconf_net_interface=wlan0
 run_test "meta-parse-succeeds-required-manually-set" \
-    "ig meta --parse ${META}/network-x-env.yaml | grep 'IGconf_net_interface=wlan0'" \
+    "ig metadata --parse ${LAYERS}/network-x-env.yaml | grep 'IGconf_net_interface=wlan0'" \
     0 \
     "Meta parse should succeed when required variables have Set: n but are manually provided"
 
@@ -459,7 +459,7 @@ run_test "meta-parse-succeeds-required-manually-set" \
 cleanup_env
 unset IGconf_lazy_path
 run_test "lazy-last-wins" \
-    "ig layer --path ${META} --apply-env test-lazy-second | grep -E '\[LAZY\].*IGconf_lazy_path=/usr/second'" \
+    "ig layer --path ${LAYERS} --apply-env test-lazy-second | grep -E '\[LAZY\].*IGconf_lazy_path=/usr/second'" \
     0 \
     "Lazy policy should apply last-wins value from test-lazy-second"
 
@@ -467,7 +467,7 @@ run_test "lazy-last-wins" \
 cleanup_env
 export IGconf_force_color=red
 run_test "force-overwrite" \
-    "ig layer --path ${META} --apply-env test-force-overwrite | grep -E '\[FORCE\].*IGconf_force_color=blue'" \
+    "ig layer --path ${LAYERS} --apply-env test-force-overwrite | grep -E '\[FORCE\].*IGconf_force_color=blue'" \
     0 \
     "Force policy should overwrite pre-existing env value"
 cleanup_env
@@ -475,22 +475,22 @@ cleanup_env
 # Test placeholder substitution
 cleanup_env
 unset IGconf_placeholder_path
-expected_dir="${META}"
+expected_dir="${LAYERS}"
 run_test "placeholder-directory" \
-   "ig meta --parse ${META}/placeholder-test.yaml | grep \"IGconf_placeholder_path=${expected_dir}\"" \
+   "ig metadata --parse ${LAYERS}/placeholder-test.yaml | grep \"IGconf_placeholder_path=${expected_dir}\"" \
    0 \
    "Placeholder ${DIRECTORY} should resolve to metadata directory"
 
 # Provider capability tests
 cleanup_env
 run_test "provider-resolution" \
-    "ig layer --path ${META} --check test-provider-base test-provider-consumer" \
+    "ig layer --path ${LAYERS} --check test-provider-base test-provider-consumer" \
     0 \
     "Provider check should pass if provider in dependency chain"
 
 cleanup_env
 run_test "provider-missing" \
-    "ig layer --path ${META} --check test-provider-consumer-missing" \
+    "ig layer --path ${LAYERS} --check test-provider-consumer-missing" \
     1 \
     "Check should fail when provider capability not available"
 
@@ -526,7 +526,7 @@ cleanup_env
 unset IGconf_basic_hostname IGconf_basic_port
 WRITE_TEST_FILE="/tmp/test-writeout-$$.env"
 run_test "meta-parse-write-out" \
-    "ig meta --parse ${META}/valid-basic.yaml --write-out ${WRITE_TEST_FILE} >/dev/null && grep -q 'IGconf_basic_hostname=\"localhost\"' ${WRITE_TEST_FILE} && grep -q 'IGconf_basic_port=\"8080\"' ${WRITE_TEST_FILE}" \
+    "ig metadata --parse ${LAYERS}/valid-basic.yaml --write-out ${WRITE_TEST_FILE} >/dev/null && grep -q 'IGconf_basic_hostname=\"localhost\"' ${WRITE_TEST_FILE} && grep -q 'IGconf_basic_port=\"8080\"' ${WRITE_TEST_FILE}" \
     0 \
     "Meta parse --write-out should write variables to file"
 rm -f ${WRITE_TEST_FILE}
@@ -535,7 +535,7 @@ cleanup_env
 unset IGconf_basic_hostname IGconf_basic_port
 WRITE_TEST_FILE="/tmp/test-layer-writeout-$$.env"
 run_test "layer-apply-env-write-out" \
-    "ig layer --path ${META} --apply-env test-basic --write-out ${WRITE_TEST_FILE} >/dev/null && grep -q 'IGconf_basic_hostname=\"localhost\"' ${WRITE_TEST_FILE} && grep -q 'IGconf_basic_port=\"8080\"' ${WRITE_TEST_FILE}" \
+    "ig layer --path ${LAYERS} --apply-env test-basic --write-out ${WRITE_TEST_FILE} >/dev/null && grep -q 'IGconf_basic_hostname=\"localhost\"' ${WRITE_TEST_FILE} && grep -q 'IGconf_basic_port=\"8080\"' ${WRITE_TEST_FILE}" \
     0 \
     "Layer apply-env --write-out should write changed variables to file"
 rm -f ${WRITE_TEST_FILE}
@@ -545,7 +545,7 @@ unset IGconf_basic_hostname IGconf_basic_port
 export IGconf_basic_hostname=already-set
 WRITE_TEST_FILE="/tmp/test-writeout-partial-$$.env"
 run_test "layer-apply-env-write-out-partial" \
-    "ig layer --path ${META} --apply-env test-basic --write-out ${WRITE_TEST_FILE} >/dev/null && ! grep -q 'IGconf_basic_hostname' ${WRITE_TEST_FILE} && grep -q 'IGconf_basic_port=\"8080\"' ${WRITE_TEST_FILE}" \
+    "ig layer --path ${LAYERS} --apply-env test-basic --write-out ${WRITE_TEST_FILE} >/dev/null && ! grep -q 'IGconf_basic_hostname' ${WRITE_TEST_FILE} && grep -q 'IGconf_basic_port=\"8080\"' ${WRITE_TEST_FILE}" \
     0 \
     "Layer apply-env --write-out should only write changed variables, not already-set ones"
 rm -f ${WRITE_TEST_FILE}
@@ -554,7 +554,7 @@ cleanup_env
 unset IGconf_basic_hostname IGconf_basic_port IGconf_types_name IGconf_types_timeout
 WRITE_TEST_FILE="/tmp/test-multi-layer-writeout-$$.env"
 run_test "layer-apply-env-write-out-multi-layer" \
-    "ig layer --path ${META} --apply-env test-basic test-all-types --write-out ${WRITE_TEST_FILE} >/dev/null && grep -q 'IGconf_basic_hostname=\"localhost\"' ${WRITE_TEST_FILE} && grep -q 'IGconf_basic_port=\"8080\"' ${WRITE_TEST_FILE} && grep -q 'IGconf_types_name=\"myapp\"' ${WRITE_TEST_FILE} && grep -q 'IGconf_types_timeout=\"30\"' ${WRITE_TEST_FILE}" \
+    "ig layer --path ${LAYERS} --apply-env test-basic test-all-types --write-out ${WRITE_TEST_FILE} >/dev/null && grep -q 'IGconf_basic_hostname=\"localhost\"' ${WRITE_TEST_FILE} && grep -q 'IGconf_basic_port=\"8080\"' ${WRITE_TEST_FILE} && grep -q 'IGconf_types_name=\"myapp\"' ${WRITE_TEST_FILE} && grep -q 'IGconf_types_timeout=\"30\"' ${WRITE_TEST_FILE}" \
     0 \
     "Layer apply-env --write-out should write variables from ALL layers, not just the last one"
 rm -f ${WRITE_TEST_FILE}
@@ -563,14 +563,14 @@ cleanup_env
 unset IGconf_basic_hostname IGconf_basic_port IGconf_deps_feature
 WRITE_TEST_FILE="/tmp/test-deps-writeout-$$.env"
 run_test "layer-apply-env-write-out-with-dependencies" \
-    "ig layer --path ${META} --apply-env test-with-deps --write-out ${WRITE_TEST_FILE} >/dev/null && grep -q 'IGconf_basic_hostname=\"localhost\"' ${WRITE_TEST_FILE} && grep -q 'IGconf_basic_port=\"8080\"' ${WRITE_TEST_FILE} && grep -q 'IGconf_deps_feature=\"enabled\"' ${WRITE_TEST_FILE}" \
+    "ig layer --path ${LAYERS} --apply-env test-with-deps --write-out ${WRITE_TEST_FILE} >/dev/null && grep -q 'IGconf_basic_hostname=\"localhost\"' ${WRITE_TEST_FILE} && grep -q 'IGconf_basic_port=\"8080\"' ${WRITE_TEST_FILE} && grep -q 'IGconf_deps_feature=\"enabled\"' ${WRITE_TEST_FILE}" \
     0 \
     "Layer apply-env --write-out should write variables from dependencies AND target layer"
 rm -f ${WRITE_TEST_FILE}
 
 run_test "bulk-lint-all-yaml" '
     # 1) collect every *.yaml / *.yml
-    files=($(find "${IGTOP}/meta" "${IGTOP}/device" "${IGTOP}/image" \
+    files=($(find "${IGTOP}/layer" "${IGTOP}/device" "${IGTOP}/image" \
                  -type f \( -name "*.yaml" -o -name "*.yml" \)))
     total=${#files[@]}
 
@@ -578,7 +578,7 @@ run_test "bulk-lint-all-yaml" '
 
     # 2) lint each file
     for f in "${files[@]}"; do
-        if ig meta --lint "$f" >/dev/null 2>&1; then
+        if ig metadata --lint "$f" >/dev/null 2>&1; then
             ((pass++))
         else
             ((fail++))
@@ -594,14 +594,14 @@ run_test "bulk-lint-all-yaml" '
 
     # 4) success when every YAML passed
     [[ $pass -eq $total ]]
-' 0 "All YAML files under meta/, device/, image/ must lint successfully"
+' 0 "All YAML files under layer/, device/, image/ must lint successfully"
 
 # Test variable dependency ordering using three-layer dependency chain and shell sourcing
 # This robust test catches ordering bugs by using shell strict mode to detect undefined variables
 cleanup_env
 run_test "variable-dependency-order-robust" \
     'WRITE_OUT_FILE=$(mktemp) && 
-     ig layer --path '"${META}"' --apply-env test-dependency-top --write-out "$WRITE_OUT_FILE" >/dev/null 2>&1 &&
+     ig layer --path '"${LAYERS}"' --apply-env test-dependency-top --write-out "$WRITE_OUT_FILE" >/dev/null 2>&1 &&
      env -i bash -c '\''
        set -aeu  # Strict mode: -a export all, -e exit on error, -u error on undefined vars
        source "$1"

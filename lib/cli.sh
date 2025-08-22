@@ -27,11 +27,11 @@ Usage:
 
 Supported commands:
   help                Show this help message
-  build  [options]    Filesystem and image construction
-  clean  [options]    Clean work tree
-  layer  [options]    Layer operations (delegated)
-  meta   [options]    Metadata operations (delegated)
-  config [options]    Config file operations (delegated)
+  build    [options]    Filesystem and image construction
+  clean    [options]    Clean work tree
+  layer    [options]    Layer operations (delegated)
+  metadata [options]    Layer metadata operations (delegated)
+  config   [options]    Config file operations (delegated)
 
 Delegated commands are processed by the core engine helper (bin/ig).
 
@@ -178,11 +178,11 @@ cli_parse_layer() {
 }
 
 
-cli_help_meta()
+cli_help_metadata()
 {
 cat <<-EOF >&2
 Usage
-  $(basename $(readlink -f "$0")) meta [options] ...
+  $(basename $(readlink -f "$0")) metadata [options] ...
 
   This is a delegated command, meaning that it passes all args straight
   through to the engine for processing. Use -h to see available options.
@@ -191,15 +191,15 @@ EOF
 }
 
 
-# Handler for meta command options
+# Handler for metadata command options
 # Arguments: 1 = nameref to a context array ; remaining = CLI args.
-cli_parse_meta() {
+cli_parse_metadata() {
    local -n _ctx=$1 # unused
    shift
 
    # Only need to support -h
    if [[ $# -gt 0 && "$1" == "-h" ]]; then
-      cli_help_meta
+      cli_help_metadata
    fi
    return 0 # Pass through everything without consuming
 }

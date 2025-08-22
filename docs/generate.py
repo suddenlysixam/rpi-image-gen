@@ -86,7 +86,7 @@ def main():
     layer_paths = [
         str(script_dir.parent / 'device'),
         str(script_dir.parent / 'image'),
-        str(script_dir.parent / 'meta')
+        str(script_dir.parent / 'layer')
     ]
     manager = LayerManager(layer_paths)
 

@@ -805,7 +805,7 @@ def _generate_boilerplate():
 # X-Env-Var-component-Valid: keywords:frontend,backend,database,cache,worker
 # X-Env-Var-component-Set: true
 #
-# Validation schemes: run 'ig meta help-validation' for details
+# Validation schemes: run 'ig metadata help-validation' for details
 # METAEND"""
 
     print(boilerplate)
@@ -816,7 +816,7 @@ def _show_validation_help():
     print(get_validation_help())
 
 def Metadata_register_parser(subparsers):
-    parser = subparsers.add_parser("meta", help="Metadata utilities")
+    parser = subparsers.add_parser("metadata", help="Layer metadata utilities")
     parser.add_argument("--parse", metavar="PATH", help="Parse metadata from file and output environment variables")
     parser.add_argument("--validate", metavar="PATH", help="Validate metadata and environment variables")
     parser.add_argument("--describe", metavar="PATH", help="Describe layer and variable information")

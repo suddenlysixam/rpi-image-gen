@@ -7,7 +7,7 @@ Layer acme-sdk-v1.yaml uses the uchroot helper to simplify user chroot operation
 ```text
 |-- config
 |   `-- acme-integration.cfg
-|-- meta
+|-- layer
 |   |-- acme-developer.yaml
 |   |-- acme-sdk-v1.yaml
 |   `-- essential.yaml

@@ -1,5 +1,5 @@
 # Example profile demonstrating a pi5 native 64-bit arm system with
-# armhf userland support and customised meta collections to describe and
+# armhf userland support and customised layer collections to describe and
 # install third-party packages using apt.
 
 debian/bookworm/arm64/base-apt-multi

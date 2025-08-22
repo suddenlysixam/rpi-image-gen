@@ -280,7 +280,7 @@ def get_validator_documentation_data() -> dict:
             {'name': 'skip', 'class': 'skip', 'description': 'Never set the variable. Useful for optional variables or when you want to disable a variable.'}
         ],
         'placeholders': [
-            {'name': '${FILENAME}', 'description': 'metadata file name'},
+            {'name': '${FILENAME}', 'description': 'layer metadata file name'},
             {'name': '${DIRECTORY}', 'description': 'directory containing the file'},
             {'name': '${FILEPATH}', 'description': 'absolute path to the file'}
         ]
@@ -332,10 +332,10 @@ def get_validation_help() -> str:
 
     # Additional sections from original help
     help_sections.extend([
-        "TIP: Use `ig meta --lint <file>` to quickly check syntax and field names without validating environment variables.\n",
+        "TIP: Use `ig metadata --lint <file>` to quickly check syntax and field names without validating environment variables.\n",
 
         "PLACEHOLDERS (auto-substituted in values):",
-        "  ${FILENAME}   - metadata file name",
+        "  ${FILENAME}   - layer metadata file name",
         "  ${DIRECTORY}  - directory containing the file",
         "  ${FILEPATH}   - absolute path to the file",
         "  Escape with \\${NAME} to keep the literal text.\n",

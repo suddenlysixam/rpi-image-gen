@@ -19,7 +19,7 @@ from logger import log_warning, log_success, log_failure, log_error
 class LayerManager:
     def __init__(self, search_paths: Optional[List[str]] = None, file_patterns: Optional[List[str]] = None, *, show_loaded: bool = False):
         if search_paths is None:
-            search_paths = ['./meta']
+            search_paths = ['./layer']
         if file_patterns is None:
             file_patterns = ['*.yaml', '*.yml']
 
@@ -46,8 +46,8 @@ class LayerManager:
 
     def _build_provider_index(self):
         """Index providers to unique layer names"""
-        for lname, meta in self.layers.items():
-            info = meta.get_layer_info()
+        for lname, layer in self.layers.items():
+            info = layer.get_layer_info()
             if not info:
                 continue
             for prov in info.get('provides', []):
@@ -355,10 +355,10 @@ class LayerManager:
         variable_definitions = {}
 
         for position, layer_name in enumerate(build_order):
-            meta = self.layers[layer_name]
+            layer = self.layers[layer_name]
 
             # Get all variables from this layer's metadata container
-            for var_name, env_var in meta._container.variables.items():
+            for var_name, env_var in layer._container.variables.items():
                 # Create a new EnvVariable with position and source layer info
                 var_with_position = EnvVariable(
                     name=env_var.name,
@@ -465,8 +465,8 @@ class LayerManager:
                 print(f"Layer '{layer_name}' not found")
             return False
 
-        meta = self.layers[layer_name]
-        results = meta.validate_env_vars()
+        layer = self.layers[layer_name]
+        results = layer.validate_env_vars()
 
         layer_valid = True
         for var, result in results.items():
@@ -501,7 +501,7 @@ class LayerManager:
                     print(f"[SKIP] {result['optional_var']}={result['value']} (optional, no validation rule, layer: {layer_name})")
 
         # Additional check: unsupported layer fields
-        unsupported_layer = meta._check_unsupported_layer_fields()
+        unsupported_layer = layer._check_unsupported_layer_fields()
         if unsupported_layer:
             for fld, msg in unsupported_layer.items():
                 if not silent:
@@ -651,7 +651,7 @@ class LayerManager:
         if layer_name not in self.layers:
             return None
 
-        meta = self.layers[layer_name]
+        layer = self.layers[layer_name]
 
         # Get detailed variable information from validators
         variables = {}
@@ -659,8 +659,8 @@ class LayerManager:
         # Read raw (unexpanded) metadata values from file
         raw_field_values = self._get_raw_metadata_fields(layer_name)
 
-        if hasattr(meta, '_container') and meta._container.variables:
-            for var_name, var_obj in meta._container.variables.items():
+        if hasattr(layer, '_container') and layer._container.variables:
+            for var_name, var_obj in layer._container.variables.items():
                 # Extract the original variable name from the IGconf_prefix_varname format
                 # var_name is like "IGconf_test_directory", we need "DIRECTORY" for "X-Env-Var-DIRECTORY"
                 parts = var_name.split('_')
@@ -704,7 +704,7 @@ class LayerManager:
                     continue
 
         # Parse metadata for documentation using processed metadata
-        raw_metadata = meta.get_metadata()
+        raw_metadata = layer.get_metadata()
         required_variables = []
         if 'X-Env-VarRequires' in raw_metadata:
             var_requires = raw_metadata['X-Env-VarRequires'].split(',')
@@ -716,7 +716,7 @@ class LayerManager:
         companion_doc = self._get_companion_doc(layer_name, format='asciidoc')
 
         return {
-            'layer_info': meta.get_layer_info(),
+            'layer_info': layer.get_layer_info(),
             'variables': variables,
             'required_variables': required_variables,
             'variable_prefix': variable_prefix,
@@ -834,7 +834,7 @@ mmdebstrap:
 # 1. Copy this template to your desired location.
 # 2. Customise the X-Env-* fields for your layer
 # 3. Customise the YAML for your use case
-# 4. For validation, run: ig meta --help-validation
+# 4. For validation, run: ig metadata --help-validation
 #
 # Notes:
 # Depending on script needs, YAML scalar/block constructs may be required."""
@@ -845,10 +845,10 @@ mmdebstrap:
 # CLI integration
 def LayerManager_register_parser(subparsers, root=None):
     if root:
-        default_paths = f'{root}/meta:{root}/device:{root}/image'
+        default_paths = f'{root}/layer:{root}/device:{root}/image'
         help_text = 'Colon-separated search paths for layers'
     else:
-        default_paths = './meta:./device:./image'
+        default_paths = './layer:./device:./image'
         help_text = 'Colon-separated search paths for layers'
 
     # Use terminal width for help formatting
@@ -934,7 +934,7 @@ Virtual capabilities:
 
 Environment-variable support:
   X-Env-VarPrefix                Prefix applied to IGconf_ env var names in this layer
-  (plus all X-Env-Var-* variable definition fields – see `ig meta --help-validation`)
+  (plus all X-Env-Var-* variable definition fields – see `ig metadata --help-validation`)
 
 Notes:
   • Provides/RequresProvider enable abstract dependencies; use them instead of hard-coding

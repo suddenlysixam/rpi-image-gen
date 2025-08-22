@@ -16,5 +16,5 @@ mmdebstrap:
     - mkdir -p $1/etc/systemd/network $1/etc/systemd/system/getty@tty1.service.d
     - ln -sf /dev/null $1/etc/systemd/network/99-default.link
     - ln -sf /dev/null $1/etc/systemd/network/73-usb-net-by-mac.link
-    - $META_HOOKS/systemd/netgen eth0 > $1/etc/systemd/network/01-eth0.network
-    - $META_HOOKS/systemd/ttyset noclear > $1/etc/systemd/system/getty@tty1.service.d/noclear.conf
+    - $LAYER_HOOKS/systemd/netgen eth0 > $1/etc/systemd/network/01-eth0.network
+    - $LAYER_HOOKS/systemd/ttyset noclear > $1/etc/systemd/system/getty@tty1.service.d/noclear.conf

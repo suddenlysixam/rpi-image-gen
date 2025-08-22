@@ -30,7 +30,7 @@ include:
   file: bookworm-minbase.cfg  # Resolves to built-in config
 
 layer:
-  app: my-kiosk               # Resolves to ./my-project/meta/my-kiosk.yaml
+  app: my-kiosk               # Resolves to ./my-project/layer/my-kiosk.yaml
 
 # Build with mixed local/built-in resources
 $ rpi-image-gen build -S ./my-project/ -c kiosk.cfg

@@ -48,7 +48,7 @@ path_refresh()
 {
    # Defaults
    ctx[EXEC_PATH]="$IGTOP/bin:$PATH"
-   ctx[LAYER_PATH]="$IGTOP/device:$IGTOP/image:$IGTOP/meta"
+   ctx[LAYER_PATH]="$IGTOP/device:$IGTOP/image:$IGTOP/layer"
    ctx[CONFIG_PATH]="$IGTOP/config"
 
    # Plug src dir into paths
@@ -56,7 +56,7 @@ path_refresh()
       [[ -d "${ctx[SRC_DIR]}/bin"    ]] && \
          ctx[EXEC_PATH]="${ctx[SRC_DIR]}/bin:${ctx[EXEC_PATH]}"
 
-      for d in device image meta; do
+      for d in device image layer; do
          [[ -d "${ctx[SRC_DIR]}/$d" ]] && \
             ctx[LAYER_PATH]="${ctx[SRC_DIR]}/$d:${ctx[LAYER_PATH]}"
          done
@@ -123,7 +123,7 @@ parameter_assembly()
       || die "Config parse failed"
 
    # Inject extras
-   printf 'META_HOOKS="%s"\n'  "$IGTOP/meta-hooks"      >> "${ctx[IGENVF]}"
+   printf 'LAYER_HOOKS="%s"\n'  "$IGTOP/layer-hooks"      >> "${ctx[IGENVF]}"
    printf 'RPI_TEMPLATES="%s"\n' "$IGTOP/templates/rpi" >> "${ctx[IGENVF]}"
 
    # Config sanity checks
@@ -523,11 +523,11 @@ main() {
          exec "$IGTOP/bin/ig" layer --path "${ctx[LAYER_PATH]}" "$@"
          ;;
 
-      meta)
-         cli_parse_meta ctx "$@"
+      metadata)
+         cli_parse_metadata ctx "$@"
          shift $?
          dependencies_check "$IGTOP/depends" || exit 1
-         exec "$IGTOP/bin/ig" meta "$@"
+         exec "$IGTOP/bin/ig" metadata "$@"
          ;;
 
       help|-h|--help)

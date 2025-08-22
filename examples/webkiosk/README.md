@@ -10,7 +10,7 @@ examples/webkiosk/
 |-- config
 |   `-- kiosk.cfg
 |-- kiosk.service.tpl
-|-- meta
+|-- layer
 |   `-- kiosk.yaml
 `-- README.md
 ```

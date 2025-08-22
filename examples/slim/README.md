@@ -19,7 +19,7 @@ examples/slim/
 |   `-- compact
 |       |-- genimage.cfg.in
 |       `-- pre-image.sh
-|-- meta
+|-- layer
 |   `-- slim-customisations.yaml
 |-- my.options
 |-- profile

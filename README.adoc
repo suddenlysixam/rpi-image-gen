@@ -89,9 +89,9 @@ See the `examples/` directory for tips and help
 * `examples/` - Examples and howto
 * `image/` - Disk layout specific assets
 * `keydir/` - Cryptographic assets
+* `layer/` - Layer library
+* `layer-hooks/` - Common hooks used by layer library
 * `lib/` - Execution helpers and macros, eg CLI handling, reusable constructs
-* `meta/` - Layer library
-* `meta-hooks/` - Common hooks used by layer library
 * `sbom/` - Software Bill of Material specific assets
 * `scripts/` - Dedicated functional hooks, eg for bdebstrap
 * `site/` - Core Python engine classes
@@ -114,7 +114,7 @@ rpi-image-gen layer --list
 rpi-image-gen layer --describe my-layer
 
 # Lint a layer file when developing a custom solution
-rpi-image-gen meta --lint /path/to/my/layer.yaml
+rpi-image-gen metadata --lint /path/to/my/layer.yaml
 
 # See all options
 rpi-image-gen --help
