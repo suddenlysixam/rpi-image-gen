@@ -22,4 +22,5 @@ fdisk
 python3-yaml
 # doc gen only
 # python3-markdown
+# asciidoctor
 # python3-jinja2

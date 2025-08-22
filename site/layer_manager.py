@@ -713,7 +713,7 @@ class LayerManager:
         variable_prefix = raw_metadata.get('X-Env-VarPrefix', '')
 
         # Check for companion doc
-        companion_doc = self._get_companion_doc(layer_name)
+        companion_doc = self._get_companion_doc(layer_name, format='asciidoc')
 
         return {
             'layer_info': meta.get_layer_info(),

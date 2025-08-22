@@ -26,6 +26,8 @@
         .deps { display: flex; flex-wrap: wrap; gap: 5px; }
         .dep-badge { background: #28a745; color: white; padding: 2px 6px; border-radius: 3px; font-size: 11px; text-decoration: none; }
         .dep-badge:hover { background: #1e7e34; }
+        /* Main content headers styling */
+        h1, h2, h3, h4, h5, h6 { color: #333; margin-top: 20px; margin-bottom: 10px; }
         /* Companion documentation content styling */
         .companion-content h1, .companion-content h2, .companion-content h3, .companion-content h4, .companion-content h5, .companion-content h6 { color: #333; margin-top: 20px; margin-bottom: 10px; }
         .companion-content p { margin: 10px 0; }
@@ -34,11 +36,84 @@
         .companion-content pre { background: #f8f9fa; padding: 15px; border-radius: 5px; overflow-x: auto; border-left: 4px solid #007acc; }
         .companion-content table { border: 1px solid #ddd; }
         .companion-content th, .companion-content td { border: 1px solid #ddd; }
+        
+        /* AsciiDoc admonition blocks (NOTE, TIP, WARNING, etc.) */
+        .admonitionblock {
+            margin: 1.5em 0;
+            padding: 0.4em 0.6em;
+            border-left: 4px solid;
+            background: #f8f9fa;
+            border-radius: 0 4px 4px 0;
+        }
+        
+        .admonitionblock .title {
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 0.85em;
+            margin-bottom: 0.25em;
+            letter-spacing: 0.5px;
+        }
+        
+        .admonitionblock .content {
+            margin: 0;
+        }
+        
+        /* Reduce spacing for paragraphs inside admonitions */
+        .admonitionblock p {
+            margin: 0.25em 0;
+        }
+        
+        .admonitionblock p:first-child {
+            margin-top: 0;
+        }
+        
+        .admonitionblock p:last-child {
+            margin-bottom: 0;
+        }
+        
+        /* Specific admonition types */
+        .admonitionblock.note {
+            border-color: #17a2b8;
+            background: #d1ecf1;
+        }
+        
+        .admonitionblock.note .title {
+            color: #0c5460;
+        }
+        
+        .admonitionblock.tip {
+            border-color: #28a745;
+            background: #d4edda;
+        }
+        
+        .admonitionblock.tip .title {
+            color: #155724;
+        }
+        
+        .admonitionblock.important {
+            border-color: #ffc107;
+            background: #fff3cd;
+        }
+        
+        .admonitionblock.important .title {
+            color: #856404;
+        }
+        
+        .admonitionblock.warning,
+        .admonitionblock.caution {
+            border-color: #dc3545;
+            background: #f8d7da;
+        }
+        
+        .admonitionblock.warning .title,
+        .admonitionblock.caution .title {
+            color: #721c24;
+        }
     </style>
 </head>
 <body>
     <div class="back-link">
-        <a href="../index.html">← Back to Layer Index</a>
+        <a href="index.html">← Back to Layer Index</a>
     </div>
 
     <div class="header">
@@ -115,7 +190,7 @@
                     <td><code>{{ var.original_value or 'Not set' }}</code></td>
                     <td>{{ var.validation_description or 'None' }}</td>
                     <td>
-                        <a href="../variable-validation.html#set-policies" class="badge policy-{{ var.set_policy }}" title="Click for policy and validation help">{{ var.set_policy }}</a>
+                        <a href="variable-validation.html#set-policies" class="badge policy-{{ var.set_policy }}" title="Click for policy and validation help">{{ var.set_policy }}</a>
                     </td>
                 </tr>
                 {% endfor %}
