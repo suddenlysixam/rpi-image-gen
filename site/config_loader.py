@@ -57,9 +57,28 @@ class ConfigLoader:
                 return cand2
         raise FileNotFoundError(f"Included file '{inc_name}' not found (searched parent dir and {self.search_paths})")
 
+    def _resolve_config_path(self) -> str:
+        """Resolve config file by trying as-is then search paths."""
+        cfg_path = Path(self.cfg_path)
+
+        # If absolute or relative path exists as-is, use it
+        if cfg_path.exists():
+            return str(cfg_path.resolve())
+
+        # If relative path, try search paths
+        if not cfg_path.is_absolute():
+            for base in self.search_paths:
+                candidate = (base / cfg_path).resolve()
+                if candidate.exists():
+                    return str(candidate)
+
+        # Not found anywhere
+        search_info = f" (searched {self.search_paths})" if not cfg_path.is_absolute() else ""
+        raise FileNotFoundError(f"Config file not found: {self.cfg_path}{search_info}")
+
     def _load(self):
-        if not os.path.exists(self.cfg_path):
-            raise FileNotFoundError(f"Config file not found: {self.cfg_path}")
+        # Resolve config file path using search paths
+        self.cfg_path = self._resolve_config_path()
 
         if self.file_format == 'yaml':
             self._load_yaml()

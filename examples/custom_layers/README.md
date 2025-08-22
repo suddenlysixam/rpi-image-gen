@@ -2,6 +2,8 @@ Build a system with a custom config and multiple layers, declaring dependencies 
 
 The config file used by this example specifies a custom layer to build a system from, which uses built-in and custom layers as dependencies. The custom layers declare additional variables to the config system which are used in the layers.
 
+Layer acme-sdk-v1.yaml uses the uchroot helper to simplify user chroot operations to ensure files are created in the user's home directory with appropriate permissions. The helper makes standard system variables available in the environment which abstracts and simplifies the operation.
+
 ```text
 |-- config
 |   `-- acme-integration.cfg
@@ -14,5 +16,5 @@ The config file used by this example specifies a custom layer to build a system 
 ```
 
 ```bash
-rpi-image-gen build -S ./examples/custom_layers/ -c ./examples/custom_layers/config/acme-integration.cfg
+rpi-image-gen build -S ./examples/custom_layers/ -c acme-integration.cfg
 ```

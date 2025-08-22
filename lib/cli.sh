@@ -26,11 +26,12 @@ Usage:
   $(basename $(readlink -f "$0")) -h|--help
 
 Supported commands:
-  help               Show this help message
-  build [options]    Filesystem and image construction
-  clean [options]    Clean work tree
-  layer [options]    Layer operations (delegated)
-  meta  [options]    Metadata operations (delegated)
+  help                Show this help message
+  build  [options]    Filesystem and image construction
+  clean  [options]    Clean work tree
+  layer  [options]    Layer operations (delegated)
+  meta   [options]    Metadata operations (delegated)
+  config [options]    Config file operations (delegated)
 
 Delegated commands are processed by the core engine helper (bin/ig).
 
@@ -75,12 +76,12 @@ cli_parse_build() {
    while getopts "B:c:fhiIS:" flag; do
       case $flag in
          B)  __ctx[BUILD_DIR]=$(validate_dir "$OPTARG") || { cli_help_build; exit 1; } ;;
-         c)  __ctx[INCONFIG]=$(validate_file "$OPTARG") || { cli_help_build; exit 1; } ;;
+         c)  __ctx[INCONFIG]="$OPTARG" ;;
          f)  __ctx[ONLY_FS]=1     ;;
+         h)  cli_help_build ; exit 0 ;;
          i)  __ctx[ONLY_IMAGE]=1  ;;
          I)  __ctx[INTERACTIVE]=y ;;
          S)  __ctx[SRC_DIR]=$(validate_dir "$OPTARG") || { cli_help_build; exit 1; } ;;
-         h)  cli_help_build ; exit 0 ;;
          *)  cli_help_build ; exit 1 ;;
       esac
    done
@@ -109,12 +110,13 @@ cli_parse_clean() {
    shift
 
    local OPTIND flag
-   while getopts "B:c:hI" flag; do
+   while getopts "B:c:hIS:" flag; do
       case $flag in
          B)  __ctx[BUILD_DIR]=$(validate_dir "$OPTARG") || { cli_help_build; exit 1; } ;;
-         c)  __ctx[INCONFIG]=$(validate_file "$OPTARG") || { cli_help_build; exit 1; } ;;
-         I)  __ctx[INTERACTIVE]=y ;;
+         c)  __ctx[INCONFIG]="$OPTARG" ;;
          h)  cli_help_clean ; exit 0 ;;
+         I)  __ctx[INTERACTIVE]=y ;;
+         S)  __ctx[SRC_DIR]=$(validate_dir "$OPTARG") || { cli_help_build; exit 1; } ;;
          *)  cli_help_clean ; exit 1 ;;
       esac
    done
@@ -176,7 +178,6 @@ cli_parse_layer() {
 }
 
 
-
 cli_help_meta()
 {
 cat <<-EOF >&2
@@ -199,6 +200,33 @@ cli_parse_meta() {
    # Only need to support -h
    if [[ $# -gt 0 && "$1" == "-h" ]]; then
       cli_help_meta
+   fi
+   return 0 # Pass through everything without consuming
+}
+
+
+cli_help_config()
+{
+cat <<-EOF >&2
+Usage
+  $(basename $(readlink -f "$0")) config [options] ...
+
+  This is a delegated command, meaning that it passes all args straight
+  through to the engine for processing. Use -h to see available options.
+
+EOF
+}
+
+
+# Handler for config command options
+# Arguments: 1 = nameref to a context array ; remaining = CLI args.
+cli_parse_config() {
+   local -n _ctx=$1 # unused
+   shift
+
+   # Only need to support -h
+   if [[ $# -gt 0 && "$1" == "-h" ]]; then
+      cli_help_config
    fi
    return 0 # Pass through everything without consuming
 }

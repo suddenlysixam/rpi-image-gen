@@ -16,6 +16,28 @@ The rpi-image-gen build process consists of five main stages executed sequential
 . **Filesystem Generation** - Filesystem creation followed by hooks and overlays
 . **Image Generation** - Disk image creation
 
+== Philosophy
+
+When instructed to use a source directory via the CLI, rpi-image-gen **prioritises that directory** for config files and layers, while still allowing references to its built-in resources. Similar to how a C compiler searches local directories before system directories (`-I. -I/usr/include`), rpi-image-gen uses a **hierarchical search path**. This allows users to have complete _project encapsulation_ for their integration.
+
+=== Practical Example
+
+[source,bash]
+----
+# Local config can include built-in base
+# File: ./my-project/config/kiosk.yaml
+include:
+  file: bookworm-minbase.cfg  # Resolves to built-in config
+
+layer:
+  app: my-kiosk               # Resolves to ./my-project/meta/my-kiosk.yaml
+
+# Build with mixed local/built-in resources
+$ rpi-image-gen build -S ./my-project/ -c kiosk.cfg
+----
+
+This philosophy enables a user to have self-contained projects with external dependencies.
+
 == Stage 1: Parameter Assembly
 
 === Purpose
