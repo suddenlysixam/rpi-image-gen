@@ -117,6 +117,16 @@ Create disk images from the prepared filesystem using the provider.
 Hooks are optional but if a hook is to be executed, it must have executable permissions for the user performing the build.
 ====
 
+In addition to the hooks described above, the following are also supported.
+
+=== bdebstrap
+
+rpi-image-gen extends the support of bdebstrap hooks to image, device and source directories. Hooks with filenames beginning with ```setup```,  ```essential```, ```customize``` and ```cleanup```, and which only contain alphanumeric characters, are supported and must exist in a sub-directory named```bdebstrap``` within the directory in order for them to be run at the respective stage of chroot creation. Their file extension is ignored. Sub-directories are not traversed.
+
+=== initramfs
+
+If ```initramfs-tools(7)``` is installed in the chroot, rpi-image-gen extends the support of initramfs scripts and hooks to image and device directories via their sub-directory ```device/initramfs-tools```. If present, the entire contents of this directory is recursively copied into the chroot. Mode and ownership attributes are preserved. Destination files will not be overwritten. rpi-image-gen performs this operation during the ```customize``` stage of chroot creation and guarantees it will take place after invocation of all image and device bdebstrap ```customize``` hooks.
+
 == Interactive Mode
 
 A CLI option allows execution to pause between major operations for user confirmation. This may be useful for inspecting log output prior to building.
