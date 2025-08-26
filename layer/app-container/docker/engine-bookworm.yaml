@@ -12,10 +12,10 @@
 #
 # X-Env-Var-trust_user1: n
 # X-Env-Var-trust_user1-Desc: Make $IGconf_device_user1 a member of the docker
-# group and therefore able to run containers (and applications) without
-# requiring root privileges. Enabling this has security implications.
-# See:
-# https://docs.docker.com/engine/security/#docker-daemon-attack-surface
+#  group and therefore able to run containers (and applications) without
+#  requiring root privileges. Enabling this has security implications.
+#  See:
+#  https://docs.docker.com/engine/security/#docker-daemon-attack-surface
 # X-Env-Var-trust_user1-Required: n
 # X-Env-Var-trust_user1-Valid: bool
 # X-Env-Var-trust_user1-Set: y

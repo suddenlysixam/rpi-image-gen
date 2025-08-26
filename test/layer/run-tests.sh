@@ -570,7 +570,7 @@ rm -f ${WRITE_TEST_FILE}
 
 run_test "bulk-lint-all-yaml" '
     # 1) collect every *.yaml / *.yml
-    files=($(find "${IGTOP}/layer" "${IGTOP}/device" "${IGTOP}/image" \
+    files=($(find "${IGTOP}/layer" "${IGTOP}/device" "${IGTOP}/image" "${IGTOP}/examples" \
                  -type f \( -name "*.yaml" -o -name "*.yml" \)))
     total=${#files[@]}
 
@@ -594,7 +594,7 @@ run_test "bulk-lint-all-yaml" '
 
     # 4) success when every YAML passed
     [[ $pass -eq $total ]]
-' 0 "All YAML files under layer/, device/, image/ must lint successfully"
+' 0 "All layer files under layer/, device/, image/, examples/ must lint successfully"
 
 # Test variable dependency ordering using three-layer dependency chain and shell sourcing
 # This robust test catches ordering bugs by using shell strict mode to detect undefined variables

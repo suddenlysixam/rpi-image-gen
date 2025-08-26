@@ -1,13 +1,13 @@
 # METABEGIN
 # X-Env-Layer-Name: debian-trixie-arm64-slim
 # X-Env-Layer-Desc: Debian Trixie custom layer for arm64 providing
-# a usable and practical base.
+#  a usable and practical base.
 # X-Env-Layer-Version: 1.0.0
 #
 # X-Env-VarRequires: IGconf_device_timezone,
-# IGconf_device_locale1,
-# IGconf_device_keyboard_layout,
-# IGconf_device_keyboard_keymap
+#  IGconf_device_locale1,
+#  IGconf_device_keyboard_layout,
+#  IGconf_device_keyboard_keymap
 # METAEND
 ---
 mmdebstrap:

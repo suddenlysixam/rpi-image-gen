@@ -1,7 +1,7 @@
 # METABEGIN
 # X-Env-Layer-Name: example-essential-base
 # X-Env-Layer-Desc: Example base layer that installs some useful packages
-# for sw development.
+#  for sw development.
 # X-Env-Layer-Version: 1.0.0
 # METAEND
 ---

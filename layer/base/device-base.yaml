@@ -30,19 +30,19 @@
 #
 # X-Env-Var-user1: pi
 # X-Env-Var-user1-Desc: A user account with this name will be created on the
-# device.
+#  device.
 # X-Env-Var-user1-Required: n
 # X-Env-Var-user1-Valid: string
 # X-Env-Var-user1-Set: y
 #
 # X-Env-Var-user1pass:
 # X-Env-Var-user1pass-Desc: Password required to log into the user1 account. If
-# empty, the account will be locked. Password requirements are as follows.
-# At least 8 characters.
-# At least one lowercase letter.
-# At least one uppercase letter.
-# At least one digit.
-# At least one special character from @$!%*?&
+#  empty, the account will be locked. Password requirements are as follows.
+#  At least 8 characters.
+#  At least one lowercase letter.
+#  At least one uppercase letter.
+#  At least one digit.
+#  At least one special character from @$!%*?&
 # X-Env-Var-user1pass-Required: n
 # X-Env-Var-user1pass-Valid: regex:^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$
 # X-Env-Var-user1pass-Set: n
@@ -61,7 +61,7 @@
 #
 # X-Env-Var-keyboard_layout: English (UK)
 # X-Env-Var-keyboard_layout-Desc: The default system keyboard layout. See
-# debconf-show keyboard-configuration keyboard-configuration/xkb-keymap
+#  debconf-show keyboard-configuration keyboard-configuration/xkb-keymap
 # X-Env-Var-keyboard_layout-Required: n
 # X-Env-Var-keyboard_layout-Valid: string
 # X-Env-Var-keyboard_layout-Set: y
@@ -80,8 +80,8 @@
 #
 # X-Env-Var-sector_size: 512
 # X-Env-Var-sector_size-Desc: Logical sector size of the device storage for which
-# the image is intended. The output raw image file size will be a multiple of
-# this value.
+#  the image is intended. The output raw image file size will be a multiple of
+#  this value.
 # X-Env-Var-sector_size-Required: n
 # X-Env-Var-sector_size-Valid: int:512-512
 # X-Env-Var-sector_size-Set: y

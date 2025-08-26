@@ -1,7 +1,7 @@
 # METABEGIN
 # X-Env-Layer-Name: systemd-net-min
 # X-Env-Layer-Desc: Minimal systemd suite for init, basic networking and
-# time synchronisation.
+#  time synchronisation.
 # X-Env-Layer-Version: 1.0.0
 # METAEND
 ---

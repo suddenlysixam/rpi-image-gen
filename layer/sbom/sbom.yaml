@@ -20,14 +20,14 @@
 #
 # X-Env-Var-syft_config: ${DIRECTORY}/syft.yaml
 # X-Env-Var-syft_config-Desc: Configuration file containing the settings syft
-# will use to scan and output the SBOM. The following parameters are explicitly
-# specified by rpi-image-gen when syft is invoked:
-# source:
+#  will use to scan and output the SBOM. The following parameters are explicitly
+#  specified by rpi-image-gen when syft is invoked:
+#  source:
 #   name
 #   version
 #   base-path
-# For further information, refer to
-# https://github.com/anchore/syft/wiki/Configuration
+#  For further information, refer to
+#  https://github.com/anchore/syft/wiki/Configuration
 # X-Env-Var-syft_config-Required: n
 # X-Env-Var-syft_config-Valid: string
 # X-Env-Var-syft_config-Set: lazy

@@ -2,8 +2,8 @@
 # X-Env-Layer-Name: example-sdk-setup
 # X-Env-Layer-Category: example
 # X-Env-Layer-Desc: Example layer with dependencies, variables and
-# demonstrating usage of the uchroot helper to install assets for the local
-# user.
+#  demonstrating usage of the uchroot helper to install assets for the local
+#  user.
 # X-Env-Layer-Version: 1.0.0
 # X-Env-Layer-Requires: example-essential-base,rpi-user-credentials
 #

@@ -162,6 +162,36 @@ class Metadata:
         # Create validation result builder
         self._result_builder = ValidationResultBuilder(filepath)
 
+    def _validate_deb822_format(self, meta_lines):
+        """
+        Validate that metadata lines follow proper DEB822 format.
+        Python deb822 is very forgiving and tries hard to avoid parsing errors
+        however this is at the detriment of silent data omissions, eg line
+        continuation problems. Try to mitigate such problems here.
+        """
+        if not meta_lines:
+            return
+
+        # Check line contination syntax
+        for i, line in enumerate(meta_lines):
+            # Check for invalid continuation lines
+            if (':' not in line and  # Not a field definition
+                not line.startswith(' ') and  # Not indented with space
+                not line.startswith('\t') and  # Not indented with tab
+                line.strip() and  # Not empty
+                i > 0):  # Not the first line
+
+                raise ValueError(f"Invalid DEB822 format: line '{line}' appears to be a continuation but is not indented. "
+                               f"Continuation lines must start with a space or tab.")
+
+        # Check for proper field name syntax (first line of each field)
+        for line in meta_lines:
+            if ':' in line and not line.startswith(' ') and not line.startswith('\t'):
+                field_name = line.split(':', 1)[0].strip()
+                # Basic field name validation (RFC822 style)
+                if not field_name or not field_name.replace('-', '').replace('_', '').isalnum():
+                    raise ValueError(f"Invalid field name '{field_name}': field names must contain only letters, numbers, hyphens, and underscores")
+
     def _load_metadata(self, path):
         """Load metadata from file"""
         if not os.path.isfile(path):
@@ -170,64 +200,68 @@ class Metadata:
         with open(path, 'r', encoding='utf-8') as f:
             lines = f.readlines()
 
-        # Detect and extract metadata block if embedded
-        if any(line.strip().startswith('# METABEGIN') for line in lines):
+        # Extract metadata block if embedded
+        if any(line.strip() == '# METABEGIN' for line in lines):
+            # Find METABEGIN and METAEND markers in comment blocks
             in_meta = False
             meta_lines = []
+
             for line in lines:
-                line = line.strip()
-                if line.startswith('# METABEGIN'):
+                stripped = line.strip()
+                if stripped == '# METABEGIN':
                     in_meta = True
                     continue
-                elif line.startswith('# METAEND'):
+                elif stripped == '# METAEND':
                     break
                 elif in_meta:
-                    if line.startswith('#'):
-                        meta_lines.append(line.lstrip('#').strip())
+                    # Extract everything between them (remove '# ' from each line)
+                    if line.startswith('# '):
+                        clean_line = line[2:].rstrip()
+                        # Remove empty lines
+                        if clean_line.strip():
+                            meta_lines.append(clean_line)
+                    elif line.startswith('#'):
+                        # Handle lines with just '#' (no space)
+                        clean_line = line[1:].rstrip()
+                        if clean_line.strip():
+                            meta_lines.append(clean_line)
 
-            # Filter out empty lines for deb822 compatibility
-            non_empty_lines = [line for line in meta_lines if line.strip()]
-
-            # Process lines to handle DEB822 continuation format
-            processed_lines = []
-            seen_fields = set()
-            for line_num, line in enumerate(non_empty_lines):
-                if ':' in line and line.split(':', 1)[0].strip().startswith('X-Env-'):
-                    # This is a field definition line
-                    field_name = line.split(':',1)[0].strip()
-                    if field_name in seen_fields:
-                        raise ValueError(f"Duplicate metadata field '{field_name}' in metadata block")
-                    seen_fields.add(field_name)
-                    processed_lines.append(line)
-                elif line.strip() and processed_lines and not line.strip().startswith('X-Env-'):
-                    # This is a continuation line
-                    processed_lines.append(' ' + line.strip())
-                elif line.strip():
-                    # This is a non-field line that's not a continuation
-                    raise ValueError(f"Malformed metadata line {line_num + 1}: '{line.strip()}' - metadata fields must be in 'Field: value' format")
-
-            meta_str = "\n".join(processed_lines)
+            # Validate before parsing
+            self._validate_deb822_format(meta_lines)
+            meta_str = "\n".join(meta_lines)
         else:
-            # Process the file to handle blank lines properly for deb822
-            # deb822 treats blank lines as record separators, but we want all fields in one record
-            processed_lines = []
-            seen_fields = set()
+            # Handle files with direct X-Env-* fields (no comment wrapper)
+            meta_lines = []
             for line in lines:
-                line = line.rstrip()  # Remove trailing whitespace
-                # Skip comments and empty lines, but preserve field lines
-                if line and not line.startswith('#'):
-                    field_candidate = line.split(':',1)[0].strip()
-                    if ':' in line and field_candidate in seen_fields:
-                        raise ValueError(f"Duplicate metadata field '{field_candidate}' in file {path}")
-                    seen_fields.add(field_candidate)
-                    processed_lines.append(line)
+                line = line.rstrip()
+                # Only keep non-comment, non-empty lines that look like metadata
+                if line and not line.startswith('#') and ':' in line:
+                    field_name = line.split(':', 1)[0].strip()
+                    if field_name.startswith('X-Env-'):
+                        meta_lines.append(line)
 
-            meta_str = "\n".join(processed_lines)
+            # Validate before parsing
+            self._validate_deb822_format(meta_lines)
+            meta_str = "\n".join(meta_lines)
 
+        # Throw directly at deb822 module
         try:
-            return deb822.Deb822(meta_str)
+            result = deb822.Deb822(meta_str)
+
+            # Minimal post-processing: validate field names and check for empty metadata
+            if result:
+                # Check all fields are X-Env-
+                invalid_fields = [field for field in result.keys() if not field.startswith('X-Env-')]
+                if invalid_fields:
+                    raise ValueError(f"Invalid field names (must start with 'X-Env-'): {', '.join(invalid_fields)}")
+            elif meta_str.strip():
+                # File has data but not X-Env
+                raise ValueError(f"No valid X-Env-* fields found in metadata")
+            # Otherwise it's intentionally empty
+
+            return result
         except Exception as e:
-            raise ValueError(f"Failed to parse metadata: {e}")
+            raise ValueError(f"Failed to parse metadata in {path}: {e}")
 
     def get_metadata(self):
         """Get raw metadata dictionary."""

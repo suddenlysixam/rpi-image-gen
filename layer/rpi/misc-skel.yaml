@@ -1,7 +1,7 @@
 # METABEGIN
 # X-Env-Layer-Name: rpi-misc-skel
 # X-Env-Layer-Desc: Raspberry Pi miscellaneous filesystem directory
-# skeleton.
+#  skeleton.
 # X-Env-Layer-Version: 1.0.0
 #
 # X-Env-VarRequires: IGconf_device_hostname

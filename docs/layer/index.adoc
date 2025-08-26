@@ -41,7 +41,7 @@ Each layer is a YAML file containing:
 - **Customisation**: Override defaults through environment variables set via the config file
 
 == X-Env Metadata
-Layers use a custom **X-Env** metadata schema loosely based on **DEB822** (https://repolib.readthedocs.io/en/latest/deb822-format.html) embedded in YAML comments. By using metadata fields a layer can define attributes, dependencies, and configuration variables. The metadata is parsed separately from the standard YAML content.
+Layers use a custom X-Env metadata schema that strictly follows the DEB822 format (https://repolib.readthedocs.io/en/latest/deb822-format.html) embedded within YAML comment blocks. The metadata is delimited by `# METABEGIN` and `# METAEND` markers and parsed using the standard `python3-debian` DEB822 parser. By using metadata fields a layer can define attributes, dependencies, and configuration variables. The metadata is parsed separately from the standard YAML content.
 
 === Metadata Structure
 X-Env metadata is contained within comment blocks:
