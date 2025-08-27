@@ -118,7 +118,7 @@ Hooks are optional but if a hook is to be executed, it must have executable perm
 ====
 
 === Device and Image Asset Directory
-A device or image layer may declare `IGconf_device_assetdir` or `IGconf_image_assetdir` respectively as locations of which to store device or image specific assets. These optional variables are referenced by rpi-image-gen. If the pre/post build and pre/post image hooks mentioned above are present in these locations, they will be executed. The hooks won't execute if the variables are not declared.
+A device or image layer may declare `IGconf_device_assetdir` or `IGconf_image_assetdir` respectively as a location of where to store device or image specific assets. These optional variables are referenced by rpi-image-gen. If the pre/post build and pre/post image hooks mentioned above are present in these locations, they will be executed. The hooks won't execute if the variables are not declared.
 
 === bdebstrap
 

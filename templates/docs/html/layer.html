@@ -36,7 +36,7 @@
         .companion-content pre { background: #f8f9fa; padding: 15px; border-radius: 5px; overflow-x: auto; border-left: 4px solid #007acc; }
         .companion-content table { border: 1px solid #ddd; }
         .companion-content th, .companion-content td { border: 1px solid #ddd; }
-        
+
         /* AsciiDoc admonition blocks (NOTE, TIP, WARNING, etc.) */
         .admonitionblock {
             margin: 1.5em 0;
@@ -45,7 +45,7 @@
             background: #f8f9fa;
             border-radius: 0 4px 4px 0;
         }
-        
+
         .admonitionblock .title {
             font-weight: bold;
             text-transform: uppercase;
@@ -53,58 +53,58 @@
             margin-bottom: 0.25em;
             letter-spacing: 0.5px;
         }
-        
+
         .admonitionblock .content {
             margin: 0;
         }
-        
+
         /* Reduce spacing for paragraphs inside admonitions */
         .admonitionblock p {
             margin: 0.25em 0;
         }
-        
+
         .admonitionblock p:first-child {
             margin-top: 0;
         }
-        
+
         .admonitionblock p:last-child {
             margin-bottom: 0;
         }
-        
+
         /* Specific admonition types */
         .admonitionblock.note {
             border-color: #17a2b8;
             background: #d1ecf1;
         }
-        
+
         .admonitionblock.note .title {
             color: #0c5460;
         }
-        
+
         .admonitionblock.tip {
             border-color: #28a745;
             background: #d4edda;
         }
-        
+
         .admonitionblock.tip .title {
             color: #155724;
         }
-        
+
         .admonitionblock.important {
             border-color: #ffc107;
             background: #fff3cd;
         }
-        
+
         .admonitionblock.important .title {
             color: #856404;
         }
-        
+
         .admonitionblock.warning,
         .admonitionblock.caution {
             border-color: #dc3545;
             background: #f8d7da;
         }
-        
+
         .admonitionblock.warning .title,
         .admonitionblock.caution .title {
             color: #721c24;
@@ -200,20 +200,58 @@
     </div>
     {% endif %}
 
-    {% if layer.mmdebstrap.get('packages') or layer.mmdebstrap.get('mirrors') or layer.mmdebstrap.get('suite') or layer.mmdebstrap.get('architectures') %}
+    {% if (
+       layer.mmdebstrap.get('packages') or
+       layer.mmdebstrap.get('mirrors') or
+       layer.mmdebstrap.get('suite') or
+       layer.mmdebstrap.get('variant') or
+       layer.mmdebstrap.get('architectures') or
+       layer.mmdebstrap.get('dpkgopts') or
+       layer.mmdebstrap.get('aptopts')
+       ) %}
     <div class="section">
-        <h2>Package Configuration</h2>
+        <h2>mmdebstrap</h2>
 
         {% if layer.mmdebstrap.get('suite') %}
+        {% set suite = layer.mmdebstrap.suite %}
         <h3>Suite</h3>
-        <p><code>{{ layer.mmdebstrap.suite }}</code></p>
+        {% if suite is string %}
+        <ul>
+            <li><code>{{ suite }}</code></li>
+        </ul>
+        {% else %}
+        <ul>
+            {% for s in suite %}
+            <li><code>{{ s }}</code></li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+        {% endif %}
+
+        {% if layer.mmdebstrap.get('variant') %}
+        {% set variant = layer.mmdebstrap.variant %}
+        <h3>Variant</h3>
+        <p>Installs package set:</p>
+        {% if variant is string %}
+        <ul>
+            <li><code>{{ variant }}</code></li>
+        </ul>
+        {% else %}
+        <ul>
+            {% for v in variant %}
+            <li><code>{{ v }}</code></li>
+            {% endfor %}
+        </ul>
+        {% endif %}
         {% endif %}
 
         {% if layer.mmdebstrap.get('architectures') %}
         {% set architectures = layer.mmdebstrap.architectures %}
         <h3>Architectures</h3>
         {% if architectures is string %}
-        <p><code>{{ architectures }}</code></p>
+        <ul>
+            <li><code>{{ architectures }}</code></li>
+        </ul>
         {% else %}
         <ul>
             {% for arch in architectures %}
@@ -226,7 +264,7 @@
         {% if layer.mmdebstrap.get('packages') %}
         {% set packages = layer.mmdebstrap.packages %}
         <h3>Packages</h3>
-        <p>This layer installs {{ packages|length }} package(s):</p>
+        <p>Installs:</p>
         <ul>
             {% for package in packages %}
             <li><code>{{ package }}</code></li>
@@ -237,10 +275,29 @@
         {% if layer.mmdebstrap.get('mirrors') %}
         {% set mirrors = layer.mmdebstrap.mirrors %}
         <h3>Mirrors</h3>
-        <p>This layer specifies the following mirror(s):</p>
         <ul>
             {% for mirror in mirrors %}
             <li><code>{{ mirror }}</code></li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+
+        {% if layer.mmdebstrap.get('dpkgopts') %}
+        {% set dpkgopts = layer.mmdebstrap.dpkgopts %}
+        <h3>dpkgopts</h3>
+        <ul>
+            {% for opt in dpkgopts %}
+            <li><code>{{ opt }}</code></li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+
+        {% if layer.mmdebstrap.get('aptopts') %}
+        {% set aptopts = layer.mmdebstrap.aptopts %}
+        <h3>aptopts</h3>
+        <ul>
+            {% for opt in aptopts %}
+            <li><code>{{ opt }}</code></li>
             {% endfor %}
         </ul>
         {% endif %}

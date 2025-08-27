@@ -1,5 +1,6 @@
 # METABEGIN
 # X-Env-Layer-Name: debian-trixie-arm64
+# X-Env-Layer-Category: distribution
 # X-Env-Layer-Desc: Debian Trixie apt base for arm64.
 # X-Env-Layer-Version: 1.0.0
 #

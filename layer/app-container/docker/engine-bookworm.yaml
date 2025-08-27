@@ -1,5 +1,6 @@
 # METABEGIN
 # X-Env-Layer-Name: docker-debian-bookworm
+# X-Env-Layer-Category: container
 # X-Env-Layer-Desc: Docker engine and framework for Debian Bookworm
 # X-Env-Layer-Version: 1.0.0
 # X-Env-Layer-Provides: docker

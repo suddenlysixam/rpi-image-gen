@@ -1,5 +1,6 @@
 # METABEGIN
 # X-Env-Layer-Name: debian-trixie-arm64-slim
+# X-Env-Layer-Category: distribution
 # X-Env-Layer-Desc: Debian Trixie custom layer for arm64 providing
 #  a usable and practical base.
 # X-Env-Layer-Version: 1.0.0

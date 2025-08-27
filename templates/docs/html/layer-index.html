@@ -16,11 +16,11 @@
         .back-link { margin-bottom: 20px; }
         .back-link a { text-decoration: none; color: #007acc; }
         .back-link a:hover { text-decoration: underline; }
-        
+
         /* Main content headers styling */
         h1, h2, h3, h4, h5, h6 { color: #333; margin-top: 20px; margin-bottom: 10px; }
         h1 a, h2 a, h3 a, h4 a, h5 a, h6 a { color: #333; text-decoration: none; }
-        
+
         /* AsciiDoc table styling */
         .tableblock { width: 100%; border-collapse: collapse; margin: 1.25em 0; }
         .tableblock.frame-all { border: 1px solid #dedede; }
@@ -36,23 +36,23 @@
         .tableblock .valign-top { vertical-align: top; }
         .tableblock .valign-middle { vertical-align: middle; }
         .tableblock .valign-bottom { vertical-align: bottom; }
-        
+
         /* Simple code block styling */
-        .listingblock pre { 
-            background: #f8f9fa; 
-            border: 1px solid #ddd; 
-            padding: 12px; 
-            border-radius: 4px; 
-            overflow-x: auto; 
-            font-family: monospace; 
-            font-size: 14px; 
+        .listingblock pre {
+            background: #f8f9fa;
+            border: 1px solid #ddd;
+            padding: 12px;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-family: monospace;
+            font-size: 14px;
         }
-        .listingblock pre code { 
-            background: none; 
-            border: none; 
-            padding: 0; 
+        .listingblock pre code {
+            background: none;
+            border: none;
+            padding: 0;
         }
-        
+
         /* AsciiDoc admonition blocks (NOTE, TIP, WARNING, etc.) */
         .admonitionblock {
             margin: 1.5em 0;
@@ -61,7 +61,7 @@
             background: #f8f9fa;
             border-radius: 0 4px 4px 0;
         }
-        
+
         .admonitionblock .title {
             font-weight: bold;
             text-transform: uppercase;
@@ -69,58 +69,58 @@
             margin-bottom: 0.25em;
             letter-spacing: 0.5px;
         }
-        
+
         .admonitionblock .content {
             margin: 0;
         }
-        
+
         /* Reduce spacing for paragraphs inside admonitions */
         .admonitionblock p {
             margin: 0.25em 0;
         }
-        
+
         .admonitionblock p:first-child {
             margin-top: 0;
         }
-        
+
         .admonitionblock p:last-child {
             margin-bottom: 0;
         }
-        
+
         /* Specific admonition types */
         .admonitionblock.note {
             border-color: #17a2b8;
             background: #d1ecf1;
         }
-        
+
         .admonitionblock.note .title {
             color: #0c5460;
         }
-        
+
         .admonitionblock.tip {
             border-color: #28a745;
             background: #d4edda;
         }
-        
+
         .admonitionblock.tip .title {
             color: #155724;
         }
-        
+
         .admonitionblock.important {
             border-color: #ffc107;
             background: #fff3cd;
         }
-        
+
         .admonitionblock.important .title {
             color: #856404;
         }
-        
+
         .admonitionblock.warning,
         .admonitionblock.caution {
             border-color: #dc3545;
             background: #f8d7da;
         }
-        
+
         .admonitionblock.warning .title,
         .admonitionblock.caution .title {
             color: #721c24;
@@ -133,7 +133,7 @@
         <a href="../index.html">← Back to Main Documentation</a>
     </div>
     {% endif %}
-    
+
     <div class="content">
         {{ content|safe }}
     </div>
@@ -145,7 +145,7 @@
     <div class="layer-list">
         {% for layer in category_layers %}
         <div class="layer-item">
-            <a href="{{ layer.name }}.html">{{ layer.name }}</a><span class="layer-desc">- {{ layer.description }}</span>
+            <a href="{{ layer.name }}.html">{{ layer.name }}</a><span class="layer-desc">- {{ layer.description|truncate(120, True, '...') }}</span>
         </div>
         {% endfor %}
     </div>

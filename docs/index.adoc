@@ -5,7 +5,7 @@
 
 Top level landing page for rpi-image-gen technical documentation.
 
-For general project information, see the link:../README.adoc[main README].
+For general information, see the https://github.com/raspberrypi/rpi-image-gen[project repository,window=_blank].
 
 == Viewing Documentation
 

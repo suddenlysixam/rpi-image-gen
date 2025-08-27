@@ -1,5 +1,6 @@
 # METABEGIN
 # X-Env-Layer-Name: debian-bookworm-arm64
+# X-Env-Layer-Category: distribution
 # X-Env-Layer-Desc: Debian Bookworm apt base for arm64
 # X-Env-Layer-Version: 1.0.0
 #
