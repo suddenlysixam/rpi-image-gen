@@ -1,32 +1,39 @@
-Build a small system with minimum base packages.
+Build a small system with minimum base packages and trimmed down packages to boot on a Raspberry Pi family 5 device only.
 
-Contains a custom image layout and a custom device dir.
+Contains custom device and image layers and demonstrates how to communicate the location of device and image specific assets, hooks, etc.
 
 ```text
 examples/slim/
+|-- config
+|   `-- pi5-slim.yaml
 |-- device
 |   `-- mypi5
-|       |-- post-build.sh
-|       `-- rootfs-overlay
-|           |-- boot
-|           |   `-- firmware
-|           |       `-- cmdline.txt
-|           `-- etc
-|               `-- fstab
-|-- config
-|   `-- pi5-slim.cfg
+|       |-- cmdline.txt
+|       |-- config.txt
+|       |-- device
+|       |   `-- rootfs-overlay
+|       |       |-- boot
+|       |       |   `-- firmware
+|       |       |       `-- cmdline.txt
+|       |       `-- etc
+|       |           `-- fstab
+|       |-- myboard.yaml
+|       `-- post-build.sh
 |-- image
 |   `-- compact
 |       |-- genimage.cfg.in
+|       |-- myimage-layout.yaml
 |       `-- pre-image.sh
 |-- layer
-|   `-- slim-customisations.yaml
-|-- my.options
-|-- profile
-|   `-- v8-svelte
+|   |-- slim-customisations.yaml
+|   `-- slim.yaml
 `-- README.md
 ```
 
 ```bash
-./build.sh -D ./examples/slim/ -c pi5-slim -o ./examples/slim/my.options
+rpi-image-gen build -S ./examples/slim/ -c pi5-slim.yaml
+```
+Or to specify a password:
+```bash
+rpi-image-gen build -S ./examples/slim/ -c pi5-slim.yaml -- IGconf_device_user1pass=<foo>
 ```

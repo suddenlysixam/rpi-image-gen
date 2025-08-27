@@ -1,0 +1,10 @@
+device:
+  layer: example-mydevice
+  hostname: zippy
+
+image:
+  layer: example-myimage
+  name: my-slim-image
+
+layer:
+  everything: example-slim-customisation
