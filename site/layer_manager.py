@@ -439,7 +439,7 @@ class LayerManager:
                 print(f"Layer '{layer_name}' not found")
                 return False
 
-            if not self.validate_single_layer_env_vars(layer_name, silent=True, ignore_missing_required=True):
+            if not self.validate_single_layer_env_vars(layer_name, silent=False, ignore_missing_required=True):
                 print(f"Validation failed for layer '{layer_name}' – aborting apply-env")
                 return False
 

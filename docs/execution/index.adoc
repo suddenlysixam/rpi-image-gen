@@ -88,11 +88,11 @@ Create the filesystem and generate the Software Bill of Materials.
 
 === Activities
 
-* *Hook*`[pre-build.sh]`: Execute from within image and device directories.
+* *Hook*`[pre-build.sh]`: Execute from within image and device asset directory.
   ** _Example Use_ - Custom validation of pre-build settings
 * *Filesystem Generation*: Execute bdebstrap
 * *Overlays*: Apply static filesystem overlays from image and device `rootfs-overlay/` directories.
-* *Hook*`[post-build.sh]`: Execute from within image and device directories.
+* *Hook*`[post-build.sh]`: Execute from within image and device asset directory.
   ** _Example Use_ - Custom installation of image or device specific assets, eg boot configuration files.
 * *SBOM*: Execute the Software Bill of Materials provider to create the SBOM file.
 
@@ -104,10 +104,10 @@ Create disk images from the prepared filesystem using the provider.
 
 === Activities
 
-* *Hook*`[pre-image.sh]`: Execute from within device and image directories.
+* *Hook*`[pre-image.sh]`: Execute from within device and image asset directory.
   ** _Example Use_ - Creating genimage templates, setting up image creation resources.
 * *Image Generation*: Execute the image provider to create images.
-* *Hook*`[post-image.sh]`: Execute from within device and image directories, or default fallback.
+* *Hook*`[post-image.sh]`: Execute from within device and image asset directory, or default fallback.
   ** _Example Use_ - Artefact compression and packaging, deployment
 
 == Hooks
@@ -117,7 +117,8 @@ Create disk images from the prepared filesystem using the provider.
 Hooks are optional but if a hook is to be executed, it must have executable permissions for the user performing the build.
 ====
 
-In addition to the hooks described above, the following are also supported.
+=== Device and Image Asset Directory
+A device or image layer may declare `IGconf_device_assetdir` or `IGconf_image_assetdir` respectively as locations of which to store device or image specific assets. These optional variables are referenced by rpi-image-gen. If the pre/post build and pre/post image hooks mentioned above are present in these locations, they will be executed. The hooks won't execute if the variables are not declared.
 
 === bdebstrap
 

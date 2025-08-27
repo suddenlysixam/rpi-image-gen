@@ -237,6 +237,10 @@ prepare_build_config()
    # Set these variables in the shell to simply further processing
    mapfile_kv "${ctx[FINALENV]}" set_kv
 
+   # Sane defaults if not set in env by layers
+   IGconf_device_assetdir=${IGconf_device_assetdir:="/dev/null"}
+   IGconf_image_assetdir=${IGconf_image_assetdir:="/dev/null"}
+
    # Create output dirs
    mkdir -p "$IGconf_image_outputdir" \
             "$IGconf_image_deploydir" \

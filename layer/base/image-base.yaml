@@ -78,5 +78,15 @@
 # X-Env-Var-provider-Required: n
 # X-Env-Var-provider-Valid: keywords:genimage
 # X-Env-Var-provider-Set: lazy
+#
+# X-Env-Var-assetdir: /dev/null
+# X-Env-Var-assetdir-Desc: Image specific asset location. Use this directory
+#  to hold image provider templates, geometry configuration, overlays, etc
+#  particular to the image layout. Hooks pre-build.sh, post-build.sh,
+#  pre-image.sh and post-image.sh will executed from here if found and
+#  executable.
+# X-Env-Var-assetdir-Required: n
+# X-Env-Var-assetdir-Valid: string
+# X-Env-Var-assetdir-Set: lazy
 # METAEND
 ---

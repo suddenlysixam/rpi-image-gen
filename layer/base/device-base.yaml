@@ -86,5 +86,15 @@
 # X-Env-Var-sector_size-Valid: int:512-512
 # X-Env-Var-sector_size-Set: y
 #
+# X-Env-Var-assetdir: /dev/null
+# X-Env-Var-assetdir-Desc: Device specific asset location. Use this directory
+#  to hold configuration files, scripts, certificates, Device Tree source, wifi
+#  regulatory domains, firmware blobs, overlays, etc particular to the device.
+#  Hooks pre-build.sh, post-build.sh, pre-image.sh and post-image.sh will
+#  executed from here if found and executable.
+# X-Env-Var-assetdir-Required: n
+# X-Env-Var-assetdir-Valid: string
+# X-Env-Var-assetdir-Set: lazy
+#
 # METAEND
 ---
