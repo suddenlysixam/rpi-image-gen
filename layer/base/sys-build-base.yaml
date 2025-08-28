@@ -46,8 +46,8 @@
 #  automatically upon build completion.
 #  This is currently an experimental feature requiring some manual involvement.
 # X-Env-Var-apt_cachedir-Required: n
-# X-Env-Var-apt_cachedir-Valid: string
-# X-Env-Var-apt_cachedir-Set: n
+# X-Env-Var-apt_cachedir-Valid: string-or-empty
+# X-Env-Var-apt_cachedir-Set: force
 #
 # X-Env-Var-workroot: $(realpath --canonicalize-missing ./work)
 # X-Env-Var-workroot-Desc: The root work directory. Depending on the system(s)

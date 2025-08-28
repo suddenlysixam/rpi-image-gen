@@ -275,12 +275,15 @@ prepare_build_config()
             _bdebstrap+=( --aptopt "Dir::Etc::TrustedParts $value" ) ;;
 
          IGconf_sys_apt_cachedir)
-            local cache=$(realpath -e "$value") 2>/dev/null || die "$key specifies invalid dir ($value)"
-            # @TODO passing --skip=cleanup/apt/cache needs bdebstrap 0.6.0+
-            #_bdebstrap+=( --aptopt 'APT::Keep-Downloaded-Packages "true"' )
-            #_bdebstrap+=( --aptopt 'Debug::pkgAcquire "true"' )
-            #_bdebstrap+=( --aptopt 'Debug::Acquire::file "true"' )
-            value="$cache" ;;
+            if [[ -n "$value" ]]; then
+              local cache=$(realpath -e "$value") 2>/dev/null || die "$key specifies invalid dir ($value)"
+              # @TODO passing --skip=cleanup/apt/cache needs bdebstrap 0.6.0+
+              #_bdebstrap+=( --aptopt 'APT::Keep-Downloaded-Packages "true"' )
+              #_bdebstrap+=( --aptopt 'Debug::pkgAcquire "true"' )
+              #_bdebstrap+=( --aptopt 'Debug::Acquire::file "true"' )
+              value="$cache"
+            fi
+            ;;
 
          IGconf_sys_apt_proxy_http)
             curl --silent --head --max-time 2 "$value" >/dev/null \
@@ -305,33 +308,38 @@ prepare_build_config()
    msg "FINAL ENV"
    mapfile_kv "${ctx[FINALENV]}" process_conf_opt
 
-
-   has_mmdebstrap() { # $1 = yaml layer
-       python3 - <<'PY' "$1"
-import sys, yaml, pathlib
-data = yaml.safe_load(pathlib.Path(sys.argv[1]).read_bytes())
-sys.exit(0 if isinstance(data, dict) and data.get("mmdebstrap") else 1)
-PY
-   }
-
-   local total=0 added=0 skipped=0
-   add_layer() {
-      local layer=$1 yaml=$2
-      [[ -f "$yaml" ]] || die "invalid layer: $yaml"
-      if has_mmdebstrap "$yaml"; then
-         _bdebstrap+=( --config "$yaml" )
-         msg "Loaded $layer"
-         ((added++))
-      else
-         warn "Skipped $layer - no mmdebstrap in $yaml"
-         ((skipped++))
-      fi
-      ((total++))
-      return 0
-   }
-   # Add mmdebstrap compatible layers
+   # Load layers that contain an mmdebstrap mapping
    msg "\nMMDEBSTRAP"
-   mapfile_kv "${ctx[LAYER_ORDER]}" add_layer
+   local total=0 added=0 skipped=0
+
+   while IFS=: read -r layer yaml; do
+      _bdebstrap+=( --config "$yaml" )
+      msg "Loaded $layer"
+      ((added++))
+   done < <(python3 - "${ctx[LAYER_ORDER]}" <<'PY'
+import sys, yaml, pathlib
+layer_file = sys.argv[1]
+with open(layer_file, 'r') as f:
+   for line in f:
+      line = line.strip()
+      if '=' not in line or line.startswith('#'):
+         continue
+
+      layer, filepath = line.split('=', 1)
+      filepath = filepath.strip('"')
+
+      try:
+         if pathlib.Path(filepath).is_file():
+            data = yaml.safe_load(pathlib.Path(filepath).read_bytes())
+            if isinstance(data, dict) and data.get("mmdebstrap"):
+               print(f"{layer}:{filepath}")
+      except:
+         pass
+PY
+)
+
+   total=$(wc -l < "${ctx[LAYER_ORDER]}" | tr -d ' ')
+   skipped=$((total - added))
    msg "Loaded ${added}/${total}, skipped $skipped"
 
    # Store variable name so we can get it by nameref. ctx is an associative
@@ -532,6 +540,13 @@ main() {
          shift $?
          dependencies_check "$IGTOP/depends" || exit 1
          exec "$IGTOP/bin/ig" metadata "$@"
+         ;;
+
+      config)
+         cli_parse_config ctx "$@"
+         shift $?
+         dependencies_check "$IGTOP/depends" || exit 1
+         exec "$IGTOP/bin/ig" config "$@"
          ;;
 
       help|-h|--help)
