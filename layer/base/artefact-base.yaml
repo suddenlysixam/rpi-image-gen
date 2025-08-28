@@ -1,0 +1,43 @@
+# METABEGIN
+# X-Env-Layer-Name: artefact-base
+# X-Env-Layer-Category: build
+# X-Env-Layer-Desc: Base artefact naming, versioning and organisation for
+#  filesystem builds.
+# X-Env-Layer-Version: 1.0.0
+#
+# X-Env-VarPrefix: artefact
+#
+# X-Env-Var-target_name: filesystem
+# X-Env-Var-target_name-Desc: Base name for the bdebstrap target (directory or
+#  file). This defines what the bdebstrap target will be called. Can be a
+#  directory name (eg, 'rootfs', 'chroot') for directory targets, or a filename
+#  (eg, 'filesystem.tar.gz', 'base-system.tgz') for archive targets. The target
+#  type affects post-build processing - hooks should handle both directory and
+#  file targets appropriately.
+# X-Env-Var-target_name-Required: n
+# X-Env-Var-target_name-Valid: string
+# X-Env-Var-target_name-Set: y
+#
+# X-Env-Var-version: $(git describe --tags --always --dirty 2>/dev/null || date +%Y-%m-%d)
+# X-Env-Var-version-Desc: Version identifier for artefacts. Used as a
+#  component in artefact naming and organisation. Supports semantic versions,
+#  git commit hashes, or any other meaningful identifier. This version
+#  is used both in the default context name and can be referenced by
+#  other layers for consistent versioning across artefacts.
+# X-Env-Var-version-Required: n
+# X-Env-Var-version-Valid: string
+# X-Env-Var-version-Set: y
+#
+# X-Env-Var-context: chroot-${IGconf_artefact_version}
+# X-Env-Var-context-Desc: Default context name for artefact organisation
+#  This provides a meaningful directory name for organizing build artefacts
+#  when no image layer is present (filesystem-only builds). The context
+#  creates a namespace for separating different builds and their artefacts.
+#  When image layers are present, the image name takes precedence over this
+#  context for artefact organisation.
+# X-Env-Var-context-Required: n
+# X-Env-Var-context-Valid: string
+# X-Env-Var-context-Set: y
+#
+# METAEND
+---

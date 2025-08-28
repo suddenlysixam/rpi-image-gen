@@ -1,0 +1,40 @@
+# METABEGIN
+# X-Env-Layer-Name: deploy-base
+# X-Env-Layer-Category: build
+# X-Env-Layer-Desc: Deployment and organisation for build output artefacts
+# X-Env-Layer-Version: 1.0.0
+# X-Env-Layer-Requires: artefact-base,sys-build-base
+#
+# X-Env-VarPrefix: deploy
+#
+# X-Env-VarRequires: IGconf_sys_workroot,IGconf_artefact_version
+# X-Env-VarRequires-Valid: string,string
+#
+# X-Env-Var-compression: none
+# X-Env-Var-compression-Desc: Compression scheme used when deploying assets.
+#  Identifier for the compression scheme applied to final deployment artefacts.
+#  This setting affects how final assets (disk images, filesystem tarballs,
+#  SBOM, etc) are compressed for distribution or storage.
+# X-Env-Var-compression-Required: n
+# X-Env-Var-compression-Valid: none,zstd
+# X-Env-Var-compression-Set: y
+#
+# X-Env-Var-dir: ${IGconf_sys_workroot}/deploy-${IGconf_artefact_version}
+# X-Env-Var-dir-Desc: Final deployment directory for completed build assets.
+#  All deployable assets (filesystem tarballs, disk images, etc) are placed
+#  in this version-specific directory. This provides a consistent location
+#  for final output assets that can be easily identified, deployed, or
+#  archived.
+# X-Env-Var-dir-Required: n
+# X-Env-Var-dir-Valid: string
+# X-Env-Var-dir-Set: y
+#
+# X-Env-Var-hook: ${DIRECTORY}/deploy.sh
+# X-Env-Var-hook-Desc: Hook to deploy all assets. This hook will install
+#  final assets to $IGconf_deploy_dir.
+# X-Env-Var-hook-Required: n
+# X-Env-Var-hook-Valid: string
+# X-Env-Var-hook-Set: y
+#
+# METAEND
+---

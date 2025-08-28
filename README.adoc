@@ -16,15 +16,19 @@ sudo ./install_deps.sh
 ./rpi-image-gen build -c ./config/bookworm-minbase.cfg
 ----
 
-The device image will be in `./work/deb12-arm64-min/artefacts/deb12-arm64-min.img`
+The device image will be in `./work/image-deb12-arm64-min/deb12-arm64-min.img`
 
 Install it onto an SD card using Raspberry Pi Imager (https://www.raspberrypi.com/software/). Select "Use Custom" if using the GUI, or use the command line:
 
 ----
-sudo rpi-imager --cli ./work/deb12-arm64-min/artefacts/deb12-arm64-min.img /dev/mmcblk0
+sudo rpi-imager --cli ./work/image-deb12-arm64-min/deb12-arm64-min.img /dev/mmcblk0
 ----
 
-**Note:** The default image intentionally has login passwords disabled. Please refer to the link:./docs/index.adoc[technical documentation] and the link:./examples[examples directory] for customisation guidance.
+**Note:** This image intentionally has login passwords disabled.
+
+To install via other means, for example using https://github.com/raspberrypi/usbboot[rpiboot,window=_blank] with https://github.com/raspberrypi/pi-gen-micro[pi-gen-micro,window=_blank]'s usb mass-storage or fastboot gadget, or provisioning with https://github.com/raspberrypi/rpi-sb-provisioner[rpi-sb-provisioner,window=_blank], take a look at the documentation in those repositories.
+
+The rpi-image-gen link:./docs/index.adoc[technical documentation] and link:./examples[examples directory] provide customisation and usage guidance.
 
 == Why use this?
 
@@ -92,7 +96,6 @@ See the `examples/` directory for tips and help
 * `layer/` - Layer library
 * `layer-hooks/` - Common hooks used by layer library
 * `lib/` - Execution helpers and macros, eg CLI handling, reusable constructs
-* `sbom/` - Software Bill of Material specific assets
 * `scripts/` - Dedicated functional hooks, eg for bdebstrap
 * `site/` - Core Python engine classes
 * `templates/` - Templating assets, eg doc generation

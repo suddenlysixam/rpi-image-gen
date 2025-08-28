@@ -226,9 +226,21 @@ prepare_build_config()
       case $key in
          IGconf_device_assetdir|\
          IGconf_image_assetdir|\
-         IGconf_image_target|\
+         IGconf_device_prebuild|\
+         IGconf_image_prebuild|\
+         IGconf_device_postbuild|\
+         IGconf_image_postbuild|\
+         IGconf_image_postbuild|\
+         IGconf_image_preimage|\
+         IGconf_device_postimage|\
+         IGconf_image_postimage|\
+         IGconf_image_postimage|\
+         IGconf_target_dir|\
+         IGconf_target_path|\
          IGconf_image_outputdir|\
-         IGconf_image_deploydir|\
+         IGconf_sbom_hook|\
+         IGconf_deploy_dir|\
+         IGconf_deploy_hook|\
          IGconf_sys_workroot)
             declare -g "$key"="$val"
             ;;
@@ -237,13 +249,9 @@ prepare_build_config()
    # Set these variables in the shell to simply further processing
    mapfile_kv "${ctx[FINALENV]}" set_kv
 
-   # Sane defaults if not set in env by layers
-   IGconf_device_assetdir=${IGconf_device_assetdir:="/dev/null"}
-   IGconf_image_assetdir=${IGconf_image_assetdir:="/dev/null"}
-
    # Create output dirs
-   mkdir -p "$IGconf_image_outputdir" \
-            "$IGconf_image_deploydir" \
+   mkdir -p "$IGconf_target_dir" \
+            "$IGconf_image_outputdir" \
             "$IGconf_sys_workroot/host/bin"
 
 
@@ -296,8 +304,8 @@ prepare_build_config()
 
          IGconf_image_name)        _bdebstrap+=( --name "$value"     ) ;;
          IGconf_device_hostname)   _bdebstrap+=( --hostname "$value" ) ;;
-         IGconf_image_outputdir)   _bdebstrap+=( --output "$value"   ) ;;
-         IGconf_image_target)      _bdebstrap+=( --target "$value"   ) ;;
+         IGconf_target_dir)        _bdebstrap+=( --output "$value"   ) ;;
+         IGconf_target_path)       _bdebstrap+=( --target "$value"   ) ;;
       esac
 
       # pass through
@@ -373,8 +381,8 @@ generate_filesystem()
    hook "$IGTOP/image/pre-build.sh"
    hook "$IGTOP/device/pre-build.sh"
 
-   hook "${IGconf_image_assetdir}/pre-build.sh"
-   hook "${IGconf_device_assetdir}/pre-build.sh"
+   hook "${IGconf_image_prebuild:-}"
+   hook "${IGconf_device_prebuild:-}"
 
    local -n _benv="${ctx[ENV_BDEBSTRAP]}" # via nameref
 
@@ -388,22 +396,25 @@ generate_filesystem()
    [[ ${ctx[INTERACTIVE]} == y ]] && \
       { ask "Filesystem complete. Apply overlays and run post-build?" y || exit 0 ; }
 
-   if [[ -d $IGconf_image_target ]]; then
-      for d in "$IGconf_image_assetdir" "$IGconf_device_assetdir"; do
+   if [[ -d $IGconf_target_path ]]; then
+      for d in "${IGconf_image_assetdir:-}" "${IGconf_device_assetdir:-}"; do
          if src=$(realpath -e "${d}/device/rootfs-overlay" 2>/dev/null); then
-            run podman unshare rsync -a -- "${src}/" "${IGconf_image_target}/"
+            run podman unshare rsync -a -- "${src}/" "${IGconf_target_path}/"
          fi
       done
    fi
 
-   hook "${IGconf_image_assetdir}/post-build.sh"   "$IGconf_image_target"
-   hook "${IGconf_device_assetdir}/post-build.sh"  "$IGconf_image_target"
+   hook "${IGconf_image_postbuild:-}"  "$IGconf_target_path"
+   hook "${IGconf_device_postbuild:-}" "$IGconf_target_path"
+
+   hook "$IGTOP/image/post-build.sh"  "$IGconf_target_path"
+   hook "$IGTOP/device/post-build.sh" "$IGconf_target_path"
 
    [[ ${ctx[INTERACTIVE]} == y ]] && \
       { ask "Post-build complete. Proceed to SBOM?" y || exit 0 ; }
 
    msg "\nSBOM"
-   hook "$IGTOP/sbom/gen.sh" "${IGconf_image_target}" "${IGconf_image_outputdir}"
+   hook "${IGconf_sbom_hook:-}" "${IGconf_target_path}" "${IGconf_target_dir}"
 }
 
 
@@ -411,31 +422,31 @@ generate_filesystem()
 ###############################################################################
 # Stage 5: Image generation
 #   pre-image hooks
-#   run genimage for every genimage*.cfg
+#   Invoke image provider
 #   post-image hooks
 ###############################################################################
 generate_images() {
-   mkdir -p "${ctx[TMPDIR]}/genimage"
+   local provider=$(get_var IGconf_image_provider "${ctx[FINALENV]}")
+   [[ -z "$provider" ]] && return 0
 
    [[ ${ctx[INTERACTIVE]} == y ]] && { ask "Generate image(s)?" y || exit 0 ; }
 
    msg "\nIMAGE"
 
-   hook "${IGconf_device_assetdir}/pre-image.sh"  \
-      "${IGconf_image_target}" "${IGconf_image_outputdir}"
+   hook "$IGTOP/device/pre-image.sh" "${IGconf_target_path}" "${IGconf_image_outputdir}"
+   hook "$IGTOP/image/pre-image.sh"  "${IGconf_target_path}" "${IGconf_image_outputdir}"
 
-   hook "${IGconf_image_assetdir}/pre-image.sh"   \
-      "${IGconf_image_target}" "${IGconf_image_outputdir}"
+   hook "${IGconf_device_preimage:-}" "${IGconf_target_path}" "${IGconf_image_outputdir}"
+   hook "${IGconf_image_preimage:-}" "${IGconf_target_path}" "${IGconf_image_outputdir}"
 
-   local provider=$(get_var IGconf_image_provider "${ctx[FINALENV]}")
-
-   if [[ "$provider" == genimage && -d "$IGconf_image_target" ]] ; then
+   if [[ "$provider" == genimage && -d "${IGconf_target_path:-}" ]] ; then
+      mkdir -p "${ctx[TMPDIR]}/genimage"
       local cfg
       for cfg in "${IGconf_image_outputdir}"/genimage*.cfg; do
          [[ -f $cfg ]] || continue
          runenv "${ctx[FINALENV]}" \
             podman unshare env genimage \
-            --rootpath   "$IGconf_image_target" \
+            --rootpath   "$IGconf_target_path" \
             --tmppath    "${ctx[TMPDIR]}/genimage" \
             --inputpath  "$IGconf_image_outputdir" \
             --outputpath "$IGconf_image_outputdir" \
@@ -446,14 +457,26 @@ generate_images() {
       done
    fi
 
-   if [[ -x ${IGconf_device_assetdir}/post-image.sh ]]; then
-      hook "${IGconf_device_assetdir}/post-image.sh" "$IGconf_image_deploydir"
-   elif [[ -x ${IGconf_image_assetdir}/post-image.sh ]]; then
-      hook "${IGconf_image_assetdir}/post-image.sh" "$IGconf_image_deploydir"
-   else
-      hook "$IGTOP/image/post-image.sh" "$IGconf_image_deploydir"
-   fi
+   hook "${IGconf_device_postimage:-}" "${IGconf_image_outputdir}"
+   hook "${IGconf_image_postimage:-}"  "${IGconf_image_outputdir}"
+
+   hook "$IGTOP/device/post-image.sh" "${IGconf_image_outputdir}"
+   hook "$IGTOP/image/post-image.sh"  "${IGconf_image_outputdir}"
 }
+
+
+
+###############################################################################
+# Stage 6: Deploy
+#   Install build assets for distribution
+###############################################################################
+deploy() {
+   [[ -z "${IGconf_deploy_dir:-}" ]] && return 0
+   [[ ${ctx[INTERACTIVE]} == y ]] && { ask "Deploy assets?" y || exit 0 ; }
+   msg "\nDEPLOY"
+   hook "$IGconf_deploy_hook"
+}
+
 
 
 ###############################################################################
@@ -465,7 +488,7 @@ clean_worktree() {
    [[ -z ${ctx[FINALENV]:-} ]] && die "FINALENV is not set"
 
    local keys=(
-      IGconf_image_target
+      IGconf_target_path
       IGconf_image_outputdir
       IGconf_image_deploydir
    )
@@ -479,7 +502,7 @@ clean_worktree() {
       msg "Remove  $key  [$val]"
       ask "Continue with removal?" y || { echo "Skipping.." ; continue ; }
       case $key in
-         IGconf_image_target)
+         IGconf_target_path)
             run podman unshare rm -rf -- "$val" ;;
          *)
             rm -rf -- "$val" ;;
@@ -515,6 +538,7 @@ main() {
          run_stage prepare_build_config
          [[ "${ctx[ONLY_IMAGE]}" == 1 ]] || run_stage generate_filesystem
          [[ "${ctx[ONLY_FS]}" == 1 ]] || run_stage generate_images
+         run_stage deploy
          ;;
 
       clean)

@@ -15,6 +15,7 @@ The rpi-image-gen build process consists of five main stages executed sequential
 . **Build Preparation** - Environment setup and bdebstrap configuration
 . **Filesystem Generation** - Filesystem creation followed by hooks and overlays
 . **Image Generation** - Disk image creation
+. **Deployment** - Installation of build assets
 
 == Philosophy
 
@@ -107,8 +108,20 @@ Create disk images from the prepared filesystem using the provider.
 * *Hook*`[pre-image.sh]`: Execute from within device and image asset directory.
   ** _Example Use_ - Creating genimage templates, setting up image creation resources.
 * *Image Generation*: Execute the image provider to create images.
-* *Hook*`[post-image.sh]`: Execute from within device and image asset directory, or default fallback.
-  ** _Example Use_ - Artefact compression and packaging, deployment
+* *Hook*`[post-image.sh]`: Execute from within device and image asset directory.
+  ** _Example Use_ - Custom packaging, signing with device keys, etc.
+
+== Stage 6: Deployment
+
+=== Purpose
+Install output assets from the build to a defined location for distribution.
+
+=== Activities
+
+Install and compress:
+
+* **Build**: Raw disk and sparse images, filesystem archives
+* **Audit**: SBOM, manifests
 
 == Hooks
 
@@ -116,6 +129,11 @@ Create disk images from the prepared filesystem using the provider.
 ====
 Hooks are optional but if a hook is to be executed, it must have executable permissions for the user performing the build.
 ====
+
+=== Core
+
+rpi-image-gen executes its own `pre/post build/image` hooks for device and image regardless of the configuration. These hooks perform generic tasks, such as installing the image provisioning map. Depending on requirements, there may not be a need to use custom hooks at these stages.
+
 
 === Device and Image Asset Directory
 A device or image layer may declare `IGconf_device_assetdir` or `IGconf_image_assetdir` respectively as a location of where to store device or image specific assets. These optional variables are referenced by rpi-image-gen. If the pre/post build and pre/post image hooks mentioned above are present in these locations, they will be executed. The hooks won't execute if the variables are not declared.

@@ -12,7 +12,7 @@ igconf isy sbom_enable || exit 0
 
 SYFTCFG=$(realpath -e $(igconf getval sbom_syft_config)) || die "Invalid syft config"
 
-SYFT_VER=v1.30.0
+SYFT_VER=v1.32.0
 
 # If host has syft, use it
 if ! hash syft 2>/dev/null; then
@@ -31,10 +31,10 @@ else
    die "sbom: '$src' is neither a file nor a directory"
 fi
 
-msg "SBOM: $SYFT scanning $scan_target"
+msg "\nSBOM: $SYFT scanning $scan_target"
 
 syft -c "$SYFTCFG" "$scan_target" \
    --base-path "$src" \
-   --source-name "$IGconf_image_name" \
-   --source-version "${IGconf_image_version}" \
-   > "${outdir}/${IGconf_image_name}.sbom"
+   --source-name "$IGconf_sbom_name" \
+   --source-version "$IGconf_sbom_version" \
+   > "${outdir}/${IGconf_sbom_filename}"

@@ -17,10 +17,14 @@
         .policy-lazy:hover { background: #e0a800; }
         .policy-force:hover { background: #c82333; }
         .policy-skip:hover { background: #545b62; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; table-layout: auto; }
         th, td { text-align: left; padding: 8px 12px; border-bottom: 1px solid #ddd; }
         th { background: #f8f9fa; font-weight: 600; }
+        td:nth-child(3) {
+            width: auto;
+        }
         code { background: #f1f3f4; padding: 2px 4px; border-radius: 3px; font-family: 'Monaco', monospace; font-size: 14px; }
+        code.long-default { word-break: break-all; white-space: pre-wrap; display: block; min-width: 30ch; }
         .back-link { margin-bottom: 20px; }
         .back-link a { text-decoration: none; color: #007acc; }
         .deps { display: flex; flex-wrap: wrap; gap: 5px; }
@@ -187,7 +191,13 @@
                 <tr>
                     <td><code>{{ var.name }}</code></td>
                     <td>{{ var.description or 'No description' }}</td>
-                    <td><code>{{ var.original_value or 'Not set' }}</code></td>
+                    <td>
+                       {% if var.original_value and var.original_value|length > 25 %}
+                       <code class="long-default">{{ var.original_value or 'Not set' }}</code>
+                       {% else %}
+                       <code>{{ var.original_value or 'Not set' }}</code>
+                       {% endif %}
+                    </td>
                     <td>{{ var.validation_description or 'None' }}</td>
                     <td>
                         <a href="variable-validation.html#set-policies" class="badge policy-{{ var.set_policy }}" title="Click for policy and validation help">{{ var.set_policy }}</a>

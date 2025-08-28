@@ -3,6 +3,10 @@
 # X-Env-Layer-Category: audit
 # X-Env-Layer-Desc: SBOM provider and settings.
 # X-Env-Layer-Version: 1.0.0
+# X-Env-Layer-Requires: artefact-base
+#
+# X-Env-VarRequires: IGconf_artefact_target_name,IGconf_artefact_version
+# X-Env-VarRequires-Valid: string,string
 #
 # X-Env-VarPrefix: sbom
 #
@@ -11,6 +15,30 @@
 # X-Env-Var-enable-Required: n
 # X-Env-Var-enable-Valid: bool
 # X-Env-Var-enable-Set: y
+#
+# X-Env-Var-version: ${IGconf_artefact_version}
+# X-Env-Var-version-Desc: Version string of the SBOM
+# X-Env-Var-version-Required: n
+# X-Env-Var-version-Valid: string
+# X-Env-Var-version-Set: y
+#
+# X-Env-Var-name: ${IGconf_artefact_target_name}-${IGconf_sbom_version}
+# X-Env-Var-name-Desc: Identifier name of the SBOM
+# X-Env-Var-name-Required: n
+# X-Env-Var-name-Valid: string
+# X-Env-Var-name-Set: y
+#
+# X-Env-Var-filename: ${IGconf_sbom_name}.sbom
+# X-Env-Var-filename-Desc: SBOM filename
+# X-Env-Var-filename-Required: n
+# X-Env-Var-filename-Valid: string
+# X-Env-Var-filename-Set: y
+#
+# X-Env-Var-hook: ${DIRECTORY}/gen.sh
+# X-Env-Var-hook-Desc: Hook to generate the SBOM filename.
+# X-Env-Var-hook-Required: n
+# X-Env-Var-hook-Valid: string
+# X-Env-Var-hook-Set: y
 #
 # X-Env-Var-provider: syft
 # X-Env-Var-provider-Desc: SBOM provider
@@ -31,4 +59,5 @@
 # X-Env-Var-syft_config-Required: n
 # X-Env-Var-syft_config-Valid: string
 # X-Env-Var-syft_config-Set: lazy
+#
 ---

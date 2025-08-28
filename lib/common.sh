@@ -148,17 +148,17 @@ check_missing_keys() {
 
 # Execute file in a directory with supplied env
 runhook() {
-   local hook_path=$1;  shift
+   local hook_path=${1:-};  shift
    local env_file=$1;   shift
 
    [[ -r $env_file ]] || die "runhook: env file '$env_file' not found or unreadable"
 
+   # No hook - no problem
+   [[ -n $hook_path && -e $hook_path ]] || return 0
+
    local hook_dir hook_name
    hook_dir=$(dirname  "$hook_path")
    hook_name=$(basename "$hook_path")
-
-   # No hook - no problem
-   [[ -e $hook_path ]] || return 0
 
    if [[ ! -x $hook_path ]]; then
       warn "Hook not executable: [$hook_dir/$hook_name] - skipping"
