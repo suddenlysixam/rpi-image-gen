@@ -39,6 +39,8 @@ The rpi-image-gen link:./docs/index.adoc[technical documentation] and link:./exa
 * **Secure** - Integrate with *rpi-sb-provisioner* (https://github.com/raspberrypi/rpi-sb-provisioner) to automatically set up signed boot and encrypted filesystems
 * **Auditable** - Generate Software Bill of Materials and CVE reports to give consumers of your image confidence
 
+rpi-image-gen is a versatile image generation and build automation tool designed to create reproducible operating system artefacts. It supports producing bootable disk images, partitioned media layouts, and device-agnostic filesystem tarballs from declarative configurations. The tool integrates package management, filesystem assembly, and image layout definition, enabling consistent builds for embedded devices, virtual machines, and general-purpose systems. By separating build logic from target hardware specifics, it simplifies cross-platform image creation, CI workflows, and distribution packaging.
+
 == Core Concepts
 
 * **Configuration** - Declare variables and build attributes in simple, easy to read files

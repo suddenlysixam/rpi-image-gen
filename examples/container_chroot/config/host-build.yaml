@@ -1,0 +1,8 @@
+target:
+  context: mydev
+
+artefact:
+  target_name: chroot.tgz
+
+layer:
+  essential: build-tools

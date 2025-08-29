@@ -127,7 +127,7 @@ parameter_assembly()
    printf 'RPI_TEMPLATES="%s"\n' "$IGTOP/templates/rpi" >> "${ctx[IGENVF]}"
 
    # Config sanity checks
-   for need in device image layer; do
+   for need in layer; do
       grep -q "^IGconf_${need}" "${ctx[IGENVF]}" \
          || die "Config provides no ${need} info"
    done
@@ -153,7 +153,7 @@ collect_layers()
 
    [[ -z ${ctx[LAYER_PATH]:-} ]] && die "LAYER_PATH is not set"
 
-   local -a layers=()
+   local -a layers=(essential)
    _collect() {
       local k=$1 v=$2
       case $k in
@@ -225,23 +225,17 @@ prepare_build_config()
       local key="$1" val="$2"
       case $key in
          IGconf_device_assetdir|\
+         IGconf_device_hostname|\
          IGconf_image_assetdir|\
-         IGconf_device_prebuild|\
-         IGconf_image_prebuild|\
-         IGconf_device_postbuild|\
-         IGconf_image_postbuild|\
-         IGconf_image_postbuild|\
-         IGconf_image_preimage|\
-         IGconf_device_postimage|\
-         IGconf_image_postimage|\
-         IGconf_image_postimage|\
+         IGconf_image_name|\
+         IGconf_image_outputdir|\
+         IGconf_sys_workroot|\
          IGconf_target_dir|\
          IGconf_target_path|\
-         IGconf_image_outputdir|\
+         *prebuild|*postbuild|*preimage|*postimage|\
          IGconf_sbom_hook|\
          IGconf_deploy_dir|\
-         IGconf_deploy_hook|\
-         IGconf_sys_workroot)
+         IGconf_deploy_hook)
             declare -g "$key"="$val"
             ;;
       esac
@@ -251,20 +245,27 @@ prepare_build_config()
 
    # Create output dirs
    mkdir -p "$IGconf_target_dir" \
-            "$IGconf_image_outputdir" \
             "$IGconf_sys_workroot/host/bin"
+   [[ -n "${IGconf_image_outputdir:-}" ]] && mkdir -p "$IGconf_image_outputdir"
 
-
+   # Host programs can be installed here
    ctx[EXEC_PATH]="${IGconf_sys_workroot}/host/bin:${ctx[EXEC_PATH]}"
    PATH=${ctx[EXEC_PATH]}
    export PATH
 
-   # Build initial bdebstrap env
+   # Create initial bdebstrap env
    _bdebstrap=( --force
                 --env PATH="$PATH"
                 --env IGTOP="$IGTOP"
                 --env SRC_DIR="${ctx[SRC_DIR]}" )
 
+   # Sane defaults
+   _bdebstrap+=( --name     "${IGconf_image_name:-rpi-image-gen}" )
+   _bdebstrap+=( --hostname "${IGconf_device_hostname:-rpi-image-gen}" )
+   _bdebstrap+=( --output   "${IGconf_target_dir:?IGconf_target_dir is not set}" )
+   _bdebstrap+=( --target   "${IGconf_target_path:?IGconf_target_path is not set}" )
+
+   # Process options from layer configuration
    process_conf_opt() {
       local key=$1 value=$2
       msg "-> $key : $value"
@@ -301,22 +302,15 @@ prepare_build_config()
          IGconf_sys_apt_get_purge)
             [[ ${value,,} =~ ^y(es)?$ ]] \
                && _bdebstrap+=( --aptopt 'APT::Get::Purge true' ) ;;
-
-         IGconf_image_name)        _bdebstrap+=( --name "$value"     ) ;;
-         IGconf_device_hostname)   _bdebstrap+=( --hostname "$value" ) ;;
-         IGconf_target_dir)        _bdebstrap+=( --output "$value"   ) ;;
-         IGconf_target_path)       _bdebstrap+=( --target "$value"   ) ;;
       esac
 
       # pass through
       _bdebstrap+=( --env "$key=$value" )
    }
-
-   # Set build params based on config
    msg "FINAL ENV"
    mapfile_kv "${ctx[FINALENV]}" process_conf_opt
 
-   # Load layers that contain an mmdebstrap mapping
+   # Only load layers that contain an mmdebstrap mapping
    msg "\nMMDEBSTRAP"
    local total=0 added=0 skipped=0
 
@@ -413,7 +407,6 @@ generate_filesystem()
    [[ ${ctx[INTERACTIVE]} == y ]] && \
       { ask "Post-build complete. Proceed to SBOM?" y || exit 0 ; }
 
-   msg "\nSBOM"
    hook "${IGconf_sbom_hook:-}" "${IGconf_target_path}" "${IGconf_target_dir}"
 }
 
