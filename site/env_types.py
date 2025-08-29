@@ -234,9 +234,8 @@ class EnvVariable:
         if valid_rule:
             try:
                 validator = parse_validator(valid_rule)
-            except ValueError:
-                # Invalid validation rule - will be caught during validation
-                pass
+            except ValueError as e:
+                raise ValueError(f"Invalid validation rule '{valid_rule}' for variable {var_name}: {e}")
 
         set_key = XEnv.var_set(base_name)
         set_raw = metadata_dict.get(set_key, "immediate")
@@ -468,8 +467,11 @@ class MetadataContainer:
                         source_layer="", position=0
                     )
                     container.variables[env_var.name] = env_var
-                except Exception:
-                    # Skip invalid variables - they'll be caught during validation
+                except ValueError as e:
+                    # Re-raise to fail layer loading
+                    raise ValueError(f"Invalid specifier for variable {var_name}: {e}")
+                except Exception as e:
+                    # Skip other types of errors - they'll be caught during validation
                     pass
 
         # Extract required/optional environment variable lists

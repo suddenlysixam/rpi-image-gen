@@ -229,7 +229,11 @@ def parse_validator(rule_str: str) -> BaseValidator:
         options = [x.strip() for x in rule_str.split(",") if x.strip()]
         return EnumValidator(options)
     else:
-        raise ValueError(f"Unknown validation rule: {rule_str}")
+        # Single value without comma - reject unless it's a known type
+        if rule_str in ["string", "string-or-empty", "string-or-unset", "bool", "int", "size"]:
+            raise ValueError(f"Unknown validation rule: {rule_str}")
+        else:
+            raise ValueError(f"Single value '{rule_str}' must use trailing comma ('{rule_str},') or keywords: prefix ('keywords:{rule_str}')")
 
 
 def get_validator_documentation_data() -> dict:
