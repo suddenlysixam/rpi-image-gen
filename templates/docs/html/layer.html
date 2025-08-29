@@ -192,10 +192,18 @@
                     <td><code>{{ var.name }}</code></td>
                     <td>{{ var.description or 'No description' }}</td>
                     <td>
-                       {% if var.original_value and var.original_value|length > 25 %}
-                       <code class="long-default">{{ var.original_value or 'Not set' }}</code>
+                       {% if var.original_value %}
+                           {% if var.original_value|length > 25 %}
+                           <code class="long-default">{{ var.original_value }}</code>
+                           {% else %}
+                           <code>{{ var.original_value }}</code>
+                           {% endif %}
+                       {% elif var.set_policy == 'skip' %}
+                           <code>&lt;disabled&gt;</code>
+                       {% elif var.validation_description and 'empty' in var.validation_description.lower() %}
+                           <code>&lt;empty&gt;</code>
                        {% else %}
-                       <code>{{ var.original_value or 'Not set' }}</code>
+                           <code>&lt;not set&gt;</code>
                        {% endif %}
                     </td>
                     <td>{{ var.validation_description or 'None' }}</td>
