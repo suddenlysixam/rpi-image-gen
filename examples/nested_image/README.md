@@ -5,5 +5,6 @@ Please make sure to install the dependencies required by the example.
 ```bash
 sudo ./install_deps.sh examples/nested_image/deps
 
-./build.sh -D ./examples/nested_image/ -c nested -o ./examples/nested_image/my.options
+rpi-image-gen build -S ./examples/nested_image/ -c nested.cfg
 ```
+User password can be provided via cmdline args.

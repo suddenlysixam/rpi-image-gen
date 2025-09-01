@@ -211,8 +211,16 @@ The configuration system supports variable expansion in configuration values usi
 [source,yaml]
 ----
 device:
-  assetdir: ${WORKSPACE}/assets/device
-  hostname: ${IGconf_device_class}-$(date +%s)
+  name: controllerbox
+  rev: 2
+  hostname: ${IGconf_device_name}-$(uuidgen | cut -d'-' -f1)
+
+image:
+  assetdir: ${WORKSPACE}/build/assets/${IGconf_device_name}-rev${IGconf_device_rev}
+
+ssh:
+  pubkey_user1=$(< ${DEPLOY}/device/baseassets/id_rsa.pub)
+  pubkey_only=y
 ----
 
 === Cross-Reference Expansion
@@ -233,8 +241,12 @@ image:
 
 During configuration processing, variables are expanded using:
 
-1. **Previously loaded configuration values**
-2. **System environment variables** (for shell-style expansion like `${HOME}`)
+. **Previously loaded configuration values**
+. **System environment variables** (for shell-style expansion like `${HOME}`)
+. A **Strict Policy** (using `bash` under `set -eu`). This means:
+  ** **errexit (set -e)**: Exit immediately if any command returns a non-zero exit status, including when variable expansion fails or returns an error.
+  ** **nounset (set -u)**: Treat unset variables as errors during expansion - attempting to expand a variable that hasn't been set will exit with an error instead of expanding to an empty string.
+  ** When these are combined, variable expansion is strict and fails quickly. Any attempt to expand an undefined variable will cause the build to exit immediately.
 
 == Configuration Loading
 
