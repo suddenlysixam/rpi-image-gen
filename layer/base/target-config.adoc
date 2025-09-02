@@ -1,0 +1,11 @@
+= bdebstrap
+
+== Installation
+
+This layer is responsible for configuration options that dictate the location and output artefact type produced by bdebstrap. At the current time, bdebstrap is not available to install from Debian Trixie.
+
+== References
+. https://github.com/bdrung/bdebstrap[bdebstrap home page,window=_blank]
+. https://tracker.debian.org/pkg/bdebstrap
+. https://gitlab.mister-muffin.de/josch/mmdebstrap[mmdebstrap home page,,window=_blank]
+. https://tracker.debian.org/pkg/mmdebstrap

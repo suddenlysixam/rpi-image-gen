@@ -1,0 +1,9 @@
+= Generic 64-bit Device Support
+
+== Compatibility
+
+This layer installs the v8 kernel which is compatible with any 64-bit capable device. It also installs boot firmware, wireless LAN and Bluetooth firmware compatible with all Raspberry Pi devices.
+
+== References
+. https://www.raspberrypi.com/documentation/computers/linux_kernel.html[Raspberry Pi linux kernel documentation,window=_blank]
+. https://www.raspberrypi.com/documentation/computers/raspberry-pi.html[Raspberry Pi hardware documentation,window=_blank]
