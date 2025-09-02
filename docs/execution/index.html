@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>rpi-image-gen Documentation</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 1200px; margin: 0 auto; padding: 20px; line-height: 1.6; }
+        .content { margin-bottom: 40px; }
+        .layer-list { margin-bottom: 30px; }
+        .layer-item { margin-bottom: 8px; }
+        .layer-item a { text-decoration: none; color: #007acc; font-weight: 500; }
+        .layer-item a:hover { text-decoration: underline; }
+        .layer-desc { color: #666; margin-left: 10px; }
+        /* Main content headers styling */
+        h1, h2, h3, h4, h5, h6 { color: #333; margin-top: 20px; margin-bottom: 10px; }
+        h1 a, h2 a, h3 a, h4 a, h5 a, h6 a { color: #333; text-decoration: none; }
+        h3 { color: #000; border-bottom: 1px solid #eee; padding-bottom: 5px; margin-top: 30px; margin-bottom: 15px; }
+        /* AsciiDoc table styling */
+        .tableblock { border-collapse: collapse; margin: 1.25em 0; table-layout: fixed !important; }
+        .tableblock.frame-all { border: 1px solid #dedede; }
+        .tableblock.grid-all th, .tableblock.grid-all td { border: 1px solid #dedede; }
+        .tableblock.stretch { table-layout: fixed !important; }
+        .tableblock.frame-all.grid-all.stretch { table-layout: fixed !important; }
+        .tableblock th, .tableblock td { padding: 0.5625em 0.625em; text-align: left; vertical-align: top; }
+        .tableblock th { background: #f8f9fa; font-weight: 600; color: rgba(0,0,0,.8); }
+        .tableblock tbody tr:nth-child(even) { background: #f8f8f7; }
+        .tableblock p { margin: 0; line-height: 1.6; }
+        .tableblock .halign-left { text-align: left; }
+        .tableblock .halign-center { text-align: center; }
+        .tableblock .halign-right { text-align: right; }
+        .tableblock .valign-top { vertical-align: top; }
+        .tableblock .valign-middle { vertical-align: middle; }
+        .tableblock .valign-bottom { vertical-align: bottom; }
+
+        /* Simple code block styling */
+        .listingblock pre {
+            background: #f8f9fa;
+            border: 1px solid #ddd;
+            padding: 12px;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-family: monospace;
+            font-size: 14px;
+        }
+        .listingblock pre code {
+            background: none;
+            border: none;
+            padding: 0;
+        }
+
+        /* AsciiDoc admonition blocks (NOTE, TIP, WARNING, etc.) */
+        .admonitionblock {
+            margin: 1.5em 0;
+            padding: 0.4em 0.6em;
+            border-left: 4px solid;
+            background: #f8f9fa;
+            border-radius: 0 4px 4px 0;
+        }
+
+        .admonitionblock .title {
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 0.85em;
+            margin-bottom: 0.25em;
+            letter-spacing: 0.5px;
+        }
+
+        .admonitionblock .content {
+            margin: 0;
+        }
+
+        /* Reduce spacing for paragraphs inside admonitions */
+        .admonitionblock p {
+            margin: 0.25em 0;
+        }
+
+        .admonitionblock p:first-child {
+            margin-top: 0;
+        }
+
+        .admonitionblock p:last-child {
+            margin-bottom: 0;
+        }
+
+        /* Specific admonition types */
+        .admonitionblock.note {
+            border-color: #17a2b8;
+            background: #d1ecf1;
+        }
+
+        .admonitionblock.note .title {
+            color: #0c5460;
+        }
+
+        .admonitionblock.tip {
+            border-color: #28a745;
+            background: #d4edda;
+        }
+
+        .admonitionblock.tip .title {
+            color: #155724;
+        }
+
+        .admonitionblock.important {
+            border-color: #ffc107;
+            background: #fff3cd;
+        }
+
+        .admonitionblock.important .title {
+            color: #856404;
+        }
+
+        .admonitionblock.warning,
+        .admonitionblock.caution {
+            border-color: #dc3545;
+            background: #f8d7da;
+        }
+
+        .admonitionblock.warning .title,
+        .admonitionblock.caution .title {
+            color: #721c24;
+        }
+    </style>
+</head>
+<body>
+    <div class="content">
+        <div id="toc" class="toc">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#_overview">Overview</a></li>
+<li><a href="#_philosophy">Philosophy</a>
+<ul class="sectlevel2">
+<li><a href="#_practical_example">Practical Example</a></li>
+</ul>
+</li>
+<li><a href="#_stage_1_parameter_assembly">Stage 1: Parameter Assembly</a>
+<ul class="sectlevel2">
+<li><a href="#_purpose">Purpose</a></li>
+<li><a href="#_activities">Activities</a></li>
+</ul>
+</li>
+<li><a href="#_stage_2_layer_processing">Stage 2: Layer Processing</a>
+<ul class="sectlevel2">
+<li><a href="#_purpose_2">Purpose</a></li>
+<li><a href="#_activities_2">Activities</a></li>
+</ul>
+</li>
+<li><a href="#_stage_3_build_preparation">Stage 3: Build Preparation</a>
+<ul class="sectlevel2">
+<li><a href="#_purpose_3">Purpose</a></li>
+<li><a href="#_activities_3">Activities</a></li>
+</ul>
+</li>
+<li><a href="#_stage_4_filesystem_generation">Stage 4: Filesystem Generation</a>
+<ul class="sectlevel2">
+<li><a href="#_purpose_4">Purpose</a></li>
+<li><a href="#_activities_4">Activities</a></li>
+</ul>
+</li>
+<li><a href="#_stage_5_image_generation">Stage 5: Image Generation</a>
+<ul class="sectlevel2">
+<li><a href="#_purpose_5">Purpose</a></li>
+<li><a href="#_activities_5">Activities</a></li>
+</ul>
+</li>
+<li><a href="#_stage_6_deployment">Stage 6: Deployment</a>
+<ul class="sectlevel2">
+<li><a href="#_purpose_6">Purpose</a></li>
+<li><a href="#_activities_6">Activities</a></li>
+</ul>
+</li>
+<li><a href="#_hooks">Hooks</a>
+<ul class="sectlevel2">
+<li><a href="#_core">Core</a></li>
+<li><a href="#_device_and_image_asset_directory">Device and Image Asset Directory</a></li>
+<li><a href="#_bdebstrap">bdebstrap</a></li>
+<li><a href="#_initramfs">initramfs</a></li>
+</ul>
+</li>
+<li><a href="#_interactive_mode">Interactive Mode</a></li>
+</ul>
+</div>
+<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p><a href="../index.html">← Back to Main Documentation</a></p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_overview"><a class="anchor" href="#_overview"></a><a class="link" href="#_overview">Overview</a></h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The rpi-image-gen build process consists of five main stages executed sequentially:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p><strong>Parameter Assembly</strong> - Input validation and configuration parsing</p>
+</li>
+<li>
+<p><strong>Layer Processing</strong> - Layer collection, validation, and dependency resolution</p>
+</li>
+<li>
+<p><strong>Build Preparation</strong> - Environment setup and bdebstrap configuration</p>
+</li>
+<li>
+<p><strong>Filesystem Generation</strong> - Filesystem creation followed by hooks and overlays</p>
+</li>
+<li>
+<p><strong>Image Generation</strong> - Disk image creation</p>
+</li>
+<li>
+<p><strong>Deployment</strong> - Installation of build assets</p>
+</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_philosophy"><a class="anchor" href="#_philosophy"></a><a class="link" href="#_philosophy">Philosophy</a></h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>When instructed to use a source directory via the CLI, rpi-image-gen <strong>prioritises that directory</strong> for config files and layers, while still allowing references to its built-in resources. Similar to how a C compiler searches local directories before system directories (<code>-I. -I/usr/include</code>), rpi-image-gen uses a <strong>hierarchical search path</strong>. This allows users to have complete <em>project encapsulation</em> for their integration.</p>
+</div>
+<div class="sect2">
+<h3 id="_practical_example"><a class="anchor" href="#_practical_example"></a><a class="link" href="#_practical_example">Practical Example</a></h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-bash" data-lang="bash"># Local config can include built-in base
+# File: ./my-project/config/kiosk.yaml
+include:
+  file: bookworm-minbase.cfg  # Resolves to built-in config
+
+layer:
+  app: my-kiosk               # Resolves to ./my-project/layer/my-kiosk.yaml
+
+# Build with mixed local/built-in resources
+$ rpi-image-gen build -S ./my-project/ -c kiosk.cfg</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This philosophy enables a user to have self-contained projects with external dependencies.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_stage_1_parameter_assembly"><a class="anchor" href="#_stage_1_parameter_assembly"></a><a class="link" href="#_stage_1_parameter_assembly">Stage 1: Parameter Assembly</a></h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_purpose"><a class="anchor" href="#_purpose"></a><a class="link" href="#_purpose">Purpose</a></h3>
+<div class="paragraph">
+<p>Validate input arguments, parse configuration files, and establish the initial environment for subsequent stages.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_activities"><a class="anchor" href="#_activities"></a><a class="link" href="#_activities">Activities</a></h3>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Input Validation and Override Processing</strong>: CLI processing</p>
+</li>
+<li>
+<p><strong>Config Parsing</strong>: Configuration file parsing</p>
+</li>
+<li>
+<p><strong>Environment Injection</strong>: Path setup, initial internal setup</p>
+</li>
+<li>
+<p><strong>Sanity Checks</strong>: Validate input sources</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_stage_2_layer_processing"><a class="anchor" href="#_stage_2_layer_processing"></a><a class="link" href="#_stage_2_layer_processing">Stage 2: Layer Processing</a></h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_purpose_2"><a class="anchor" href="#_purpose_2"></a><a class="link" href="#_purpose_2">Purpose</a></h3>
+<div class="paragraph">
+<p>Discover, validate, and order all layers specified in the configuration, and expand all configuration variables to their final values.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_activities_2"><a class="anchor" href="#_activities_2"></a><a class="link" href="#_activities_2">Activities</a></h3>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Layer Collection</strong>: Extract layer references from config</p>
+</li>
+<li>
+<p><strong>Layer Validation</strong>: Generate layer configuration variables</p>
+</li>
+<li>
+<p><strong>Dependency Resolution</strong>: Resolve layer build order to determine the build sequence</p>
+</li>
+<li>
+<p><strong>Variable Expansion</strong>: Resolves configuration variables with defined policy handling</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_stage_3_build_preparation"><a class="anchor" href="#_stage_3_build_preparation"></a><a class="link" href="#_stage_3_build_preparation">Stage 3: Build Preparation</a></h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_purpose_3"><a class="anchor" href="#_purpose_3"></a><a class="link" href="#_purpose_3">Purpose</a></h3>
+<div class="paragraph">
+<p>Set up the build environment and assemble bdebstrap parameters with the necessary configuration.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_activities_3"><a class="anchor" href="#_activities_3"></a><a class="link" href="#_activities_3">Activities</a></h3>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Path Configuration</strong>: Paths updated to allow location of host binaries and tools</p>
+</li>
+<li>
+<p><strong>APT Configuration</strong>: Configure apt settings including:</p>
+<div class="ulist">
+<ul>
+<li>
+<p>Key directories</p>
+</li>
+<li>
+<p>Cache settings</p>
+</li>
+<li>
+<p>Proxy settings</p>
+</li>
+<li>
+<p>Package options</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p><strong>Command Assembly</strong>: Constructs the initial bdebstrap command including:</p>
+<div class="ulist">
+<ul>
+<li>
+<p>Environment variables</p>
+</li>
+<li>
+<p>Target settings</p>
+</li>
+<li>
+<p>All compatible YAML layer files</p>
+</li>
+<li>
+<p>Installing core hook runners for setup, essential, customize, and cleanup phases</p>
+</li>
+</ul>
+</div>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_stage_4_filesystem_generation"><a class="anchor" href="#_stage_4_filesystem_generation"></a><a class="link" href="#_stage_4_filesystem_generation">Stage 4: Filesystem Generation</a></h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_purpose_4"><a class="anchor" href="#_purpose_4"></a><a class="link" href="#_purpose_4">Purpose</a></h3>
+<div class="paragraph">
+<p>Create the filesystem and generate the Software Bill of Materials.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_activities_4"><a class="anchor" href="#_activities_4"></a><a class="link" href="#_activities_4">Activities</a></h3>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Hook</strong><code>[pre-build.sh]</code>: Execute from within image and device asset directory.</p>
+<div class="ulist">
+<ul>
+<li>
+<p><em>Example Use</em> - Custom validation of pre-build settings</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p><strong>Filesystem Generation</strong>: Execute bdebstrap</p>
+</li>
+<li>
+<p><strong>Overlays</strong>: Apply static filesystem overlays from image and device <code>rootfs-overlay/</code> directories.</p>
+</li>
+<li>
+<p><strong>Hook</strong><code>[post-build.sh]</code>: Execute from within image and device asset directory.</p>
+<div class="ulist">
+<ul>
+<li>
+<p><em>Example Use</em> - Custom installation of image or device specific assets, eg boot configuration files.</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p><strong>SBOM</strong>: Execute the Software Bill of Materials provider to create the SBOM file.</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_stage_5_image_generation"><a class="anchor" href="#_stage_5_image_generation"></a><a class="link" href="#_stage_5_image_generation">Stage 5: Image Generation</a></h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_purpose_5"><a class="anchor" href="#_purpose_5"></a><a class="link" href="#_purpose_5">Purpose</a></h3>
+<div class="paragraph">
+<p>Create disk images from the prepared filesystem using the provider.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_activities_5"><a class="anchor" href="#_activities_5"></a><a class="link" href="#_activities_5">Activities</a></h3>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Hook</strong><code>[pre-image.sh]</code>: Execute from within device and image asset directory.</p>
+<div class="ulist">
+<ul>
+<li>
+<p><em>Example Use</em> - Creating genimage templates, setting up image creation resources.</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p><strong>Image Generation</strong>: Execute the image provider to create images.</p>
+</li>
+<li>
+<p><strong>Hook</strong><code>[post-image.sh]</code>: Execute from within device and image asset directory.</p>
+<div class="ulist">
+<ul>
+<li>
+<p><em>Example Use</em> - Custom packaging, signing with device keys, etc.</p>
+</li>
+</ul>
+</div>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_stage_6_deployment"><a class="anchor" href="#_stage_6_deployment"></a><a class="link" href="#_stage_6_deployment">Stage 6: Deployment</a></h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_purpose_6"><a class="anchor" href="#_purpose_6"></a><a class="link" href="#_purpose_6">Purpose</a></h3>
+<div class="paragraph">
+<p>Install output assets from the build to a defined location for distribution.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_activities_6"><a class="anchor" href="#_activities_6"></a><a class="link" href="#_activities_6">Activities</a></h3>
+<div class="paragraph">
+<p>Install and compress:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Build</strong>: Raw disk and sparse images, filesystem archives</p>
+</li>
+<li>
+<p><strong>Audit</strong>: SBOM, manifests</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_hooks"><a class="anchor" href="#_hooks"></a><a class="link" href="#_hooks">Hooks</a></h2>
+<div class="sectionbody">
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Important</div>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>Hooks are optional but if a hook is to be executed, it must have executable permissions for the user performing the build.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="sect2">
+<h3 id="_core"><a class="anchor" href="#_core"></a><a class="link" href="#_core">Core</a></h3>
+<div class="paragraph">
+<p>rpi-image-gen executes its own <code>pre/post build/image</code> hooks for device and image regardless of the configuration. These hooks perform generic tasks, such as installing the image provisioning map. Depending on requirements, there may not be a need to use custom hooks at these stages.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_device_and_image_asset_directory"><a class="anchor" href="#_device_and_image_asset_directory"></a><a class="link" href="#_device_and_image_asset_directory">Device and Image Asset Directory</a></h3>
+<div class="paragraph">
+<p>A device or image layer may declare <code>IGconf_device_assetdir</code> or <code>IGconf_image_assetdir</code> respectively as a location of where to store device or image specific assets. These optional variables are referenced by rpi-image-gen. If the pre/post build and pre/post image hooks mentioned above are present in these locations, they will be executed. The hooks won&#8217;t execute if the variables are not declared.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_bdebstrap"><a class="anchor" href="#_bdebstrap"></a><a class="link" href="#_bdebstrap">bdebstrap</a></h3>
+<div class="paragraph">
+<p>rpi-image-gen extends the support of bdebstrap hooks to image, device and source directories. Hooks with filenames beginning with <code><code>setup</code></code>,  <code><code>essential</code></code>, <code><code>customize</code></code> and <code><code>cleanup</code></code>, and which only contain alphanumeric characters, are supported and must exist in a sub-directory named<code><code>bdebstrap</code></code> within the directory in order for them to be run at the respective stage of chroot creation. Their file extension is ignored. Sub-directories are not traversed.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_initramfs"><a class="anchor" href="#_initramfs"></a><a class="link" href="#_initramfs">initramfs</a></h3>
+<div class="paragraph">
+<p>If <code><code>initramfs-tools(7)</code></code> is installed in the chroot, rpi-image-gen extends the support of initramfs scripts and hooks to image and device directories via their sub-directory <code><code>device/initramfs-tools</code></code>. If present, the entire contents of this directory is recursively copied into the chroot. Mode and ownership attributes are preserved. Destination files will not be overwritten. rpi-image-gen performs this operation during the <code><code>customize</code></code> stage of chroot creation and guarantees it will take place after invocation of all image and device bdebstrap <code><code>customize</code></code> hooks.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_interactive_mode"><a class="anchor" href="#_interactive_mode"></a><a class="link" href="#_interactive_mode">Interactive Mode</a></h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>A CLI option allows execution to pause between major operations for user confirmation. This may be useful for inspecting log output prior to building.</p>
+</div>
+</div>
+</div>
+
+    </div>
+
+    
+</body>
+</html>

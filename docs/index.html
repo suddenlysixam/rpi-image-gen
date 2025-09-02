@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>rpi-image-gen Documentation</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 1200px; margin: 0 auto; padding: 20px; line-height: 1.6; }
+        .content { margin-bottom: 40px; }
+        .layer-list { margin-bottom: 30px; }
+        .layer-item { margin-bottom: 8px; }
+        .layer-item a { text-decoration: none; color: #007acc; font-weight: 500; }
+        .layer-item a:hover { text-decoration: underline; }
+        .layer-desc { color: #666; margin-left: 10px; }
+        /* Main content headers styling */
+        h1, h2, h3, h4, h5, h6 { color: #333; margin-top: 20px; margin-bottom: 10px; }
+        h1 a, h2 a, h3 a, h4 a, h5 a, h6 a { color: #333; text-decoration: none; }
+        h3 { color: #000; border-bottom: 1px solid #eee; padding-bottom: 5px; margin-top: 30px; margin-bottom: 15px; }
+        /* AsciiDoc table styling */
+        .tableblock { border-collapse: collapse; margin: 1.25em 0; table-layout: fixed !important; }
+        .tableblock.frame-all { border: 1px solid #dedede; }
+        .tableblock.grid-all th, .tableblock.grid-all td { border: 1px solid #dedede; }
+        .tableblock.stretch { table-layout: fixed !important; }
+        .tableblock.frame-all.grid-all.stretch { table-layout: fixed !important; }
+        .tableblock th, .tableblock td { padding: 0.5625em 0.625em; text-align: left; vertical-align: top; }
+        .tableblock th { background: #f8f9fa; font-weight: 600; color: rgba(0,0,0,.8); }
+        .tableblock tbody tr:nth-child(even) { background: #f8f8f7; }
+        .tableblock p { margin: 0; line-height: 1.6; }
+        .tableblock .halign-left { text-align: left; }
+        .tableblock .halign-center { text-align: center; }
+        .tableblock .halign-right { text-align: right; }
+        .tableblock .valign-top { vertical-align: top; }
+        .tableblock .valign-middle { vertical-align: middle; }
+        .tableblock .valign-bottom { vertical-align: bottom; }
+
+        /* Simple code block styling */
+        .listingblock pre {
+            background: #f8f9fa;
+            border: 1px solid #ddd;
+            padding: 12px;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-family: monospace;
+            font-size: 14px;
+        }
+        .listingblock pre code {
+            background: none;
+            border: none;
+            padding: 0;
+        }
+
+        /* AsciiDoc admonition blocks (NOTE, TIP, WARNING, etc.) */
+        .admonitionblock {
+            margin: 1.5em 0;
+            padding: 0.4em 0.6em;
+            border-left: 4px solid;
+            background: #f8f9fa;
+            border-radius: 0 4px 4px 0;
+        }
+
+        .admonitionblock .title {
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 0.85em;
+            margin-bottom: 0.25em;
+            letter-spacing: 0.5px;
+        }
+
+        .admonitionblock .content {
+            margin: 0;
+        }
+
+        /* Reduce spacing for paragraphs inside admonitions */
+        .admonitionblock p {
+            margin: 0.25em 0;
+        }
+
+        .admonitionblock p:first-child {
+            margin-top: 0;
+        }
+
+        .admonitionblock p:last-child {
+            margin-bottom: 0;
+        }
+
+        /* Specific admonition types */
+        .admonitionblock.note {
+            border-color: #17a2b8;
+            background: #d1ecf1;
+        }
+
+        .admonitionblock.note .title {
+            color: #0c5460;
+        }
+
+        .admonitionblock.tip {
+            border-color: #28a745;
+            background: #d4edda;
+        }
+
+        .admonitionblock.tip .title {
+            color: #155724;
+        }
+
+        .admonitionblock.important {
+            border-color: #ffc107;
+            background: #fff3cd;
+        }
+
+        .admonitionblock.important .title {
+            color: #856404;
+        }
+
+        .admonitionblock.warning,
+        .admonitionblock.caution {
+            border-color: #dc3545;
+            background: #f8d7da;
+        }
+
+        .admonitionblock.warning .title,
+        .admonitionblock.caution .title {
+            color: #721c24;
+        }
+    </style>
+</head>
+<body>
+    <div class="content">
+        <div id="toc" class="toc">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#_viewing_documentation">Viewing Documentation</a>
+<ul class="sectlevel2">
+<li><a href="#_online">Online</a></li>
+<li><a href="#_offline">Offline</a></li>
+</ul>
+</li>
+<li><a href="#_documentation_structure">Documentation Structure</a></li>
+<li><a href="#_terminology">Terminology</a></li>
+</ul>
+</div>
+<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>Top level landing page for rpi-image-gen technical documentation.</p>
+</div>
+<div class="paragraph">
+<p>For general information, see the <a href="https://github.com/raspberrypi/rpi-image-gen" target="_blank" rel="noopener">project repository</a>.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_viewing_documentation"><a class="link" href="#_viewing_documentation">Viewing Documentation</a></h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_online"><a class="link" href="#_online">Online</a></h3>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Technical Documentation</strong>: <a href="https://raspberrypi.github.io/rpi-image-gen/" class="bare">https://raspberrypi.github.io/rpi-image-gen/</a></p>
+</li>
+<li>
+<p><strong>Project Information</strong>: <a href="https://github.com/raspberrypi/rpi-image-gen" class="bare">https://github.com/raspberrypi/rpi-image-gen</a></p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_offline"><a class="link" href="#_offline">Offline</a></h3>
+<div class="paragraph">
+<p>The technical documentation HTML pages are browsable offline via <code><a href="file:///path/to/page.html" class="bare">file:///path/to/page.html</a></code>.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_documentation_structure"><a class="link" href="#_documentation_structure">Documentation Structure</a></h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p><a href="./execution/index.html">execution/</a> Execution flow overview</p>
+</li>
+<li>
+<p><a href="./config/index.html">config/</a> Configuration system</p>
+</li>
+<li>
+<p><a href="./layer/index.html">layer/</a> Layer information and metadata</p>
+</li>
+<li>
+<p><a href="./provisioning/index.html">provisioning/</a> Device provisioning information</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_terminology"><a class="link" href="#_terminology">Terminology</a></h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The following terms are used throughout the documentation:</p>
+</div>
+<div class="paragraph">
+<p><strong>Host</strong> The machine on which rpi-image-gen is executing. Analogous to GNU Build.</p>
+</div>
+<div class="paragraph">
+<p><strong>Device</strong> The machine on which output files generated by rpi-image-gen will execute. Analogous to GNU Host.</p>
+</div>
+<div class="paragraph">
+<p><strong>Class</strong> The Raspberry Pi device hardware model that output files are intended to target, e.g. pi4, cm5.</p>
+</div>
+<div class="paragraph">
+<p><strong>Variant</strong> Enables differentiation between devices of the same class, e.g. lite.</p>
+</div>
+<div class="paragraph">
+<p><strong>Package</strong> A collection of files and software resources, encapsulated in a known format, that constitute part of a larger software system.</p>
+</div>
+<div class="paragraph">
+<p><strong>Config</strong> File defining the variables and attributes that rpi-image-gen will use to construct the device filesystem, image, etc.</p>
+</div>
+<div class="paragraph">
+<p><strong>Image</strong> The complete disk layout, including partitioning scheme and filesystem structure for an executable and bootable device storage medium.</p>
+</div>
+<div class="paragraph">
+<p><strong>Layer</strong> A YAML file in a defined format comprising of a modular, composable component that defines specific aspects of your device build.</p>
+</div>
+<div class="paragraph">
+<p><strong>Hook</strong> A shell script that may be optional and which if found, will be run at a defined point in a particular flow of execution.</p>
+</div>
+<div class="paragraph">
+<p><strong>SBOM</strong> Software Bill Of Materials</p>
+</div>
+<div class="paragraph">
+<p><strong>CVE</strong> Common Vulnerabilities and Exposures</p>
+</div>
+</div>
+</div>
+
+    </div>
+
+    
+</body>
+</html>
