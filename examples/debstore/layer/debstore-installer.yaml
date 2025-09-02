@@ -9,6 +9,6 @@ mmdebstrap:
   customize-hooks:
   - |-
     mkdir -p $1/tmp/debs && cp -a pkgs/*.deb $1/tmp/debs
-    chroot $1 sh -c "apt install -y /tmp/debs/*.deb"
+    [ -n "$(ls -A $1/tmp/debs/*.deb 2>/dev/null)" ] && chroot $1 sh -c "apt install -y /tmp/debs/*.deb" || true
   cleanup-hooks:
   - rm -rf $1/tmp/debs

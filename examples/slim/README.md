@@ -33,7 +33,3 @@ examples/slim/
 ```bash
 rpi-image-gen build -S ./examples/slim/ -c pi5-slim.yaml
 ```
-Or to specify a password:
-```bash
-rpi-image-gen build -S ./examples/slim/ -c pi5-slim.yaml -- IGconf_device_user1pass=<foo>
-```

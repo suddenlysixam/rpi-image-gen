@@ -1,0 +1,6 @@
+include:
+  file: bookworm-minbase.yaml
+
+image:
+  layer: example-nested-layout
+  name: nested-example

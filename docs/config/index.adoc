@@ -248,6 +248,12 @@ During configuration processing, variables are expanded using:
   ** **nounset (set -u)**: Treat unset variables as errors during expansion - attempting to expand a variable that hasn't been set will exit with an error instead of expanding to an empty string.
   ** When these are combined, variable expansion is strict and fails quickly. Any attempt to expand an undefined variable will cause the build to exit immediately.
 
+[NOTE]
+====
+There may be a need to handle non-alphanumeric characters in config files and/or command line arguments. Best practices advise encapsulating the text for a more robust approach, even if it's not always technically necessary. For YAML files, use single quotes for literal strings. For example `password: 'Fo0bar!!'`. For INI files, quote values containing special characters. For example `password = "Fo0bar!!"`. For command line arguments, use single quotes to preserve the literal text. For example `rpi-image-gen build -c <args> -- IGconf_device_user1pass='Fo0bar!!'`.
+====
+
+
 == Configuration Loading
 
 === Processing Overview

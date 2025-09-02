@@ -5,6 +5,7 @@
 #  dpkg to trim files so we boot a v8 kernel on pi5 / cm5 only. Declares the
 #  asset dir so that overlays and hooks will be found.
 # X-Env-Layer-Version: 1.0.0
+# X-Env-Layer-Requires: device-base
 # X-Env-Layer-Provides: device
 #
 # X-Env-VarPrefix: device
