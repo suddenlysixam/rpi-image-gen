@@ -1015,7 +1015,7 @@ def _layer_main(args):
                     for dep in manager.get_dependencies(dep_layer):
                         # guard against cycles / duplicates
                         if dep in seen:
-                            print(f"{pad}└─ {dep} (already shown)")
+                            print(f"{pad}- {dep} (already shown)")
                             continue
                         seen.add(dep)
 
