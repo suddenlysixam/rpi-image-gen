@@ -17,7 +17,7 @@ from logger import log_warning, log_success, log_failure, log_error
 
 # Handles discovery, dependency resolution, and orchestration
 class LayerManager:
-    def __init__(self, search_paths: Optional[List[str]] = None, file_patterns: Optional[List[str]] = None, *, show_loaded: bool = False):
+    def __init__(self, search_paths: Optional[List[str]] = None, file_patterns: Optional[List[str]] = None, *, show_loaded: bool = False, doc_mode: bool = False):
         if search_paths is None:
             search_paths = ['./layer']
         if file_patterns is None:
@@ -28,6 +28,7 @@ class LayerManager:
         self.layers: Dict[str, Metadata] = {}  # layer_name -> Metadata object
         self.layer_files: Dict[str, str] = {}  # layer_name -> file_path
         self.show_loaded = show_loaded
+        self.doc_mode = doc_mode  # When True, load all layers regardless of environment variables
         # provider index will be built after layers are loaded
         self.provider_index: Dict[str, str] = {}
         self.provider_conflicts: Dict[str, Set[str]] = {}
@@ -74,7 +75,7 @@ class LayerManager:
 
             for metadata_file in all_files:
                 try:
-                    meta = Metadata(metadata_file)
+                    meta = Metadata(metadata_file, doc_mode=self.doc_mode)
                 except Exception:
                     # Malformed YAML or metadata – skip
                     continue
@@ -715,6 +716,13 @@ class LayerManager:
         # Check for companion doc
         companion_doc = self._get_companion_doc(layer_name, format='asciidoc')
 
+        # Process dependencies to categorise them as static or dynamic
+        dependencies = self._categorise_dependencies(layer_name)
+
+        # Reverse dependencies don't need categorisation - we can't determine them
+        # if they use env vars, so we only report static rdeps.
+        reverse_dependencies = self.get_reverse_dependencies(layer_name)
+
         return {
             'layer_info': layer.get_layer_info(),
             'variables': variables,
@@ -723,8 +731,8 @@ class LayerManager:
             'mmdebstrap': mmdebstrap_config,
             'file_path': relative_path,
             'companion_doc': companion_doc,
-            'dependencies': self.get_dependencies(layer_name),
-            'reverse_dependencies': self.get_reverse_dependencies(layer_name)
+            'dependencies': dependencies,
+            'reverse_dependencies': reverse_dependencies
         }
 
     def _get_companion_doc(self, layer_name: str, format: str = 'markdown') -> str:
@@ -792,6 +800,29 @@ class LayerManager:
             return raw_fields
         except Exception:
             return {}
+
+    def _categorise_dependencies(self, layer_name: str) -> dict:
+        """Categorise dependencies as static or dynamic based on environment variable usage."""
+        layer_info = self.get_layer_info(layer_name)
+        if not layer_info:
+            return {'static_dep': [], 'dyn_dep': []}
+
+        static_deps = []
+        dyn_deps = []
+
+        for dep in layer_info.get('depends', []):
+            if '${' in dep and '}' in dep:
+                # Contains env variable substitution (dynamic)
+                dyn_deps.append(dep)
+            else:
+                # static
+                static_deps.append(dep)
+
+        return {
+            'static_dep': static_deps,
+            'dyn_dep': dyn_deps
+        }
+
 
 
 def _generate_layer_boilerplate():

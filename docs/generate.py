@@ -88,7 +88,7 @@ def main():
         str(script_dir.parent / 'image'),
         str(script_dir.parent / 'layer')
     ]
-    manager = LayerManager(layer_paths)
+    manager = LayerManager(layer_paths, doc_mode=True)
 
     # All layer names
     layer_names = sorted(manager.layers.keys())

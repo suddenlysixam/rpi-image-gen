@@ -313,7 +313,7 @@ class EnvLayer:
 
     @classmethod
     def from_metadata_fields(cls, metadata_dict: Dict[str, str],
-                           filepath: str = "") -> Optional['EnvLayer']:
+                           filepath: str = "", doc_mode: bool = False) -> Optional['EnvLayer']:
         """Create an EnvLayer from metadata fields."""
         # Check if this has layer information
         layer_name = metadata_dict.get(XEnv.layer_name(), "")
@@ -329,16 +329,16 @@ class EnvLayer:
 
         # Parse dependency lists
         requires_str = metadata_dict.get(XEnv.layer_requires(), "")
-        requires = cls._parse_dependency_list(requires_str)
+        requires = cls._parse_dependency_list(requires_str, doc_mode)
 
         provides_str = metadata_dict.get(XEnv.layer_provides(), "")
-        provides = cls._parse_dependency_list(provides_str)
+        provides = cls._parse_dependency_list(provides_str, doc_mode)
 
         requires_provider_str = metadata_dict.get(XEnv.layer_requires_provider(), "")
-        requires_provider = cls._parse_dependency_list(requires_provider_str)
+        requires_provider = cls._parse_dependency_list(requires_provider_str, doc_mode)
 
         conflicts_str = metadata_dict.get(XEnv.layer_conflicts(), "")
-        conflicts = cls._parse_dependency_list(conflicts_str)
+        conflicts = cls._parse_dependency_list(conflicts_str, doc_mode)
 
         # Infer config file from filepath if not provided
         import os
@@ -357,7 +357,7 @@ class EnvLayer:
         )
 
     @staticmethod
-    def _parse_dependency_list(depends_str: str) -> List[str]:
+    def _parse_dependency_list(depends_str: str, doc_mode: bool = False) -> List[str]:
         """Parse dependency string into list of layer names/IDs with environment variable evaluation."""
         if not depends_str.strip():
             return []
@@ -369,19 +369,22 @@ class EnvLayer:
             if dep_name:
                 # Find and evaluate environment variables in dependency names
                 if '${' in dep_name:
-                    dep_name = EnvLayer._evaluate_env_variables(dep_name)
+                    dep_name = EnvLayer._evaluate_env_variables(dep_name, doc_mode)
 
                 # Validate dependency name format
                 if re.search(r"\s", dep_name):
                     raise ValueError(
                         f"Invalid dependency token '{dep_name}' - dependencies must be comma-separated without spaces/newlines inside a token")
-                if not re.match(r'^[A-Za-z0-9_-]+$', dep_name):
+                # In doc_mode, allow environment variable placeholders like ${VAR}-suffix
+                if doc_mode and not re.match(r'^[A-Za-z0-9_${}-]+$', dep_name):
+                    raise ValueError(f"Invalid dependency name '{dep_name}' - only alphanum, dash, underscore, and environment variable placeholders allowed")
+                elif not doc_mode and not re.match(r'^[A-Za-z0-9_-]+$', dep_name):
                     raise ValueError(f"Invalid dependency name '{dep_name}' - only alphanum, dash, underscore allowed")
                 deps.append(dep_name)
         return deps
 
     @staticmethod
-    def _evaluate_env_variables(text: str) -> str:
+    def _evaluate_env_variables(text: str, doc_mode: bool = False) -> str:
         """Evaluate ${VAR} environment variable substitutions in text."""
         import re
         import os
@@ -390,7 +393,11 @@ class EnvLayer:
             var_name = match.group(1)
             env_value = os.environ.get(var_name)
             if env_value is None:
-                raise ValueError(f"Environment variable '{var_name}' not found for dependency evaluation")
+                if doc_mode:
+                    # In documentation mode, return the original placeholder
+                    return match.group(0)
+                else:
+                    raise ValueError(f"Environment variable '{var_name}' not found for dependency evaluation")
             return env_value
 
         return re.sub(r'\$\{([A-Za-z_][A-Za-z0-9_]*)\}', replacer, text)
@@ -460,7 +467,7 @@ class MetadataContainer:
 
     @classmethod
     def from_metadata_dict(cls, metadata_dict: Dict[str, str],
-                          filepath: str = "") -> 'MetadataContainer':
+                          filepath: str = "", doc_mode: bool = False) -> 'MetadataContainer':
         """Create a MetadataContainer from a metadata dictionary."""
         container = cls(filepath)
         container.raw_metadata = metadata_dict.copy()
@@ -472,7 +479,7 @@ class MetadataContainer:
         container.var_prefix = container.raw_metadata.get(XEnv.var_prefix(), "").lower()
 
         # Extract layer information
-        container.layer = EnvLayer.from_metadata_fields(container.raw_metadata, filepath)
+        container.layer = EnvLayer.from_metadata_fields(container.raw_metadata, filepath, doc_mode)
 
         # Extract variables
         for key in container.raw_metadata.keys():

@@ -136,15 +136,18 @@
     </div>
     {% endif %}
 
-    {% if layer.dependencies or layer.reverse_dependencies or layer.layer_info.provides or layer.layer_info.provider_requires %}
+    {% if layer.dependencies.static_dep or layer.dependencies.dyn_dep or layer.reverse_dependencies or layer.layer_info.provides or layer.layer_info.provider_requires %}
     <div class="section">
         <h2>Relationships</h2>
-        {% if layer.dependencies %}
+        {% if layer.dependencies.static_dep or layer.dependencies.dyn_dep %}
         <p><strong>Depends on:</strong></p>
         <div class="deps">
-            {% for dep in layer.dependencies %}
+            {%- for dep in layer.dependencies.static_dep %}
             <a href="{{ dep }}.html" class="dep-badge">{{ dep }}</a>
-            {% endfor %}
+            {%- endfor %}
+            {%- for dep in layer.dependencies.dyn_dep %}
+            <span class="dep-badge" style="background: #6c757d; cursor: default;" title="Dynamic dependency (contains environment variables)">{{ dep }}</span>
+            {%- endfor %}
         </div>
         {% endif %}
         {% if layer.reverse_dependencies %}

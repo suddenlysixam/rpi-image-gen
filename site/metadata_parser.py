@@ -152,12 +152,12 @@ def get_supported_fields_list() -> list:
 class Metadata:
     """Metadata parser with modular classes."""
 
-    def __init__(self, filepath):
+    def __init__(self, filepath, doc_mode: bool = False):
         self.filepath = filepath
         raw_metadata = self._load_metadata(filepath)
 
         # Create the container (applies placeholder substitutions internally)
-        self._container = MetadataContainer.from_metadata_dict(raw_metadata, filepath)
+        self._container = MetadataContainer.from_metadata_dict(raw_metadata, filepath, doc_mode)
 
         # Create validation result builder
         self._result_builder = ValidationResultBuilder(filepath)
