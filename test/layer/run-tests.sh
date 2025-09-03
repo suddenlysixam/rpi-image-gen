@@ -578,11 +578,28 @@ run_test "bulk-lint-all-yaml" '
 
     # 2) lint each file
     for f in "${files[@]}"; do
-        if ig metadata --lint "$f" >/dev/null 2>&1; then
-            ((pass++))
+        filename=$(basename "$f")
+
+        # Look for corresponding env file
+        env_file="${IGTOP}/test/layer/env/dist/${filename}.env"
+
+        # Run lint in a subshell with environment variables loaded
+        if [[ -f "$env_file" ]]; then
+            echo "Loading environment from: $env_file"
+            if ( set -a; . "$env_file" && ig metadata --lint "$f" >/dev/null 2>&1 ); then
+                ((pass++))
+            else
+                ((fail++))
+                failed+=("$f")
+            fi
         else
-            ((fail++))
-            failed+=("$f")
+            # No env file, run normally
+            if ig metadata --lint "$f" >/dev/null 2>&1; then
+                ((pass++))
+            else
+                ((fail++))
+                failed+=("$f")
+            fi
         fi
     done
 
