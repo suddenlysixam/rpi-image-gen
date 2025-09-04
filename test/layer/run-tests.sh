@@ -618,4 +618,67 @@ run_test "variable-dependency-order-robust" \
     "Variables should be in correct dependency order and shell-sourceable with strict error checking"
 
 
+print_header "ENVIRONMENT VARIABLE DEPENDENCY TESTS"
+
+# Test environment variable dependency evaluation with proper environment
+cleanup_env
+export ARCH=arm64
+export DISTRO=debian
+run_test "env-var-deps-with-env" \
+    "ig layer --path ${LAYERS} --check test-env-var-deps" \
+    0 \
+    "Environment variable dependencies should resolve when variables are set"
+
+# Test environment variable dependency evaluation without environment variables
+cleanup_env
+unset ARCH DISTRO
+run_test "env-var-deps-missing-env" \
+    "ig layer --path ${LAYERS} --check test-env-var-deps" \
+    1 \
+    "Environment variable dependencies should fail when variables are missing"
+
+# Test build order with environment variable dependencies
+cleanup_env
+export ARCH=arm64
+export DISTRO=debian
+run_test "env-var-deps-build-order" \
+    "ig layer --path ${LAYERS} --build-order test-env-var-deps | grep -E 'test-basic|arm64-toolchain|debian-packages'" \
+    0 \
+    "Build order should include resolved environment variable dependencies"
+
+# Test that static dependencies still work
+cleanup_env
+run_test "static-deps-still-work" \
+    "ig layer --path ${LAYERS} --check test-basic" \
+    0 \
+    "Static dependencies should continue to work without environment variables"
+
+# Test mixed static and environment variable dependencies
+cleanup_env
+export ARCH=arm64
+export DISTRO=debian
+run_test "mixed-deps-static-and-env" \
+    "ig layer --path ${LAYERS} --check test-env-var-deps" \
+    0 \
+    "Mixed static and environment variable dependencies should work together"
+
+# Test environment variable dependency validation
+cleanup_env
+export ARCH=arm64
+export DISTRO=debian
+run_test "env-var-deps-validate" \
+    "ig layer --path ${LAYERS} --validate test-env-var-deps" \
+    0 \
+    "Environment variable dependencies should validate successfully"
+
+# Test environment variable dependency apply-env
+cleanup_env
+export ARCH=arm64
+export DISTRO=debian
+run_test "env-var-deps-apply-env" \
+    "ig layer --path ${LAYERS} --apply-env test-env-var-deps | grep -E '\\[SET\\].*IGconf_envtest_feature'" \
+    0 \
+    "Environment variable dependencies should work with apply-env"
+
+
 print_summary

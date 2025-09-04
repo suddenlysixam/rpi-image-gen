@@ -237,6 +237,49 @@ image:
   name: ${IGconf_device_class}-custom-image
 ----
 
+=== Environment Variable Dependencies
+
+Layer dependencies can use environment variable expansion to create dynamic dependency resolution:
+
+[source,yaml]
+----
+# METABEGIN
+# X-Env-Layer-Name: arch-specific-tools
+# X-Env-Layer-Requires: base-layer,${ARCH}-toolchain,${DISTRO}-packages
+# METAEND
+----
+
+This allows layers to dynamically depend on other layers based on build-time environment variables:
+
+[source,bash]
+----
+# Set environment variables before processing
+export ARCH=arm64
+export DISTRO=debian
+
+# Layer dependencies will be equivalent to:
+# X-Env-Layer-Requires: base-layer, arm64-toolchain, debian-packages
+----
+
+This feature enables dynamic layer selection. For example, one usage could be to use the same layer across different build environments to support toolchain selection based on target architecture. By using variables in the 'parent' layer, dynamic dependency resolution pulls in an architecture specific toolchain 'child' layer.
+
+[NOTE]
+====
+Layer discovery will fail if variables referenced in dependencies are not set in the environment.
+====
+
+[IMPORTANT]
+====
+Environment variable dependencies are evaluated during layer discovery, not during layer variable expansion. This ensures dependencies are resolved before layer processing begins. Because of this, only variables *already present* in the environment can be used in layer dependencies.
+
+For example:
+
+- System or custom environment variables (e.g., `USER`, `ARCH`, `DISTRO`)
+- Configuration file variables or command line overrides
+
+All dependencies are always included, i.e. variable names result in actual layer names at build-time. For example, `${ARCH}-toolchain` always results in a dependency, but the specific layer name depends on the `ARCH` environment variable value.
+====
+
 === Expansion Context
 
 During configuration processing, variables are expanded using:

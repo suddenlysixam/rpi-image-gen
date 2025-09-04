@@ -1,0 +1,20 @@
+# METABEGIN
+# X-Env-Layer-Name: test-env-var-deps
+# X-Env-Layer-Desc: Test layer with environment variable dependencies
+# X-Env-Layer-Version: 1.0.0
+# X-Env-Layer-Category: test
+# X-Env-Layer-Requires: test-basic,${ARCH}-toolchain,${DISTRO}-packages
+# X-Env-VarPrefix: envtest
+# X-Env-Var-feature: enabled
+# X-Env-Var-feature-Desc: Feature enabled by environment variables
+# X-Env-Var-feature-Valid: enabled,disabled
+# METAEND
+---
+
+# This layer tests environment variable evaluation in dependencies
+# It should require:
+# - test-basic (static dependency)
+# - ${ARCH}-toolchain (evaluated from ARCH env var)
+# - ${DISTRO}-packages (evaluated from DISTRO env var)
+
+feature_status: "${IGconf_envtest_feature}"

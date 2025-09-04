@@ -45,7 +45,7 @@ X-Env metadata is contained within comment blocks:
 # X-Env-Layer-Name: This layer's name
 # X-Env-Layer-Description: Brief description of what this layer does
 # X-Env-Layer-Category: device
-# X-Env-Layer-Depends: base-layer,required-layer
+# X-Env-Layer-Requires: base-layer,required-layer
 # X-Env-VarPrefix: device
 # X-Env-Var-hostname: pi-${HOSTNAME_SUFFIX}
 # X-Env-Var-hostname-Description: System hostname for the device
@@ -66,13 +66,13 @@ mmdebstrap:
 - **`X-Env-Layer-Description`**: Human-readable description of the layer's purpose
 - **`X-Env-Layer-Category`**: Categorisation (device, image, etc.)
 - **`X-Env-Layer-Version`**: Version identifier for the layer
-- **`X-Env-Layer-Depends`**: Comma-separated list of required layers
+- **`X-Env-Layer-Requires`**: Comma-separated list of required layers
 - **`X-Env-Layer-Provides`**: Services or capabilities this layer provides
 - **`X-Env-Layer-RequiresProvider`**: Services or capabilities this layer requires
 - **`X-Env-Layer-Conflicts`**: Layers that cannot be used together with this one
 
 ### Dependencies and Providers
-**X-Env-Layer-Depends**  
+**X-Env-Layer-Requires**  
 - Direct layer references - "I need these specific layers"  
 - Concrete dependencies - Must reference actual layer names  
 - Build order enforcement - Dependencies are loaded first and are pull in automatically  

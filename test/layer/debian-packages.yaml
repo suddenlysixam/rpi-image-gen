@@ -1,0 +1,12 @@
+# METABEGIN
+# X-Env-Layer-Name: debian-packages
+# X-Env-Layer-Desc: Debian packages layer for testing
+# X-Env-Layer-Version: 1.0.0
+# X-Env-Layer-Category: test
+# METAEND
+---
+
+# Debian packages configuration
+packages:
+  distro: debian
+  manager: apt

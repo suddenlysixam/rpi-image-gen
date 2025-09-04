@@ -161,6 +161,7 @@
 <ul class="sectlevel2">
 <li><a href="#_environment_variable_expansion">Environment Variable Expansion</a></li>
 <li><a href="#_cross_reference_expansion">Cross-Reference Expansion</a></li>
+<li><a href="#_environment_variable_dependencies">Environment Variable Dependencies</a></li>
 <li><a href="#_expansion_context">Expansion Context</a></li>
 </ul>
 </li>
@@ -545,6 +546,80 @@ ssh:
 image:
   name: ${IGconf_device_class}-custom-image</code></pre>
 </div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_environment_variable_dependencies"><a class="anchor" href="#_environment_variable_dependencies"></a><a class="link" href="#_environment_variable_dependencies">Environment Variable Dependencies</a></h3>
+<div class="paragraph">
+<p>Layer dependencies can use environment variable expansion to create dynamic dependency resolution:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-yaml" data-lang="yaml"># METABEGIN
+# X-Env-Layer-Name: arch-specific-tools
+# X-Env-Layer-Requires: base-layer,${ARCH}-toolchain,${DISTRO}-packages
+# METAEND</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This allows layers to dynamically depend on other layers based on build-time environment variables:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-bash" data-lang="bash"># Set environment variables before processing
+export ARCH=arm64
+export DISTRO=debian
+
+# Layer dependencies will be equivalent to:
+# X-Env-Layer-Requires: base-layer, arm64-toolchain, debian-packages</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This feature enables dynamic layer selection. For example, one usage could be to use the same layer across different build environments to support toolchain selection based on target architecture. By using variables in the 'parent' layer, dynamic dependency resolution pulls in an architecture specific toolchain 'child' layer.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>Layer discovery will fail if variables referenced in dependencies are not set in the environment.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Important</div>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>Environment variable dependencies are evaluated during layer discovery, not during layer variable expansion. This ensures dependencies are resolved before layer processing begins. Because of this, only variables <strong>already present</strong> in the environment can be used in layer dependencies.</p>
+</div>
+<div class="paragraph">
+<p>For example:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>System or custom environment variables (e.g., <code>USER</code>, <code>ARCH</code>, <code>DISTRO</code>)</p>
+</li>
+<li>
+<p>Configuration file variables or command line overrides</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>All dependencies are always included, i.e. variable names result in actual layer names at build-time. For example, <code>${ARCH}-toolchain</code> always results in a dependency, but the specific layer name depends on the <code>ARCH</code> environment variable value.</p>
+</div>
+</td>
+</tr>
+</table>
 </div>
 </div>
 <div class="sect2">

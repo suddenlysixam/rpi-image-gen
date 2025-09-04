@@ -358,7 +358,7 @@ class EnvLayer:
 
     @staticmethod
     def _parse_dependency_list(depends_str: str) -> List[str]:
-        """Parse dependency string into list of layer names/IDs."""
+        """Parse dependency string into list of layer names/IDs with environment variable evaluation."""
         if not depends_str.strip():
             return []
 
@@ -367,6 +367,10 @@ class EnvLayer:
         for dep in depends_str.split(','):
             dep_name = dep.strip()
             if dep_name:
+                # Find and evaluate environment variables in dependency names
+                if '${' in dep_name:
+                    dep_name = EnvLayer._evaluate_env_variables(dep_name)
+
                 # Validate dependency name format
                 if re.search(r"\s", dep_name):
                     raise ValueError(
@@ -375,6 +379,21 @@ class EnvLayer:
                     raise ValueError(f"Invalid dependency name '{dep_name}' - only alphanum, dash, underscore allowed")
                 deps.append(dep_name)
         return deps
+
+    @staticmethod
+    def _evaluate_env_variables(text: str) -> str:
+        """Evaluate ${VAR} environment variable substitutions in text."""
+        import re
+        import os
+
+        def replacer(match):
+            var_name = match.group(1)
+            env_value = os.environ.get(var_name)
+            if env_value is None:
+                raise ValueError(f"Environment variable '{var_name}' not found for dependency evaluation")
+            return env_value
+
+        return re.sub(r'\$\{([A-Za-z_][A-Za-z0-9_]*)\}', replacer, text)
 
     @classmethod
     def _validate_layer_fields(cls, metadata_dict: Dict[str, str], filepath: str = "") -> None:

@@ -148,7 +148,7 @@
 <li><a href="#_layer_attributes">Layer Attributes</a></li>
 <li><a href="#_dependencies_and_providers">Dependencies and Providers</a>
 <ul class="sectlevel3">
-<li><a href="#_x_env_layer_depends">X-Env-Layer-Depends</a></li>
+<li><a href="#_x_env_layer_requires">X-Env-Layer-Requires</a></li>
 <li><a href="#_x_env_layer_provides_x_env_layer_requiresprovider">X-Env-Layer-Provides / X-Env-Layer-RequiresProvider</a></li>
 </ul>
 </li>
@@ -286,7 +286,7 @@
 # X-Env-Layer-Name: This layer's name
 # X-Env-Layer-Description: Brief description of what this layer does
 # X-Env-Layer-Category: device
-# X-Env-Layer-Depends: base-layer,required-layer
+# X-Env-Layer-Requires: base-layer,required-layer
 # X-Env-VarPrefix: device
 # X-Env-Var-hostname: pi-${HOSTNAME_SUFFIX}
 # X-Env-Var-hostname-Description: System hostname for the device
@@ -318,7 +318,7 @@ mmdebstrap:
 <p><code>X-Env-Layer-Version</code>: Version identifier for the layer</p>
 </div>
 <div class="paragraph">
-<p><code>X-Env-Layer-Depends</code>: Comma-separated list of required layers</p>
+<p><code>X-Env-Layer-Requires</code>: Comma-separated list of required layers</p>
 </div>
 <div class="paragraph">
 <p><code>X-Env-Layer-Provides</code>: Services or capabilities this layer provides</p>
@@ -333,7 +333,7 @@ mmdebstrap:
 <div class="sect2">
 <h3 id="_dependencies_and_providers"><a class="anchor" href="#_dependencies_and_providers"></a><a class="link" href="#_dependencies_and_providers">Dependencies and Providers</a></h3>
 <div class="sect3">
-<h4 id="_x_env_layer_depends"><a class="anchor" href="#_x_env_layer_depends"></a><a class="link" href="#_x_env_layer_depends">X-Env-Layer-Depends</a></h4>
+<h4 id="_x_env_layer_requires"><a class="anchor" href="#_x_env_layer_requires"></a><a class="link" href="#_x_env_layer_requires">X-Env-Layer-Requires</a></h4>
 <div class="ulist">
 <ul>
 <li>
@@ -343,12 +343,56 @@ mmdebstrap:
 <p><strong>Concrete dependencies</strong>: Must reference actual layer names</p>
 </li>
 <li>
+<p><strong>Environment variable expansion</strong>: Supports <code>${VAR}</code> syntax for dynamic dependencies</p>
+</li>
+<li>
 <p><strong>Build order enforcement</strong>: Dependencies are loaded first and are pull in automatically</p>
 </li>
 <li>
 <p><strong>Example</strong>: A device layer depends on a device base-layer because the base-layer provides mandatory settings inherited by the device layer.</p>
 </li>
 </ul>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-yaml" data-lang="yaml"># METABEGIN
+# X-Env-Layer-Name: conditional-layer
+# X-Env-Layer-Requires: base-layer,${ARCH}-toolchain,${DISTRO}-packages
+# METAEND</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Environment variables in dependencies are evaluated during layer discovery using the current environment context. If a required environment variable is not set, layer discovery will fail.</p>
+</div>
+<div class="paragraph">
+<p>This enables dynamic layer dependency resolution based on build-time variables such as:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Architecture</strong>: <code>${ARCH}-toolchain</code> resolves to <code>arm64-toolchain</code> when <code>ARCH=arm64</code></p>
+</li>
+<li>
+<p><strong>Distribution</strong>: <code>${DISTRO}-packages</code> resolves to <code>debian-packages</code> when <code>DISTRO=debian</code></p>
+</li>
+<li>
+<p><strong>Build variant</strong>: <code>${VARIANT}-config</code> for different build configurations</p>
+</li>
+</ul>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Important</div>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>Only variables present in the environment can be used in dependencies.</p>
+</div>
+</td>
+</tr>
+</table>
 </div>
 </div>
 <div class="sect3">
@@ -371,6 +415,20 @@ mmdebstrap:
 <p><strong>Example</strong>: A layer requires a device provider, which could be satisfied by different device layers</p>
 </li>
 </ul>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Important</div>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>Unlike dependencies, environment variables are not supported when evaluating providers.</p>
+</div>
+</td>
+</tr>
+</table>
 </div>
 </div>
 </div>

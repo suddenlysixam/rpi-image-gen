@@ -50,7 +50,7 @@ X-Env metadata is contained within comment blocks:
 # X-Env-Layer-Name: This layer's name
 # X-Env-Layer-Description: Brief description of what this layer does
 # X-Env-Layer-Category: device
-# X-Env-Layer-Depends: base-layer,required-layer
+# X-Env-Layer-Requires: base-layer,required-layer
 # X-Env-VarPrefix: device
 # X-Env-Var-hostname: pi-${HOSTNAME_SUFFIX}
 # X-Env-Var-hostname-Description: System hostname for the device
@@ -75,7 +75,7 @@ mmdebstrap:
 
 `X-Env-Layer-Version`: Version identifier for the layer
 
-`X-Env-Layer-Depends`: Comma-separated list of required layers
+`X-Env-Layer-Requires`: Comma-separated list of required layers
 
 `X-Env-Layer-Provides`: Services or capabilities this layer provides
 
@@ -84,12 +84,35 @@ mmdebstrap:
 `X-Env-Layer-Conflicts`: Layers that cannot be used together with this one
 
 === Dependencies and Providers
-==== X-Env-Layer-Depends
+
+==== X-Env-Layer-Requires
 
 - **Direct layer references**: "I need these specific layers"
 - **Concrete dependencies**: Must reference actual layer names
+- **Environment variable expansion**: Supports `${VAR}` syntax for dynamic dependencies
 - **Build order enforcement**: Dependencies are loaded first and are pull in automatically
 - **Example**: A device layer depends on a device base-layer because the base-layer provides mandatory settings inherited by the device layer.
+
+[source,yaml]
+----
+# METABEGIN
+# X-Env-Layer-Name: conditional-layer
+# X-Env-Layer-Requires: base-layer,${ARCH}-toolchain,${DISTRO}-packages
+# METAEND
+----
+
+Environment variables in dependencies are evaluated during layer discovery using the current environment context. If a required environment variable is not set, layer discovery will fail.
+
+This enables dynamic layer dependency resolution based on build-time variables such as:
+
+- **Architecture**: `${ARCH}-toolchain` resolves to `arm64-toolchain` when `ARCH=arm64`
+- **Distribution**: `${DISTRO}-packages` resolves to `debian-packages` when `DISTRO=debian`
+- **Build variant**: `${VARIANT}-config` for different build configurations
+
+[IMPORTANT]
+====
+Only variables present in the environment can be used in dependencies.
+====
 
 ==== X-Env-Layer-Provides / X-Env-Layer-RequiresProvider
 
@@ -98,6 +121,11 @@ mmdebstrap:
 - **Flexible implementation**: Any layer providing the capability can fulfill it
 - **Relationships**: If a provider is required, only one can exist in the overall configuration
 - **Example**: A layer requires a device provider, which could be satisfied by different device layers
+
+[IMPORTANT]
+====
+Unlike dependencies, environment variables are not supported when evaluating providers.
+====
 
 === Environment Variables
 `X-Env-VarPrefix`: Prefix for all variables declared by this layer (e.g., `device`)

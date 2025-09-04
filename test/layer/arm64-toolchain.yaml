@@ -1,0 +1,12 @@
+# METABEGIN
+# X-Env-Layer-Name: arm64-toolchain
+# X-Env-Layer-Desc: ARM64 toolchain layer for testing
+# X-Env-Layer-Version: 1.0.0
+# X-Env-Layer-Category: test
+# METAEND
+---
+
+# ARM64 toolchain configuration
+toolchain:
+  arch: arm64
+  compiler: gcc-aarch64-linux-gnu
