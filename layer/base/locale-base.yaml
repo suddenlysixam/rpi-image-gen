@@ -1,0 +1,34 @@
+# METABEGIN
+# X-Env-Layer-Name: locale-base
+# X-Env-Layer-Category: foundation
+# X-Env-Layer-Desc: Default locale settings
+# X-Env-Layer-Version: 1.0.0
+#
+# X-Env-VarPrefix: locale
+#
+# X-Env-Var-default: en_GB.UTF-8
+# X-Env-Var-default-Desc: The default system locale.
+# X-Env-Var-default-Required: n
+# X-Env-Var-default-Valid: string
+# X-Env-Var-default-Set: y
+#
+# X-Env-Var-keyboard_keymap: gb
+# X-Env-Var-keyboard_keymap-Desc: The default system keyboard map.
+# X-Env-Var-keyboard_keymap-Required: n
+# X-Env-Var-keyboard_keymap-Valid: string
+# X-Env-Var-keyboard_keymap-Set: y
+#
+# X-Env-Var-keyboard_layout: English (UK)
+# X-Env-Var-keyboard_layout-Desc: The default system keyboard layout. See
+#  debconf-show keyboard-configuration keyboard-configuration/xkb-keymap
+# X-Env-Var-keyboard_layout-Required: n
+# X-Env-Var-keyboard_layout-Valid: string
+# X-Env-Var-keyboard_layout-Set: y
+#
+# X-Env-Var-timezone: Europe/London
+# X-Env-Var-timezone-Desc: The default system timezone defined by IANA.
+# X-Env-Var-timezone-Required: n
+# X-Env-Var-timezone-Valid: string
+# X-Env-Var-timezone-Set: y
+# METAEND
+---
