@@ -1,0 +1,14 @@
+# METABEGIN
+# X-Env-Layer-Name: rpi-linux-2712
+# X-Env-Layer-Category: kernel
+# X-Env-Layer-Desc: Raspberry Pi 2712 kernel
+# X-Env-Layer-Version: 1.0.0
+# METAEND
+---
+env:
+  INITRD: "No"
+mmdebstrap:
+  architectures:
+    - arm64
+  packages:
+    - linux-image-rpi-2712

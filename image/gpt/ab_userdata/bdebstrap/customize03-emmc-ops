@@ -5,7 +5,7 @@ igconf isy image_ptable_protect || exit 0
 
 chroot $1 apt install mmc-utils
 
-# meta/ab-initramfs has already installed initramfs-tools
+# layer/ab-initramfs has already installed initramfs-tools
 cat <<- 'EOF' > $1/etc/initramfs-tools/hooks/ab-install-files
 #!/bin/sh
 case $1 in

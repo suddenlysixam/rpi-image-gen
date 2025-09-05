@@ -1,0 +1,14 @@
+# METABEGIN
+# X-Env-Layer-Name: test-placeholder
+# X-Env-Layer-Desc: Layer to test placeholder substitution
+# X-Env-Layer-Version: 1.0.0
+# X-Env-Layer-Category: test
+#
+#  Environment Variables
+# X-Env-VarPrefix: placeholder
+#
+# X-Env-Var-path: ${DIRECTORY}
+# X-Env-Var-path-Desc: Should resolve to directory of this file
+# X-Env-Var-path-Set: y
+# METAEND
+--- 

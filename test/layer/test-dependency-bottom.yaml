@@ -1,0 +1,18 @@
+# METABEGIN
+# X-Env-Layer-Name: test-dependency-bottom
+# X-Env-Layer-Desc: Bottom layer with foundational variables for dependency order testing
+# X-Env-Layer-Version: 1.0.0
+# X-Env-Layer-Category: test
+#
+#  Environment Variables
+# X-Env-VarPrefix: dep
+# X-Env-Var-Base: /test/base/path
+# X-Env-Var-Base-Set: immediate
+# X-Env-Var-Base-Desc: Base path for dependency test
+# X-Env-Var-Component: core
+# X-Env-Var-Component-Set: lazy  
+# X-Env-Var-Component-Desc: Component name for dependency test
+# METAEND
+
+config:
+  bottom_layer: true 

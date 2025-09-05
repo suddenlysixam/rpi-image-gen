@@ -1,0 +1,16 @@
+# METABEGIN
+# X-Env-Layer-Name: test-force-overwrite
+# X-Env-Layer-Desc: Test layer with Set: force behaviour
+# X-Env-Layer-Version: 1.0.0
+# X-Env-Layer-Category: test
+#
+#  Environment Variables
+# X-Env-VarPrefix: force
+#
+# X-Env-Var-color: blue
+# X-Env-Var-color-Desc: Preferred UI colour
+# X-Env-Var-color-Set: force
+# METAEND
+
+config:
+  color: "${IGconf_force_color}" 

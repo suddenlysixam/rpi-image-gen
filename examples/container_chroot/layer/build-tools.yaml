@@ -1,0 +1,26 @@
+# METABEGIN
+# X-Env-Layer-Name: build-tools
+# X-Env-Layer-Category: example
+# X-Env-Layer-Desc: Native development tools to support pkg download and build
+#  using autotools in a bash shell.
+# METAEND
+---
+mmdebstrap:
+  mode: auto
+  variant: minbase
+  suite: trixie
+  mirrors:
+    - deb http://deb.debian.org/debian trixie main contrib non-free non-free-firmware
+    - deb http://deb.debian.org/debian-security trixie-security main contrib non-free non-free-firmware
+    - deb http://deb.debian.org/debian trixie-updates main contrib non-free non-free-firmware
+  packages:
+    - build-essential
+    - gcc
+    - make
+    - autoconf
+    - automake
+    - libtool
+    - pkg-config
+    - wget
+    - bash
+    - ca-certificates

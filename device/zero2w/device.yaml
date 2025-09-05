@@ -1,0 +1,29 @@
+# METABEGIN
+# X-Env-Layer-Name: rpizero2w
+# X-Env-Layer-Category: device
+# X-Env-Layer-Desc: Raspberry Pi Zero 2 W specific device layer
+# X-Env-Layer-Version: 1.0.0
+# X-Env-Layer-Requires: rpi-generic64
+# X-Env-Layer-Provides: device
+#
+# X-Env-VarPrefix: device
+#
+# X-Env-Var-class: zero2w
+# X-Env-Var-class-Desc: Device class
+# X-Env-Var-class-Required: n
+# X-Env-Var-class-Valid: keywords:zero2w
+# X-Env-Var-class-Set: y
+#
+# X-Env-Var-storage_type: sd
+# X-Env-Var-storage_type-Desc: Storage media type.
+# X-Env-Var-storage_type-Required: n
+# X-Env-Var-storage_type-Valid: keywords:sd
+# X-Env-Var-storage_type-Set: y
+#
+# X-Env-Var-assetdir: ${DIRECTORY}
+# X-Env-Var-assetdir-Desc: Device specific asset directory
+# X-Env-Var-assetdir-Required: n
+# X-Env-Var-assetdir-Valid: string
+# X-Env-Var-assetdir-Set: y
+# METAEND
+---

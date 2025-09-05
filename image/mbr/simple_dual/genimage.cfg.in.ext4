@@ -20,6 +20,7 @@ image <IMAGE_NAME>.<IMAGE_SUFFIX> {
    hdimage {
       align = 8M
       partition-table-type = "mbr"
+      fill = true
    }
 
    partition boot {

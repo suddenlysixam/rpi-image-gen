@@ -1,0 +1,67 @@
+# METABEGIN
+# X-Env-Layer-Name: openssh-server
+# X-Env-Layer-Desc: OpenSSH server daemon and local user SSH key setup.
+# X-Env-Layer-Version: 1.0.0
+# X-Env-Layer-Requires: rpi-user-credentials
+#
+# X-Env-VarRequires: IGconf_device_user1
+# X-Env-VarRequires-Valid: string
+#
+# X-Env-VarPrefix: ssh
+#
+# X-Env-Var-pubkey_user1:
+# X-Env-Var-pubkey_user1-Desc: Controls
+#  /home/${IGconf_device_user1}/.ssh/authorized_keys
+#  By default, authorized_keys will be created empty. If set to a valid file
+#  path, the contents of the file is used to populate authorized_keys. If set to
+#  a non-empty string that's not a valid file path, the contents of the variable
+#  is used to populate authorized_keys.
+#  Since it's possible to pass variables via the command line, one way to
+#  specify this in build scripts could be as follows:
+#  IGconf_ssh_pubkey_user1=$(< /path/to/.ssh/id_rsa.pub)
+# X-Env-Var-pubkey_user1-Required: n
+# X-Env-Var-pubkey_user1-Valid: string-or-empty
+# X-Env-Var-pubkey_user1-Set: y
+#
+# X-Env-Var-pubkey_only: n
+# X-Env-Var-pubkey_only-Desc: Applies sshd settings via /etc/ssh/sshd_config.d/
+#  If n, default sshd settings are in place which means password authentication
+#  is enabled.
+#  If y, only SSH public key authentication is enabled. Challenge Response,
+#  Password and Kerberos authentication are disabled. If alternative sshd
+#  settings are required, consider using a device or image rootfs-overlay, or
+#  custom bdebstrap hook.
+# X-Env-Var-pubkey_only-Required: n
+# X-Env-Var-pubkey_only-Valid: bool
+# X-Env-Var-pubkey_only-Set: y
+# METAEND
+---
+mmdebstrap:
+  packages:
+    - openssh-server
+  customize-hooks:
+    - uchroot $1 'mkdir -m 0700 -p ${HOME}/.ssh'
+    - uchroot $1 'install -m 0600 /dev/null ${HOME}/.ssh/authorized_keys'
+    - |-
+      set -u
+      if [ -f "$IGconf_ssh_pubkey_user1" ] ; then
+         cat "$IGconf_ssh_pubkey_user1" | uchroot $1 'cat > ${HOME}/.ssh/authorized_keys'
+      elif [ -n "${IGconf_ssh_pubkey_user1:-}" ]; then
+         uchroot $1 'echo "$IGconf_ssh_pubkey_user1" > ${HOME}/.ssh/authorized_keys'
+      else
+         echo "No SSH keys installed" >&2
+      fi
+    - |-
+      if igconf isy ssh_pubkey_only ; then
+         mkdir -p $1/etc/ssh/sshd_config.d
+         cat <<- 'EOCHROOT' > $1/etc/ssh/sshd_config.d/01pubkey-only.conf
+      PermitRootLogin no
+      ChallengeResponseAuthentication no
+      PasswordAuthentication no
+      GSSAPIAuthentication no
+      UsePAM yes
+      PubkeyAuthentication yes
+      AuthenticationMethods publickey
+      EOCHROOT
+      fi
+    - $BDEBSTRAP_HOOKS/enable-units "$1" ssh

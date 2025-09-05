@@ -1,0 +1,8 @@
+= Raspberry Pi 5 Device Configuration
+
+== Compatibility
+
+This layer installs the 2712 kernel which has a 16kB page size. Some libs and apps are/were known to have trouble executing on such a system. Depending on your needs, you may require running the v8 kernel (kernel8) on your device instead.
+
+== References
+https://www.raspberrypi.com/documentation/computers/linux_kernel.html[Raspberry Pi linux kernel documentation,window=_blank]

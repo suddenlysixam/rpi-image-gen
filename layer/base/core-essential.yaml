@@ -1,0 +1,10 @@
+# METABEGIN
+# X-Env-Layer-Name: essential
+# X-Env-Layer-Category: foundation
+# X-Env-Layer-Desc:  Serves as the mandatory foundation for all rpi-image-gen
+#  builds, and is automatically included in every configuration to provide
+#  essential build infrastructure.
+# X-Env-Layer-Version: 1.0.0
+# X-Env-Layer-Requires: artefact-base,sys-build-base,target-config
+# METAEND
+---

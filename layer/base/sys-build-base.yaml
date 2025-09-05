@@ -1,0 +1,63 @@
+# METABEGIN
+# X-Env-Layer-Name: sys-build-base
+# X-Env-Layer-Category: build
+# X-Env-Layer-Desc: Build environment configuration including workspace, apt
+#  settings, and system foundation defaults.
+# X-Env-Layer-Version: 1.0.0
+#
+# X-Env-VarPrefix: sys
+#
+# X-Env-Var-apt_proxy:
+# X-Env-Var-apt_proxy-Desc: APT Proxy URL
+#  If you require the use of an APT HTTP proxy, set it using this. The proxy
+#  setting will not be included in the image, making it safe to use an
+#  `apt-cacher` or similar package for development.
+# X-Env-Var-apt_proxy-Required: n
+# X-Env-Var-apt_proxy-Valid: regex:(https?|ftp)://[^:/\s]+:\d+[^\s]*
+# X-Env-Var-apt_proxy-Set: n
+#
+# X-Env-Var-apt_get_purge: y
+# X-Env-Var-apt_get_purge-Desc: Purge APT operations in the chroot by default.
+#  Refer to apt-get(8).
+# X-Env-Var-apt_get_purge-Required: n
+# X-Env-Var-apt_get_purge-Valid: bool
+# X-Env-Var-apt_get_purge-Set: y
+#
+# X-Env-Var-apt_keydir:
+# X-Env-Var-apt_keydir-Desc: APT key directory
+#  If a particular collection of keys are required for bdebstrap to download
+#  packages from the mirror(s) provided, set the directory containing them here.
+#  This will be passed to bdebstrap via aptopt Dir::Etc::TrustedParts. If not
+#  specified, rpi-image-gen sets this directory and assembles the keys it
+#  requires into it.
+#  This particular setting of Dir::Etc::TrustedParts will not be included in the
+#  image. If using this option, please make sure to install your key(s) into the
+#  chroot explicitly if a key contained in this directory points to a location
+#  that is not otherwise populated during chroot creation (for example by
+#  installing a keyring package).
+# X-Env-Var-apt_keydir-Required: n
+# X-Env-Var-apt_keydir-Valid: string-or-empty
+# X-Env-Var-apt_keydir-Set: y
+#
+# X-Env-Var-apt_cachedir:
+# X-Env-Var-apt_cachedir-Desc: Cache directory for APT operations.
+#  Use this to specify the root directory APT uses when downloading packages.
+#  APT will re-use packages from this directory where possible, meaning that
+#  usage of this directory can decrease build time.
+#  By default, the cache dir resides in the chroot and is cleaned up
+#  automatically upon build completion.
+#  This is currently an experimental feature requiring some manual involvement.
+# X-Env-Var-apt_cachedir-Required: n
+# X-Env-Var-apt_cachedir-Valid: string-or-empty
+# X-Env-Var-apt_cachedir-Set: force
+#
+# X-Env-Var-workroot: $(realpath --canonicalize-missing ./work)
+# X-Env-Var-workroot-Desc: The root work directory. Depending on the system(s)
+#  being built, this directory can amount to a substantial amount of consumed
+#  disk space.
+# X-Env-Var-workroot-Required: n
+# X-Env-Var-workroot-Valid: string
+# X-Env-Var-workroot-Set: y
+#
+# METAEND
+---

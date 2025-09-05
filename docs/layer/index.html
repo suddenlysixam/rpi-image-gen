@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Layer Documentation Index - rpi-image-gen</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 1200px; margin: 0 auto; padding: 20px; line-height: 1.6; }
+        .header { margin-bottom: 40px; }
+        .layer-list { margin-bottom: 30px; }
+        .layer-item { margin-bottom: 8px; }
+        .layer-item a { text-decoration: none; color: #007acc; font-weight: 500; }
+        .layer-item a:hover { text-decoration: underline; }
+        .layer-desc { color: #666; margin-left: 10px; }
+        h3 { color: #000; border-bottom: 1px solid #eee; padding-bottom: 5px; margin-top: 30px; margin-bottom: 15px; }
+        .back-link { margin-bottom: 20px; }
+        .back-link a { text-decoration: none; color: #007acc; }
+        .back-link a:hover { text-decoration: underline; }
+
+        /* Main content headers styling */
+        h1, h2, h3, h4, h5, h6 { color: #333; margin-top: 20px; margin-bottom: 10px; }
+        h1 a, h2 a, h3 a, h4 a, h5 a, h6 a { color: #333; text-decoration: none; }
+
+        /* AsciiDoc table styling */
+        .tableblock { width: 100%; border-collapse: collapse; margin: 1.25em 0; }
+        .tableblock.frame-all { border: 1px solid #dedede; }
+        .tableblock.grid-all th, .tableblock.grid-all td { border: 1px solid #dedede; }
+        .tableblock.stretch { width: 100%; }
+        .tableblock th, .tableblock td { padding: 0.5625em 0.625em; text-align: left; vertical-align: top; }
+        .tableblock th { background: #f8f9fa; font-weight: 600; color: rgba(0,0,0,.8); }
+        .tableblock tbody tr:nth-child(even) { background: #f8f8f7; }
+        .tableblock p { margin: 0; line-height: 1.6; }
+        .tableblock .halign-left { text-align: left; }
+        .tableblock .halign-center { text-align: center; }
+        .tableblock .halign-right { text-align: right; }
+        .tableblock .valign-top { vertical-align: top; }
+        .tableblock .valign-middle { vertical-align: middle; }
+        .tableblock .valign-bottom { vertical-align: bottom; }
+
+        /* Simple code block styling */
+        .listingblock pre {
+            background: #f8f9fa;
+            border: 1px solid #ddd;
+            padding: 12px;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-family: monospace;
+            font-size: 14px;
+        }
+        .listingblock pre code {
+            background: none;
+            border: none;
+            padding: 0;
+        }
+
+        /* AsciiDoc admonition blocks (NOTE, TIP, WARNING, etc.) */
+        .admonitionblock {
+            margin: 1.5em 0;
+            padding: 0.4em 0.6em;
+            border-left: 4px solid;
+            background: #f8f9fa;
+            border-radius: 0 4px 4px 0;
+        }
+
+        .admonitionblock .title {
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 0.85em;
+            margin-bottom: 0.25em;
+            letter-spacing: 0.5px;
+        }
+
+        .admonitionblock .content {
+            margin: 0;
+        }
+
+        /* Reduce spacing for paragraphs inside admonitions */
+        .admonitionblock p {
+            margin: 0.25em 0;
+        }
+
+        .admonitionblock p:first-child {
+            margin-top: 0;
+        }
+
+        .admonitionblock p:last-child {
+            margin-bottom: 0;
+        }
+
+        /* Specific admonition types */
+        .admonitionblock.note {
+            border-color: #17a2b8;
+            background: #d1ecf1;
+        }
+
+        .admonitionblock.note .title {
+            color: #0c5460;
+        }
+
+        .admonitionblock.tip {
+            border-color: #28a745;
+            background: #d4edda;
+        }
+
+        .admonitionblock.tip .title {
+            color: #155724;
+        }
+
+        .admonitionblock.important {
+            border-color: #ffc107;
+            background: #fff3cd;
+        }
+
+        .admonitionblock.important .title {
+            color: #856404;
+        }
+
+        .admonitionblock.warning,
+        .admonitionblock.caution {
+            border-color: #dc3545;
+            background: #f8d7da;
+        }
+
+        .admonitionblock.warning .title,
+        .admonitionblock.caution .title {
+            color: #721c24;
+        }
+    </style>
+</head>
+<body>
+    
+
+    <div class="content">
+        <div id="toc" class="toc">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#_what_are_layers">What are Layers?</a></li>
+<li><a href="#_how_are_layers_used">How are Layers Used?</a>
+<ul class="sectlevel2">
+<li><a href="#_layer_structure">Layer Structure</a></li>
+<li><a href="#_build_process">Build Process</a></li>
+<li><a href="#_key_benefits_of_layers">Key Benefits of Layers</a></li>
+</ul>
+</li>
+<li><a href="#_x_env_metadata">X-Env Metadata</a>
+<ul class="sectlevel2">
+<li><a href="#_metadata_structure">Metadata Structure</a></li>
+<li><a href="#_layer_attributes">Layer Attributes</a></li>
+<li><a href="#_dependencies_and_providers">Dependencies and Providers</a>
+<ul class="sectlevel3">
+<li><a href="#_x_env_layer_requires">X-Env-Layer-Requires</a></li>
+<li><a href="#_x_env_layer_provides_x_env_layer_requiresprovider">X-Env-Layer-Provides / X-Env-Layer-RequiresProvider</a></li>
+</ul>
+</li>
+<li><a href="#_environment_variables">Environment Variables</a></li>
+<li><a href="#_variable_naming_convention">Variable Naming Convention</a></li>
+<li><a href="#_placeholder_support">Placeholder Support</a></li>
+</ul>
+</li>
+<li><a href="#_configuration_variables">Configuration Variables</a></li>
+<li><a href="#_device_and_image_layers">Device and Image Layers</a></li>
+<li><a href="#_specifying_layers">Specifying Layers</a></li>
+<li><a href="#_how_to_use_this_documentation">How to Use This Documentation</a></li>
+<li><a href="#_getting_started">Getting Started</a></li>
+</ul>
+</div>
+<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p><a href="../index.html">← Back to Main Documentation</a></p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_what_are_layers"><a class="anchor" href="#_what_are_layers"></a><a class="link" href="#_what_are_layers">What are Layers?</a></h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Layers are modular, composable components that define specific aspects of your Raspberry Pi build. Each layer encapsulates a specific and focussed piece of functionality and can declare dependencies on other layers, creating a flexible build system. Layers have been loosely grouped into categories with a super-set being as follows.</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Device Layers</strong>: Hardware-specific configuration for a particular device type. For example, may only install firmware applicable to Pi5.</p>
+</li>
+<li>
+<p><strong>Image Layers</strong>: Image-specific configuration to produce an image with a defined footprint / on-disk layout. For example, an image capable of supporting AB booting for OS and system slot redundancy.</p>
+</li>
+<li>
+<p><strong>General Layers</strong>: Reusable configuration snippets, utilities, groups of related functionality, packages and/or scripts. For example, local system user account creation, basic networking, etc.</p>
+</li>
+<li>
+<p><strong>Suites</strong>: A layer providing a particular baseline of device functionality. Typically, these type of 'profile' layers are agnostic to the underlying device. Using a suite allows a single layer to recursively pull in other layers to provide a common base of functionality such as a desktop or SDK, or a minimal set of userland components providing apt and networking, container utilities, etc.</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_how_are_layers_used"><a class="anchor" href="#_how_are_layers_used"></a><a class="link" href="#_how_are_layers_used">How are Layers Used?</a></h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>rpi-image-gen uses custom metadata in a layer to declare variables and construct a deterministic layer build order then passes this to <strong>bdebstrap</strong> (<a href="https://github.com/bdrung/bdebstrap" class="bare">https://github.com/bdrung/bdebstrap</a>) which aggregates and merges everything together into a configuration. That configuration is handed off to <strong>mmdebstrap</strong> (<a href="https://gitlab.mister-muffin.de/josch/mmdebstrap" class="bare">https://gitlab.mister-muffin.de/josch/mmdebstrap</a>) which is the engine that drives creation of the filesystem. By using bdebstrap, layers provide a structured way to configure and extend mmdebstrap&#8217;s capabilities:</p>
+</div>
+<div class="sect2">
+<h3 id="_layer_structure"><a class="anchor" href="#_layer_structure"></a><a class="link" href="#_layer_structure">Layer Structure</a></h3>
+<div class="paragraph">
+<p>Each layer is a YAML file containing:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>X-Env Metadata</strong>: <em>Mandatory.</em> Layer attributes, variable declarations, dependencies</p>
+</li>
+<li>
+<p><strong>mmdebstrap configuration</strong>: <em>Optional.</em> Package lists, repository mirrors, scripts</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_build_process"><a class="anchor" href="#_build_process"></a><a class="link" href="#_build_process">Build Process</a></h3>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p><strong>Parameter Assembly</strong>: Config file, cmdline and CLI establish desired layers, environment variables and search paths</p>
+</li>
+<li>
+<p><strong>Layer Resolution</strong>: Layer dependencies determine build order</p>
+</li>
+<li>
+<p><strong>Variable Expansion</strong>: Environment variables are validated and expanded using defined rules</p>
+</li>
+<li>
+<p><strong>Configuration Merging</strong>: Layer are merged</p>
+</li>
+<li>
+<p><strong>mmdebstrap Execution</strong>: The merged configuration drives mmdebstrap to create the filesystem</p>
+</li>
+<li>
+<p><strong>Processing</strong>: Additional layer-specific scripts are executed at defined points, eg setup, essential, customize, cleanup, etc</p>
+</li>
+<li>
+<p><strong>Post-Processing</strong>: filesystem overlays, SBOM generation, image creation, hooks</p>
+</li>
+</ol>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_key_benefits_of_layers"><a class="anchor" href="#_key_benefits_of_layers"></a><a class="link" href="#_key_benefits_of_layers">Key Benefits of Layers</a></h3>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Modularity</strong>: Mix and match layers to create custom images</p>
+</li>
+<li>
+<p><strong>Reusability</strong>: Share common configurations across different builds</p>
+</li>
+<li>
+<p><strong>Validation</strong>: Built-in variable validation prevents configuration errors</p>
+</li>
+<li>
+<p><strong>Dependencies</strong>: Automatic resolution of layer prerequisites</p>
+</li>
+<li>
+<p><strong>Customisation</strong>: Override defaults through environment variables set via the config file</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_x_env_metadata"><a class="anchor" href="#_x_env_metadata"></a><a class="link" href="#_x_env_metadata">X-Env Metadata</a></h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Layers use a custom X-Env metadata schema that strictly follows the DEB822 format (<a href="https://repolib.readthedocs.io/en/latest/deb822-format.html" class="bare">https://repolib.readthedocs.io/en/latest/deb822-format.html</a>) embedded within YAML comment blocks. The metadata is delimited by <code># METABEGIN</code> and <code># METAEND</code> markers and parsed using the standard <code>python3-debian</code> DEB822 parser. By using metadata fields a layer can define attributes, dependencies, and configuration variables. The metadata is parsed separately from the standard YAML content.</p>
+</div>
+<div class="sect2">
+<h3 id="_metadata_structure"><a class="anchor" href="#_metadata_structure"></a><a class="link" href="#_metadata_structure">Metadata Structure</a></h3>
+<div class="paragraph">
+<p>X-Env metadata is contained within comment blocks:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-yaml" data-lang="yaml"># METABEGIN
+# X-Env-Layer-Name: This layer's name
+# X-Env-Layer-Description: Brief description of what this layer does
+# X-Env-Layer-Category: device
+# X-Env-Layer-Requires: base-layer,required-layer
+# X-Env-VarPrefix: device
+# X-Env-Var-hostname: pi-${HOSTNAME_SUFFIX}
+# X-Env-Var-hostname-Description: System hostname for the device
+# X-Env-Var-hostname-Valid: regex:^[a-zA-Z0-9.-]+$
+# X-Env-Var-hostname-Set: immediate
+# METAEND
+
+# mmdebstrap YAML configuration follows...
+
+mmdebstrap:
+  packages:
+    - systemd
+    - network-manager</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_layer_attributes"><a class="anchor" href="#_layer_attributes"></a><a class="link" href="#_layer_attributes">Layer Attributes</a></h3>
+<div class="paragraph">
+<p><code>X-Env-Layer-Name</code>: Layer name</p>
+</div>
+<div class="paragraph">
+<p><code>X-Env-Layer-Description</code>: Human-readable description of the layer&#8217;s purpose</p>
+</div>
+<div class="paragraph">
+<p><code>X-Env-Layer-Category</code>: Categorisation (device, image, etc.)</p>
+</div>
+<div class="paragraph">
+<p><code>X-Env-Layer-Version</code>: Version identifier for the layer</p>
+</div>
+<div class="paragraph">
+<p><code>X-Env-Layer-Requires</code>: Comma-separated list of required layers</p>
+</div>
+<div class="paragraph">
+<p><code>X-Env-Layer-Provides</code>: Services or capabilities this layer provides</p>
+</div>
+<div class="paragraph">
+<p><code>X-Env-Layer-RequiresProvider</code>: Services or capabilities this layer requires</p>
+</div>
+<div class="paragraph">
+<p><code>X-Env-Layer-Conflicts</code>: Layers that cannot be used together with this one</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_dependencies_and_providers"><a class="anchor" href="#_dependencies_and_providers"></a><a class="link" href="#_dependencies_and_providers">Dependencies and Providers</a></h3>
+<div class="sect3">
+<h4 id="_x_env_layer_requires"><a class="anchor" href="#_x_env_layer_requires"></a><a class="link" href="#_x_env_layer_requires">X-Env-Layer-Requires</a></h4>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Direct layer references</strong>: "I need these specific layers"</p>
+</li>
+<li>
+<p><strong>Concrete dependencies</strong>: Must reference actual layer names</p>
+</li>
+<li>
+<p><strong>Environment variable expansion</strong>: Supports <code>${VAR}</code> syntax for dynamic dependencies</p>
+</li>
+<li>
+<p><strong>Build order enforcement</strong>: Dependencies are loaded first and are pull in automatically</p>
+</li>
+<li>
+<p><strong>Example</strong>: A device layer depends on a device base-layer because the base-layer provides mandatory settings inherited by the device layer.</p>
+</li>
+</ul>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-yaml" data-lang="yaml"># METABEGIN
+# X-Env-Layer-Name: conditional-layer
+# X-Env-Layer-Requires: base-layer,${ARCH}-toolchain,${DISTRO}-packages
+# METAEND</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Environment variables in dependencies are evaluated during layer discovery using the current environment context. If a required environment variable is not set, layer discovery will fail.</p>
+</div>
+<div class="paragraph">
+<p>This enables dynamic layer dependency resolution based on build-time variables such as:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Architecture</strong>: <code>${ARCH}-toolchain</code> resolves to <code>arm64-toolchain</code> when <code>ARCH=arm64</code></p>
+</li>
+<li>
+<p><strong>Distribution</strong>: <code>${DISTRO}-packages</code> resolves to <code>debian-packages</code> when <code>DISTRO=debian</code></p>
+</li>
+<li>
+<p><strong>Build variant</strong>: <code>${VARIANT}-config</code> for different build configurations</p>
+</li>
+</ul>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Important</div>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>Only variables present in the environment can be used in dependencies.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_x_env_layer_provides_x_env_layer_requiresprovider"><a class="anchor" href="#_x_env_layer_provides_x_env_layer_requiresprovider"></a><a class="link" href="#_x_env_layer_provides_x_env_layer_requiresprovider">X-Env-Layer-Provides / X-Env-Layer-RequiresProvider</a></h4>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Abstract capability requirements</strong>: "I need something that provides X"</p>
+</li>
+<li>
+<p><strong>Service/capability contracts</strong>: Multiple layers could satisfy the requirement</p>
+</li>
+<li>
+<p><strong>Flexible implementation</strong>: Any layer providing the capability can fulfill it</p>
+</li>
+<li>
+<p><strong>Relationships</strong>: If a provider is required, only one can exist in the overall configuration</p>
+</li>
+<li>
+<p><strong>Example</strong>: A layer requires a device provider, which could be satisfied by different device layers</p>
+</li>
+</ul>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Important</div>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>Unlike dependencies, environment variables are not supported when evaluating providers.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_environment_variables"><a class="anchor" href="#_environment_variables"></a><a class="link" href="#_environment_variables">Environment Variables</a></h3>
+<div class="paragraph">
+<p><code>X-Env-VarPrefix</code>: Prefix for all variables declared by this layer (e.g., <code>device</code>)</p>
+</div>
+<div class="paragraph">
+<p><code>X-Env-VarRequires</code>: Comma-separated list of variables this layer expects from other layers</p>
+</div>
+<div class="paragraph">
+<p><code>X-Env-Var-&lt;name&gt;</code>: Variable declaration with default value (supports placeholders like <code>${DIRECTORY}</code>)</p>
+</div>
+<div class="paragraph">
+<p><code>X-Env-Var-&lt;name&gt;-Description</code>: Human-readable description of the variable</p>
+</div>
+<div class="paragraph">
+<p><code>X-Env-Var-&lt;name&gt;-Valid</code>: Validation rule (type, range, regex, enum, etc.)</p>
+</div>
+<div class="paragraph">
+<p><code>X-Env-Var-&lt;name&gt;-Set</code>: Set policy (immediate, lazy, force, skip)</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_variable_naming_convention"><a class="anchor" href="#_variable_naming_convention"></a><a class="link" href="#_variable_naming_convention">Variable Naming Convention</a></h3>
+<div class="paragraph">
+<p>Variables follow the pattern: <code>IGconf_&lt;prefix&gt;_&lt;name&gt;</code></p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Layer declares</strong>: <code>X-Env-Var-hostname</code> with prefix <code>device</code></p>
+</li>
+<li>
+<p><strong>Environment variable</strong>: <code>IGconf_device_hostname</code></p>
+</li>
+<li>
+<p><strong>Template expansion</strong>: Can reference as <code>${IGconf_device_hostname}</code> in YAML values</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_placeholder_support"><a class="anchor" href="#_placeholder_support"></a><a class="link" href="#_placeholder_support">Placeholder Support</a></h3>
+<div class="paragraph">
+<p>Variable values support dynamic placeholders:</p>
+</div>
+<div class="paragraph">
+<p><code>${DIRECTORY}</code>: Directory containing the layer file</p>
+</div>
+<div class="paragraph">
+<p><code>${FILENAME}</code>: Name of the layer file (without extension)</p>
+</div>
+<div class="paragraph">
+<p><code>${FILEPATH}</code>: Full path to the layer file</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_configuration_variables"><a class="anchor" href="#_configuration_variables"></a><a class="link" href="#_configuration_variables">Configuration Variables</a></h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The environment variables declared by a layer customise build behavior:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Validation</strong>: Each variable includes validation rules (types, ranges, patterns)</p>
+</li>
+<li>
+<p><strong>Placeholders</strong>: Support for dynamic values like <code>${DIRECTORY}</code> and <code>${FILENAME}</code></p>
+</li>
+<li>
+<p><strong>Set Policies</strong>: Control when and how variables are applied during layer resolution</p>
+</li>
+<li>
+<p><strong>Documentation</strong>: Integrated help and validation error messages</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>For variable validation help and policy explanations, use <code><code>rpi-image-gen metadata --help-validation</code></code> or refer to the variable-validation help page accessible via the individual layer documentation pages.</p>
+</div>
+<div class="paragraph">
+<p>For detailed information about a particular layer, including configuration options and defaults, please inspect the layer via the command line (<code><code>rpi-image-gen layer --describe &lt;layer name&gt;</code></code>) or refer to the layer&#8217;s documentation page. It is recommended to use a config file to set layer variables. Layers that declare variables specify a defined prefix. Use this prefix in the config file to set variables applicable to that layer. For example - device and image layers define variables with prefix 'device' and 'image' respectively:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-yaml" data-lang="yaml">device:
+  storage_type: nvme
+
+image:
+  compression: zstd</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_device_and_image_layers"><a class="anchor" href="#_device_and_image_layers"></a><a class="link" href="#_device_and_image_layers">Device and Image Layers</a></h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The config system allows device and image layers to be specified two different ways. Both yield the same result. The main difference is that the latter allows the name of the variable holding the device/image layer to be defined by the user, therefore making it customisable. Using the former makes more sense if defining other device settings since they can all be encapsulated under the same section in the config file.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-yaml" data-lang="yaml">device:
+  layer: rpi5</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-yaml" data-lang="yaml">layer:
+  myvar: rpi5</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The above would result in two variables being defined:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-bash" data-lang="bash">IGconf_device_layer=rpi5
+IGconf_layer_myvar=rpi5</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Both would pull layer <code><code>rpi5</code></code> into the system configuration.</p>
+</div>
+<div class="paragraph">
+<p>rpi-image-gen expands and references all <code><code>IGconf_layer_*</code></code> variables at layer collection time, whereas it looks specifically for <code><code>IGconf_device_layer</code></code> and <code><code>IGconf_image_layer</code></code> to locate device and image layers respectively for those particular sections.</p>
+</div>
+<div class="paragraph">
+<p>It&#8217;s worth noting that rpi-image-gen does not mandate a device or image layer being specified. The construction of a filesystem can take place with or without either of these. For example, a user may wish to use rpi-image-gen to create a filesystem tar ball for use in a docker container.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_specifying_layers"><a class="anchor" href="#_specifying_layers"></a><a class="link" href="#_specifying_layers">Specifying Layers</a></h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Layers can be specified in the config file by name (i.e. their <code><code>X-Env-Layer-Name</code></code>). The name of the variable containing the layer name is completely arbitrary.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-yaml" data-lang="yaml">layer:
+  foo: trixie-minbase
+  bar: rpi5
+  app: my-app</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This would result in the following variables being defined:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-bash" data-lang="bash">IGconf_layer_foo=trixie-minbase
+IGconf_layer_bar=rpi5
+IGconf_layer_app=my-app</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>rpi-image-gen would attempt to locate layers <code><code>trixie-minbase</code></code>,<code><code>rpi5</code></code> and <code><code>my-app</code></code>, including their depdendencies. Deduplication of layers occurs at the resolution phase, meaning that specifying duplicate layer names is harmless and basically a nop.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_how_to_use_this_documentation"><a class="anchor" href="#_how_to_use_this_documentation"></a><a class="link" href="#_how_to_use_this_documentation">How to Use This Documentation</a></h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p>Browse the auto-generated layer list (currently only available in the HTML documentation) to find layers relevant to your build</p>
+</li>
+<li>
+<p>Click on any layer name to view detailed documentation information including:</p>
+</li>
+<li>
+<p>Configuration variables and their validation rules</p>
+</li>
+<li>
+<p>Package dependencies and installation details</p>
+</li>
+<li>
+<p>Layer relationships and dependencies</p>
+</li>
+<li>
+<p>Technical implementation details and companion information</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_getting_started"><a class="anchor" href="#_getting_started"></a><a class="link" href="#_getting_started">Getting Started</a></h2>
+<div class="sectionbody">
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Choose a device layer that matches your Raspberry Pi hardware</p>
+</li>
+<li>
+<p>Choose an image layer applicable to your deployment</p>
+</li>
+<li>
+<p>Add a suite and/or list of general layers for additional functionality</p>
+</li>
+<li>
+<p>Configure the variables as documented in each layer</p>
+</li>
+<li>
+<p>Run <code>rpi-image-gen build</code> with your config</p>
+</li>
+</ol>
+</div>
+</div>
+</div>
+
+    </div>
+
+    <h2>Available Layers</h2>
+    
+    
+    <h3>Audit</h3>
+    <div class="layer-list">
+        
+        <div class="layer-item">
+            <a href="sbom-base.html">sbom-base</a><span class="layer-desc">- SBOM provider and settings.</span>
+        </div>
+        
+    </div>
+    
+    <h3>Build</h3>
+    <div class="layer-list">
+        
+        <div class="layer-item">
+            <a href="artefact-base.html">artefact-base</a><span class="layer-desc">- Base artefact naming, versioning and organisation for
+ filesystem builds.</span>
+        </div>
+        
+        <div class="layer-item">
+            <a href="deploy-base.html">deploy-base</a><span class="layer-desc">- Deployment and organisation for build output artefacts</span>
+        </div>
+        
+        <div class="layer-item">
+            <a href="sys-build-base.html">sys-build-base</a><span class="layer-desc">- Build environment configuration including workspace, apt
+ settings, and system foundation defaults.</span>
+        </div>
+        
+        <div class="layer-item">
+            <a href="target-config.html">target-config</a><span class="layer-desc">- bdebstrap output target configuration.</span>
+        </div>
+        
+    </div>
+    
+    <h3>Container</h3>
+    <div class="layer-list">
+        
+        <div class="layer-item">
+            <a href="docker-debian-bookworm.html">docker-debian-bookworm</a><span class="layer-desc">- Docker engine and framework for Debian Bookworm</span>
+        </div>
+        
+        <div class="layer-item">
+            <a href="docker-debian-trixie.html">docker-debian-trixie</a><span class="layer-desc">- Docker engine and framework for Debian Trixie</span>
+        </div>
+        
+    </div>
+    
+    <h3>Device</h3>
+    <div class="layer-list">
+        
+        <div class="layer-item">
+            <a href="device-base.html">device-base</a><span class="layer-desc">- Device defaults.</span>
+        </div>
+        
+        <div class="layer-item">
+            <a href="rpi-cm4.html">rpi-cm4</a><span class="layer-desc">- Raspberry Pi CM4 specific device layer</span>
+        </div>
+        
+        <div class="layer-item">
+            <a href="rpi-cm5.html">rpi-cm5</a><span class="layer-desc">- Raspberry Pi CM5 specific device layer</span>
+        </div>
+        
+        <div class="layer-item">
+            <a href="rpi-generic64.html">rpi-generic64</a><span class="layer-desc">- Generic Raspberry Pi device common with v8 kernel, boot
+ firmware supporting all devices, and wlan/BT firmware.</span>
+        </div>
+        
+        <div class="layer-item">
+            <a href="rpi3.html">rpi3</a><span class="layer-desc">- Raspberry Pi 3 specific device layer</span>
+        </div>
+        
+        <div class="layer-item">
+            <a href="rpi4.html">rpi4</a><span class="layer-desc">- Raspberry Pi 4 specific device layer</span>
+        </div>
+        
+        <div class="layer-item">
+            <a href="rpi5.html">rpi5</a><span class="layer-desc">- Raspberry Pi 5 specific device layer</span>
+        </div>
+        
+        <div class="layer-item">
+            <a href="rpizero2w.html">rpizero2w</a><span class="layer-desc">- Raspberry Pi Zero 2 W specific device layer</span>
+        </div>
+        
+    </div>
+    
+    <h3>Distribution</h3>
+    <div class="layer-list">
+        
+        <div class="layer-item">
+            <a href="debian-bookworm-arm64.html">debian-bookworm-arm64</a><span class="layer-desc">- Debian Bookworm apt base for arm64</span>
+        </div>
+        
+        <div class="layer-item">
+            <a href="debian-bookworm-arm64-multi.html">debian-bookworm-arm64-multi</a><span class="layer-desc">- Debian Bookworm apt base for arm64 and armhf.</span>
+        </div>
+        
+        <div class="layer-item">
+            <a href="debian-bookworm-arm64-slim.html">debian-bookworm-arm64-slim</a><span class="layer-desc">- Debian Bookworm custom layer for arm64 providing
+ a usable and practical base.</span>
+        </div>
+        
+        <div class="layer-item">
+            <a href="debian-trixie-arm64.html">debian-trixie-arm64</a><span class="layer-desc">- Debian Trixie apt base for arm64.</span>
+        </div>
+        
+        <div class="layer-item">
+            <a href="debian-trixie-arm64-multi.html">debian-trixie-arm64-multi</a><span class="layer-desc">- Debian Trixie apt base for arm64 and armhf.</span>
+        </div>
+        
+        <div class="layer-item">
+            <a href="debian-trixie-arm64-slim.html">debian-trixie-arm64-slim</a><span class="layer-desc">- Debian Trixie custom layer for arm64 providing
+ a usable and practical base.</span>
+        </div>
+        
+        <div class="layer-item">
+            <a href="raspbian-bookworm-armhf.html">raspbian-bookworm-armhf</a><span class="layer-desc">- Raspbian Bookworm apt base for armhf.</span>
+        </div>
+        
+        <div class="layer-item">
+            <a href="raspbian-trixie-armhf.html">raspbian-trixie-armhf</a><span class="layer-desc">- Raspbian Trixie apt base for armhf.</span>
+        </div>
+        
+    </div>
+    
+    <h3>Firmware</h3>
+    <div class="layer-list">
+        
+        <div class="layer-item">
+            <a href="rpi-boot-firmware.html">rpi-boot-firmware</a><span class="layer-desc">- Raspberry Pi boot firmware for all devices</span>
+        </div>
+        
+    </div>
+    
+    <h3>Foundation</h3>
+    <div class="layer-list">
+        
+        <div class="layer-item">
+            <a href="essential.html">essential</a><span class="layer-desc">- Serves as the mandatory foundation for all rpi-image-gen
+ builds, and is automatically included in every configuratio...</span>
+        </div>
+        
+    </div>
+    
+    <h3>General</h3>
+    <div class="layer-list">
+        
+        <div class="layer-item">
+            <a href="ca-certificates.html">ca-certificates</a><span class="layer-desc">- Common CA Certificate PEM files</span>
+        </div>
+        
+        <div class="layer-item">
+            <a href="fake-hwclock.html">fake-hwclock</a><span class="layer-desc">- Persistent time management for non-RTC systems.</span>
+        </div>
+        
+        <div class="layer-item">
+            <a href="openssh-server.html">openssh-server</a><span class="layer-desc">- OpenSSH server daemon and local user SSH key setup.</span>
+        </div>
+        
+        <div class="layer-item">
+            <a href="rpi-debian-bookworm.html">rpi-debian-bookworm</a><span class="layer-desc">- Raspberry Pi Debian Bookworm APT repository</span>
+        </div>
+        
+        <div class="layer-item">
+            <a href="rpi-debian-trixie.html">rpi-debian-trixie</a><span class="layer-desc">- Raspberry Pi Debian Trixie APT repository</span>
+        </div>
+        
+        <div class="layer-item">
+            <a href="rpi-essential-base.html">rpi-essential-base</a><span class="layer-desc">- Raspberry Pi essential basic system packages</span>
+        </div>
+        
+        <div class="layer-item">
+            <a href="rpi-misc-skel.html">rpi-misc-skel</a><span class="layer-desc">- Raspberry Pi miscellaneous filesystem directory
+ skeleton.</span>
+        </div>
+        
+        <div class="layer-item">
+            <a href="rpi-misc-utils.html">rpi-misc-utils</a><span class="layer-desc">- Raspberry Pi system utilities</span>
+        </div>
+        
+        <div class="layer-item">
+            <a href="rpi-user-credentials.html">rpi-user-credentials</a><span class="layer-desc">- Raspberry Pi base layer for local user admin.
+ Creates a local account for user IGconf_device_user1, a home directory...</span>
+        </div>
+        
+        <div class="layer-item">
+            <a href="systemd-net-min.html">systemd-net-min</a><span class="layer-desc">- Minimal systemd suite for init, basic networking and
+ time synchronisation.</span>
+        </div>
+        
+    </div>
+    
+    <h3>Image</h3>
+    <div class="layer-list">
+        
+        <div class="layer-item">
+            <a href="image-base.html">image-base</a><span class="layer-desc">- Default image settings and build attributes.</span>
+        </div>
+        
+        <div class="layer-item">
+            <a href="image-rota.html">image-rota</a><span class="layer-desc">- Rotational OTA and AB support with GPT.
+ This layout supports redundancy of os and system slot components and
+ provid...</span>
+        </div>
+        
+        <div class="layer-item">
+            <a href="image-rpios.html">image-rpios</a><span class="layer-desc">- Raspberry Pi OS style image layout with MBR, vfat
+ boot partition, and a root partition that can be ext4 or btrfs.</span>
+        </div>
+        
+    </div>
+    
+    <h3>Kernel</h3>
+    <div class="layer-list">
+        
+        <div class="layer-item">
+            <a href="rpi-linux-2712.html">rpi-linux-2712</a><span class="layer-desc">- Raspberry Pi 2712 kernel</span>
+        </div>
+        
+        <div class="layer-item">
+            <a href="rpi-linux-v7.html">rpi-linux-v7</a><span class="layer-desc">- Raspberry Pi v7 kernel</span>
+        </div>
+        
+        <div class="layer-item">
+            <a href="rpi-linux-v7l.html">rpi-linux-v7l</a><span class="layer-desc">- Raspberry Pi v7l kernel</span>
+        </div>
+        
+        <div class="layer-item">
+            <a href="rpi-linux-v8.html">rpi-linux-v8</a><span class="layer-desc">- Raspberry Pi v8 kernel</span>
+        </div>
+        
+    </div>
+    
+    <h3>Suite</h3>
+    <div class="layer-list">
+        
+        <div class="layer-item">
+            <a href="bookworm-minbase.html">bookworm-minbase</a><span class="layer-desc">- Debian Bookworm with apt, utils, wired networking, ssh.</span>
+        </div>
+        
+        <div class="layer-item">
+            <a href="trixie-minbase.html">trixie-minbase</a><span class="layer-desc">- Debian Trixie with apt, utils, wired networking, ssh.</span>
+        </div>
+        
+    </div>
+    
+</body>
+</html>

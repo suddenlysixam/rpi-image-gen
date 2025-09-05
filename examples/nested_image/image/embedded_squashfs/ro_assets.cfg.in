@@ -1,6 +1,8 @@
 # demo-only: encapsulate firmware in squashfs image
+# Use 16k block size to support using with 2712 kernel
 image firmware.squashfs {
    squashfs {
+      block-size = 16384
       compression = zstd
    }
    mountpoint = "/boot/firmware"

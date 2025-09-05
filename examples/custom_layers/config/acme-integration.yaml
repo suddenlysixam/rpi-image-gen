@@ -1,0 +1,12 @@
+device:
+  layer: rpi5
+
+layer:
+  custom: example-suite-layer
+
+image:
+  layer: image-rpios
+  boot_part_size: 200%
+  root_part_size: 300%
+  name: acme-developer
+  compression: zstd

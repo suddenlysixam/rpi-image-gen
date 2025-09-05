@@ -1,0 +1,21 @@
+# METABEGIN
+# X-Env-Layer-Name: test-dependency-top
+# X-Env-Layer-Desc: Top layer that constructs final paths
+# X-Env-Layer-Version: 1.0.0
+# X-Env-Layer-Category: test
+# X-Env-Layer-Requires: test-dependency-middle
+# X-Env-VarPrefix: dep
+# X-Env-VarRequires: IGconf_dep_base,IGconf_dep_service,IGconf_dep_configpath
+# X-Env-Var-FinalPath: ${IGconf_dep_base}/${IGconf_dep_service}/final
+# X-Env-Var-FinalPath-Set: force
+# X-Env-Var-FinalPath-Desc: Final path constructed from all layers
+# X-Env-Var-Component: enhanced-core
+# X-Env-Var-Component-Set: force
+# X-Env-Var-Component-Desc: Enhanced component name (force override)
+# X-Env-Var-Result: ${IGconf_dep_configpath}/${IGconf_dep_component}/result
+# X-Env-Var-Result-Set: immediate
+# X-Env-Var-Result-Desc: Final result using forced component value
+# METAEND
+
+config:
+  top_layer: true 

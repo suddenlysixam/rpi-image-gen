@@ -1,0 +1,9 @@
+# METABEGIN
+# X-Env-Layer-Name: ca-certificates
+# X-Env-Layer-Desc: Common CA Certificate PEM files
+# X-Env-Layer-Version: 1.0.0
+# METAEND
+---
+mmdebstrap:
+  packages:
+    - ca-certificates

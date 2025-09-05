@@ -1,0 +1,505 @@
+= rpi-image-gen Configuration System
+:author: rpi-image-gen documentation
+:toc: left
+:toclevels: 3
+:sectlinks:
+:sectanchors:
+
+link:../index.adoc[← Back to Main Documentation]
+
+== Overview
+
+rpi-image-gen provides a flexible, hierarchical approach to managing build variables through multiple configuration sources with clear precedence rules. The system is built around the `IGconf_` prefix namespace and supports both INI and YAML file formats.
+
+== Core Architecture
+
+=== Variable Naming Convention
+
+All configuration variables in rpi-image-gen use the `IGconf_` prefix followed by a structured naming pattern:
+
+[source]
+----
+IGconf_<section>_<key>
+----
+
+Where:
+
+* **section**: Logical grouping (e.g., `device`, `image`)
+* **key**: Specific configuration parameter (e.g., `class`, `storage_type`, `hostname`)
+
+Example variables:
+[source,bash]
+----
+IGconf_device_class=pi5
+IGconf_device_storage_type=sd
+IGconf_image_compression=zstd
+----
+
+=== Layer Variable Declaration
+
+Variables are declared by layer YAML files using metadata headers within comment blocks:
+
+[source,yaml]
+----
+# METABEGIN
+# X-Env-Layer-Name: rpi5
+# X-Env-Layer-Category: device
+# X-Env-Layer-Desc: Raspberry Pi 5 specific device layer
+#
+# X-Env-VarPrefix: device
+#
+# X-Env-Var-class: pi5
+# X-Env-Var-class-Desc: Device class
+# X-Env-Var-class-Required: n
+# X-Env-Var-class-Valid: keywords:pi5
+# X-Env-Var-class-Set: y
+#
+# X-Env-Var-storage_type: sd
+# X-Env-Var-storage_type-Desc: Pi5 storage type
+# X-Env-Var-storage_type-Required: n
+# X-Env-Var-storage_type-Valid: sd,nvme
+# X-Env-Var-storage_type-Set: y
+# METAEND
+----
+
+==== Variable Declaration Metadata
+
+Each variable declaration includes several metadata fields:
+
+* **X-Env-Var-<name>**: Default value for the variable
+* **X-Env-Var-<name>-Desc**: Human-readable description
+* **X-Env-Var-<name>-Required**: Whether the variable is required (`y`/`n`)
+* **X-Env-Var-<name>-Valid**: Validation rules (keywords, patterns, etc.)
+* **X-Env-Var-<name>-Set**: Variable assignment policy
+
+==== Variable Prefix
+
+The `X-Env-VarPrefix` field specifies the section name used in the `IGconf_` namespace:
+
+[source]
+----
+X-Env-VarPrefix: device
+----
+
+Results in variables like:
+[source,bash]
+----
+IGconf_device_class=pi5
+IGconf_device_storage_type=sd
+----
+
+== Configuration File Support
+
+The configuration system supports both INI and YAML file formats with automatic format detection based on file extension.
+
+=== YAML Configuration Format
+
+YAML provides the most flexible configuration format with native support for hierarchical data and includes:
+
+[source,yaml]
+----
+include:
+  file: base.yaml
+
+device:
+  class: pi5
+  storage_type: sd
+  hostname: ${IGconf_device_class}-$(tr -dc 'a-z' < /dev/urandom | head -c 6)
+
+image:
+  compression: zstd
+  boot_part_size: 200%
+  root_part_size: 300%
+----
+
+=== INI Configuration Format
+
+INI format provides traditional section-based configuration:
+
+[source,ini]
+----
+!include base.cfg
+
+[device]
+class = pi5
+storage_type = sd
+hostname = ${IGconf_device_class}-$(tr -dc 'a-z' < /dev/urandom | head -c 6)
+
+[image]
+compression = zstd
+boot_part_size = 200%
+root_part_size = 300%
+----
+
+=== Configuration Includes
+
+Both formats support including other configuration files to promote reusability and modularity. The include precedence order is shown in the table below.
+
+[cols="1,6,5"]
+|===
+|Priority |Source |Description
+
+|1 (Highest)
+|Parent directory of the including file
+|
+
+|2
+|<src dir>/config
+|The source directory if specified via the command line
+
+|3 (Lowest)
+|<built-in>/config
+|Default in-tree location, eg ```/usr/share/rpi-image-gen/config/```
+|===
+
+==== YAML Includes
+
+[source,yaml]
+----
+include:
+  file: shared/base.yaml
+----
+
+==== INI Includes
+
+[source,ini]
+----
+!include shared/base.cfg
+----
+
+Therefore, included files are resolved using:
+
+1. **Parent directory**
+2. **Search path**
+
+== Variable Sources and Precedence
+
+The configuration system supports multiple variable sources with a clear precedence hierarchy:
+
+[cols="1,6,5"]
+|===
+|Priority |Source |Description
+
+|1 (Highest)
+|Command Line Overrides
+|Variables specified after `--` on the command line
+
+|2
+|Configuration Files
+|INI or YAML configuration files
+
+|3 (Lowest)
+|Layer Defaults
+|Default values declared in layer metadata
+|===
+
+=== Command Line Overrides
+
+Variables can be set directly on the command line as overrides after `--`, taking the highest precedence:
+
+[source,bash]
+----
+rpi-image-gen build -c config.yaml -- IGconf_device_class=pi5 IGconf_image_compression=xz
+----
+
+== Variable Expansion
+
+The configuration system supports variable expansion in configuration values using shell-style syntax:
+
+=== Environment Variable Expansion
+
+[source,yaml]
+----
+device:
+  name: controllerbox
+  rev: 2
+  hostname: ${IGconf_device_name}-$(uuidgen | cut -d'-' -f1)
+
+image:
+  assetdir: ${WORKSPACE}/build/assets/${IGconf_device_name}-rev${IGconf_device_rev}
+
+ssh:
+  pubkey_user1=$(< ${DEPLOY}/device/baseassets/id_rsa.pub)
+  pubkey_only=y
+----
+
+=== Cross-Reference Expansion
+
+Variables can reference other configuration variables:
+
+[source,yaml]
+----
+device:
+  class: pi5
+  hostname: ${IGconf_device_class}-server
+
+image:
+  name: ${IGconf_device_class}-custom-image
+----
+
+=== Environment Variable Dependencies
+
+Layer dependencies can use environment variable expansion to create dynamic dependency resolution:
+
+[source,yaml]
+----
+# METABEGIN
+# X-Env-Layer-Name: arch-specific-tools
+# X-Env-Layer-Requires: base-layer,${ARCH}-toolchain,${DISTRO}-packages
+# METAEND
+----
+
+This allows layers to dynamically depend on other layers based on build-time environment variables:
+
+[source,bash]
+----
+# Set environment variables before processing
+export ARCH=arm64
+export DISTRO=debian
+
+# Layer dependencies will be equivalent to:
+# X-Env-Layer-Requires: base-layer, arm64-toolchain, debian-packages
+----
+
+This feature enables dynamic layer selection. For example, one usage could be to use the same layer across different build environments to support toolchain selection based on target architecture. By using variables in the 'parent' layer, dynamic dependency resolution pulls in an architecture specific toolchain 'child' layer.
+
+[NOTE]
+====
+Layer discovery will fail if variables referenced in dependencies are not set in the environment.
+====
+
+[IMPORTANT]
+====
+Environment variable dependencies are evaluated during layer discovery, not during layer variable expansion. This ensures dependencies are resolved before layer processing begins. Because of this, only variables *already present* in the environment can be used in layer dependencies.
+
+For example:
+
+- System or custom environment variables (e.g., `USER`, `ARCH`, `DISTRO`)
+- Configuration file variables or command line overrides
+
+All dependencies are always included, i.e. variable names result in actual layer names at build-time. For example, `${ARCH}-toolchain` always results in a dependency, but the specific layer name depends on the `ARCH` environment variable value.
+====
+
+=== Expansion Context
+
+During configuration processing, variables are expanded using:
+
+. **Previously loaded configuration values**
+. **System environment variables** (for shell-style expansion like `${HOME}`)
+. A **Strict Policy** (using `bash` under `set -eu`). This means:
+  ** **errexit (set -e)**: Exit immediately if any command returns a non-zero exit status, including when variable expansion fails or returns an error.
+  ** **nounset (set -u)**: Treat unset variables as errors during expansion - attempting to expand a variable that hasn't been set will exit with an error instead of expanding to an empty string.
+  ** When these are combined, variable expansion is strict and fails quickly. Any attempt to expand an undefined variable will cause the build to exit immediately.
+
+[NOTE]
+====
+There may be a need to handle non-alphanumeric characters in config files and/or command line arguments. Best practices advise encapsulating the text for a more robust approach, even if it's not always technically necessary. For YAML files, use single quotes for literal strings. For example `password: 'Fo0bar!!'`. For INI files, quote values containing special characters. For example `password = "Fo0bar!!"`. For command line arguments, use single quotes to preserve the literal text. For example `rpi-image-gen build -c <args> -- IGconf_device_user1pass='Fo0bar!!'`.
+====
+
+
+== Configuration Loading
+
+=== Processing Overview
+
+The configuration system processes files using the following steps:
+
+1. **Parse main configuration file** - Automatically detects INI or YAML format
+2. **Process includes recursively** - Follows include directives with circular dependency detection
+3. **Apply command line overrides** - Processes variables specified after `--`
+4. **Expand variables** - Resolves variable references using configuration context
+5. **Set environment variables** - Applies final values following precedence rules
+6. **Generate output** - Either loads into environment or writes to file
+
+== Command Line Interface
+
+=== Config Command
+
+The `config` command provides direct access to configuration functionality:
+
+[source,bash]
+----
+# Load all sections into environment
+rpi-image-gen config myconfig.yaml
+
+# Load specific section
+rpi-image-gen config myconfig.yaml --section device
+
+# Write resolved config to file
+rpi-image-gen config myconfig.yaml --write-to build.env
+
+# Use command line overrides
+rpi-image-gen config myconfig.yaml -- IGconf_device_class=pi5 IGconf_image_compression=xz
+
+# Custom include search paths
+rpi-image-gen config myconfig.yaml --path "./config:./shared:./templates"
+
+# Disable variable expansion
+rpi-image-gen config myconfig.yaml --no-expand
+
+# Combine options with overrides
+rpi-image-gen config myconfig.yaml --section device --write-to build.env -- IGconf_device_class=pi5
+----
+
+=== Config Generation
+
+Generate example configuration files:
+
+[source,bash]
+----
+# Generate boilerplate INI and YAML examples
+rpi-image-gen config --gen
+
+# Migrate INI to YAML format
+rpi-image-gen config legacy.cfg --migrate > modern.yaml
+----
+
+== Integration with Layer System
+
+=== Layer Variable Discovery
+
+The configuration system integrates with the layer management system to:
+
+1. **Discover declared variables** from layer metadata
+2. **Validate variable values** against declared constraints
+3. **Apply variable policies** (immediate, lazy, force, skip)
+4. **Resolve variable dependencies** between layers
+
+=== Variable Policies
+
+Variables support different assignment policies:
+
+* **immediate**: Set the variable if it is currently unset (first-wins strategy). This is the default behavior.
+* **lazy**: Applied after all layers are processed (last-wins strategy). Useful for defaults that can be overridden.
+* **force**: Always overwrite existing environment value, regardless of what was set before.
+* **skip**: Never set the variable.
+
+Refer to the layer documentation for further details.
+
+=== Layer Build Order
+
+Variables are processed in layer dependency order, ensuring that:
+
+1. **Base layer variables** are available to dependent layers
+2. **Variable expansion** can reference previously set values
+3. **Validation** occurs with complete variable context
+
+== Best Practices
+
+=== Configuration Organisation
+
+1. **Use base configurations** for common settings across builds
+2. **Layer-specific overrides** in focused configuration files
+3. **Environment-specific values** in separate configuration files
+4. **Runtime overrides** via command-line arguments after `--`
+
+=== Variable Naming
+
+1. **Follow prefix conventions** with logical section grouping
+2. **Use descriptive names** that indicate purpose and scope
+3. **Consistent naming patterns** within configuration sections
+
+=== File Structure
+
+[source]
+----
+config/
+├── base.yaml              # Common base configuration
+├── environments/
+│   ├── development.yaml   # Development overrides
+│   ├── staging.yaml      # Staging overrides
+│   └── production.yaml   # Production overrides
+└── variants/
+    ├── local.yaml       # Local development settings
+    └── ci.yaml          # CI/CD specific settings
+----
+
+=== Variable Expansion Security
+
+1. **Validate input** in configuration files to prevent injection
+2. **Limit variable scope** to prevent unintended expansion
+3. **Use quotes** for values containing special characters
+4. **Test expansion** in controlled environments before production
+
+== Error Handling and Debugging
+
+=== Common Configuration Issues
+
+* **Circular includes**: Detected automatically with clear error messages
+* **Missing include files**: Searches all configured paths before failing
+* **Invalid YAML/INI syntax**: Provides line numbers and context
+* **Undefined variable expansion**: Fails fast with variable name
+* **Section/key conflicts**: Resolved by precedence rules
+
+=== Debugging Configuration
+
+1. **Use `--write-to`** to see resolved variable values
+2. **Check precedence** with CFG/OVR output prefixes
+3. **Validate includes** by examining search path messages
+4. **Run interactively** to allow a pseudo 'dry-run' stepped flow 
+5. **Test expansion** with simple configuration files
+
+=== Output Interpretation
+
+Configuration loading outputs show variable sources:
+
+[source]
+----
+CFG IGconf_device_class=pi5         # From configuration file
+OVR IGconf_device_hostname=pi5-test  # From command line override
+----
+
+Layer collection output shows variable policy and evaluated value:
+
+[source]
+----
+ [SET]  IGconf_device_class=pi5 (layer: rpi5)
+ [SKIP]  IGconf_device_hostname (already set)
+ [LAZY]  IGconf_device_variant=none (layer: device-base)
+----
+
+== Migration and Compatibility
+
+=== INI to YAML Migration
+
+Use the built-in migration tool:
+
+[source,bash]
+----
+rpi-image-gen config legacy.cfg --migrate > modern.yaml
+----
+
+The migration tool:
+
+* **Preserves include directives** with updated syntax
+* **Maintains section structure** and variable relationships
+* **Updates file extensions** in include references
+* **Adds migration comments** for traceability
+
+=== Backward Compatibility
+
+The configuration system maintains compatibility with:
+
+* **Existing INI files** through automatic format detection
+* **Legacy include syntax** (`!include` vs `include:`)
+* **Environment variable patterns** used by previous versions
+* **Command-line interfaces** with extended functionality
+
+== Performance Considerations
+
+=== Configuration Loading Performance
+
+* **Lazy evaluation** of variable expansion where possible
+* **Caching of included files** to avoid repeated parsing
+* **Minimal environment manipulation** during loading
+* **Efficient precedence resolution** without redundant checks
+
+== Summary
+
+The rpi-image-gen configuration system provides a robust foundation for managing complex build configurations through:
+
+* **Hierarchical variable organisation** with the `IGconf_` namespace
+* **Multiple configuration sources** with clear precedence rules
+* **Flexible file formats** (INI and YAML) with include support
+* **Variable expansion** supporting cross-references and environment integration
+* **Layer system integration** for variable discovery and validation
+* **Command-line tools** for configuration management and debugging

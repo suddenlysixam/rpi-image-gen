@@ -1,0 +1,17 @@
+# METABEGIN
+# X-Env-Layer-Name: example-suite-layer
+# X-Env-Layer-Category: example
+# X-Env-Layer-Desc: Example layer that demonstrates simply pulling several
+#  other layers that are agnostic to device.
+# X-Env-Layer-Version: 1.0.0
+# X-Env-Layer-Requires: debian-bookworm-arm64-multi,
+#  rpi-debian-bookworm,
+#  rpi-misc-utils,
+#  rpi-essential-base,
+#  rpi-misc-skel,
+#  rpi-user-credentials,
+#  systemd-net-min,
+#  fake-hwclock,
+#  example-sdk-setup
+# METAEND
+---

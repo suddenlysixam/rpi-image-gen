@@ -1,0 +1,27 @@
+= Essential Configuration
+
+== What it provides
+
+The essential layer doesn't define variables itself but ensures that every build has access to:
+
+. **Artefact naming**
+. **Build environment**
+. **Target configuration**
+. **Core build infrastructure**
+
+== Architecture Role
+
+* **Foundation layer**: Sits at the bottom of the dependency hierarchy
+* **Mandatory inclusion**: Cannot be excluded from any build
+* **Infrastructure aggregation**: Pulls together all essential base layers
+* **Dependency management**: Ensures consistent base infrastructure across builds
+
+== Benefits
+
+* **Guaranteed infrastructure**: Every build has the required foundation
+* **Consistent behaviour**: Same core variables available in every build
+* **Future-proof**: Easy to add more essential dependencies as needed
+
+== Usage
+
+Users don't need to explicitly include this layer - it's automatically included by the build system. All other layers can depend on essential to ensure they have access to the core build infrastructure. This ensures that every rpi-image-gen build, whether filesystem-only or full image, has access to the fundamental build tools and configuration needed for successful execution.

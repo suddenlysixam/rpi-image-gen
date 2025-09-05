@@ -1,0 +1,31 @@
+= Image Configuration
+
+== Common Attributes
+
+Different image layers are provided to support image generation with a specific footprint while allowing for customisation.
+Unless otherwise stated, the following apply to all image layers:
+
+**Provider**
+
+rpi-image-gen uses https://github.com/pengutronix/genimage[genimage,window=_blank] for creating filesystem images.
+
+**Default Partition Size**
+
+Each partition image encapsulated in a disk image has a default size. Typically this is 100% of the filesystem that is created and filled, which means there is no headroom if the filesystem is intended to be writable. Customisation of images should involve setting variables governing size accordingly if the default is not suitable. 100% is likely a suitable size if the partition contains a read-only filesystem such as squashfs.
+
+**mke2fs.conf**
+
+In order to ensure ext filesystems are created consistently, image creation involves `genimage` using a particular `mke2fs.conf`. Additional options may be passed to `mke2fs` via the `genimage` template.
+
+**vfat**
+
+When creating FAT filesystems, different options may be passed to `mkdosfs(8)` by `genimage` depending on needs.
+
+**Sparse Images**
+
+Image layers create sparse images by default. Sparse format means filesystem images with lots of empty space can be transferred and written to device storage in a much shorter time using fastboot when compared with primitive tools such as `dd`. Other utilities such as `bmaptool` provide a similar much-improved way for storage handling of large images.  Because `genimage` can create sparse images itself, this removes the need to use https://source.android.com[AOSP,window=_blank] tools in the image creation flow.
+
+[WARNING]
+====
+Older versions of `genimage` can be problematic when creating sparse images. For example, `genimage` v16 currently shipping in Debian Bookworm does not create usable sparse images of vfat filesystems. Raspberry Pi provisioning tools such as `rpi-sb-provisioner` (https://github.com/raspberrypi/rpi-sb-provisioner) rely on sparse image format, so it is recommended to use the most up-to-date version of `genimage` as possible.
+====

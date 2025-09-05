@@ -1,0 +1,16 @@
+# METABEGIN
+# X-Env-Layer-Name: test-lazy-first
+# X-Env-Layer-Desc: First layer providing lazy default for PATH variable
+# X-Env-Layer-Version: 1.0.0
+# X-Env-Layer-Category: test
+#
+#  Environment Variables
+# X-Env-VarPrefix: lazy
+#
+# X-Env-Var-path: /usr/first
+# X-Env-Var-path-Desc: Initial default path
+# X-Env-Var-path-Set: lazy
+# METAEND
+
+settings:
+  path: "${IGconf_lazy_path}" 

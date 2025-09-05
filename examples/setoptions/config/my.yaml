@@ -1,0 +1,16 @@
+include:
+  file: bookworm-minbase.yaml
+
+image:
+  root_part_size: 200%
+  name: mydeviceimage
+
+device:
+  hostname: frobulator
+  user1: pilot
+  user1pass: Fo0bar!!
+
+database:
+  host: example.com
+  port: 8080
+  url: http://${IGconf_database_host}:${IGconf_database_port}

@@ -1,0 +1,9 @@
+# METABEGIN
+# This file has a metadata block but no valid X-Env fields
+# Random-Field: this is not an X-Env field
+# Another-Invalid: field name
+# Just some comments with no fields
+# METAEND
+
+test:
+  value: "${IGconf_malformed_valid}"

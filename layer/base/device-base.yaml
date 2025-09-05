@@ -1,0 +1,132 @@
+# METABEGIN
+# X-Env-Layer-Name: device-base
+# X-Env-Layer-Category: device
+# X-Env-Layer-Desc: Device defaults.
+# X-Env-Layer-Version: 1.0.0
+# X-Env-Layer-Requires:
+# X-Env-Layer-RequiresProvider: device
+#
+# X-Env-VarRequires-Valid: string
+#
+# X-Env-VarPrefix: device
+#
+# X-Env-Var-class: pi5
+# X-Env-Var-class-Desc: Raspberry Pi device
+# X-Env-Var-class-Required: n
+# X-Env-Var-class-Valid: zero2w,pi4,cm4,pi5,cm5
+# X-Env-Var-class-Set: lazy
+#
+# X-Env-Var-variant: none
+# X-Env-Var-variant-Desc: Raspberry Pi device variant, eg 8G, lite, ..
+# X-Env-Var-variant-Required: n
+# X-Env-Var-variant-Valid: string
+# X-Env-Var-variant-Set: lazy
+#
+# X-Env-Var-hostname: ${IGconf_device_class}-$(tr -dc 'a-z' < /dev/urandom | head -c 6)
+# X-Env-Var-hostname-Desc: Sets the network hostname for the device
+# X-Env-Var-hostname-Required: false
+# X-Env-Var-hostname-Valid: string
+# X-Env-Var-hostname-Set: y
+#
+# X-Env-Var-user1: pi
+# X-Env-Var-user1-Desc: A user account with this name will be created on the
+#  device.
+# X-Env-Var-user1-Required: n
+# X-Env-Var-user1-Valid: string
+# X-Env-Var-user1-Set: y
+#
+# X-Env-Var-user1pass:
+# X-Env-Var-user1pass-Desc: Password required to log into the user1 account. If
+#  empty, the account will be locked. Password requirements are as follows.
+#  At least 8 characters.
+#  At least one lowercase letter.
+#  At least one uppercase letter.
+#  At least one digit.
+#  At least one special character from @$!%*?&
+# X-Env-Var-user1pass-Required: n
+# X-Env-Var-user1pass-Valid: regex:^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$
+# X-Env-Var-user1pass-Set: n
+#
+# X-Env-Var-locale1: en_GB.UTF-8
+# X-Env-Var-locale1-Desc: The default system locale.
+# X-Env-Var-locale1-Required: n
+# X-Env-Var-locale1-Valid: string
+# X-Env-Var-locale1-Set: y
+#
+# X-Env-Var-keyboard_keymap: gb
+# X-Env-Var-keyboard_keymap-Desc: The default system keyboard map.
+# X-Env-Var-keyboard_keymap-Required: n
+# X-Env-Var-keyboard_keymap-Valid: string
+# X-Env-Var-keyboard_keymap-Set: y
+#
+# X-Env-Var-keyboard_layout: English (UK)
+# X-Env-Var-keyboard_layout-Desc: The default system keyboard layout. See
+#  debconf-show keyboard-configuration keyboard-configuration/xkb-keymap
+# X-Env-Var-keyboard_layout-Required: n
+# X-Env-Var-keyboard_layout-Valid: string
+# X-Env-Var-keyboard_layout-Set: y
+#
+# X-Env-Var-timezone: Europe/London
+# X-Env-Var-timezone-Desc: The default system timezone defined by IANA.
+# X-Env-Var-timezone-Required: n
+# X-Env-Var-timezone-Valid: string
+# X-Env-Var-timezone-Set: y
+#
+# X-Env-Var-storage_type: sd
+# X-Env-Var-storage_type-Desc: Device storage media type.
+# X-Env-Var-storage_type-Required: n
+# X-Env-Var-storage_type-Valid: sd,emmc,nvme
+# X-Env-Var-storage_type-Set: lazy
+#
+# X-Env-Var-sector_size: 512
+# X-Env-Var-sector_size-Desc: Logical sector size of the device storage for which
+#  the image is intended. The output raw image file size will be a multiple of
+#  this value.
+# X-Env-Var-sector_size-Required: n
+# X-Env-Var-sector_size-Valid: int:512-512
+# X-Env-Var-sector_size-Set: y
+#
+# X-Env-Var-assetdir: /dev/null
+# X-Env-Var-assetdir-Desc: Device specific asset location. Use this directory
+#  to hold configuration files, scripts, certificates, Device Tree source, wifi
+#  regulatory domains, firmware blobs, overlays, etc particular to the device.
+# X-Env-Var-assetdir-Required: n
+# X-Env-Var-assetdir-Valid: string
+# X-Env-Var-assetdir-Set: lazy
+#
+# X-Env-Var-prebuild: ${IGconf_device_assetdir}/pre-build.sh
+# X-Env-Var-prebuild-Desc: Pre-build hook. If found and executable, this script
+#  will be executed from its parent directory before the filesystem build
+#  commences.
+#  Example use: Device specific pre-build validation
+# X-Env-Var-prebuild-Required: n
+# X-Env-Var-prebuild-Valid: string
+# X-Env-Var-prebuild-Set: lazy
+#
+# X-Env-Var-postbuild: ${IGconf_device_assetdir}/post-build.sh
+# X-Env-Var-postbuild-Desc: Post-build hook. If found and executable, this script
+#  will be executed from its parent directory after the filesystem build has
+#  completed.
+#  Example use: Installation of device specific assets
+# X-Env-Var-postbuild-Required: n
+# X-Env-Var-postbuild-Valid: string
+# X-Env-Var-postbuild-Set: lazy
+#
+# X-Env-Var-preimage: ${IGconf_device_assetdir}/pre-image.sh
+# X-Env-Var-preimage-Desc: Pre-image hook. If found and executable, this script
+#  will executed from its parent directory before image creation commences.
+# X-Env-Var-preimage-Required: n
+# X-Env-Var-preimage-Valid: string
+# X-Env-Var-preimage-Set: lazy
+#
+# X-Env-Var-postimage: ${IGconf_device_assetdir}/post-image.sh
+# X-Env-Var-postimage-Desc: Post-image hook. If found and executable, this script
+#  will be executed from its parent directory after image creation has
+#  completed.
+#  Example use: Signing image assets with device specific keys.
+# X-Env-Var-postimage-Required: n
+# X-Env-Var-postimage-Valid: string
+# X-Env-Var-postimage-Set: lazy
+#
+# METAEND
+---

@@ -1,0 +1,47 @@
+#!/bin/sh
+
+# safe userspec chroot wrapper as local user IGconf_device_user1 with shell
+# command execution.
+# This user is created by rpi-user-credentials as a valid regular local user
+# with home dir. The command is 
+set -u
+
+if [ $# -eq 0 ]; then
+   >&2 echo "uchroot <chroot_path> [command...]"
+   exit 1
+fi
+
+if [ -z "${IGconf_device_user1:-}" ]; then
+   >&2 echo "uchroot: IGconf_device_user1 not set"
+   exit 1
+fi
+
+if [ ! -d "$1" ]; then
+   >&2 echo "uchroot: dir '$1' is invalid"
+   exit 1
+fi
+
+dir="$1"
+shift
+
+if [ -r "${dir}/etc/passwd" ]; then
+   spec=$(grep "^$IGconf_device_user1:" "${dir}/etc/passwd" 2>/dev/null || true)
+   if [ -n "$spec" ]; then
+      # home is 6th field
+      home_dir=$(echo "$spec" | cut -d: -f6)
+      if [ -d "${dir}${home_dir}" ]; then
+         # GID is 4th field
+         user_gid=$(echo "$spec" | cut -d: -f4)
+         userspec="${IGconf_device_user1}:${user_gid}"
+
+         USER="$IGconf_device_user1" \
+         LOGNAME="$IGconf_device_user1" \
+         HOME="$home_dir" \
+         chroot --userspec "$userspec" "$dir" /bin/sh -c "$*"
+         exit $?
+      fi
+   fi
+fi
+
+>&2 echo "uchroot: User '$IGconf_device_user1' does not exist"
+exit 1

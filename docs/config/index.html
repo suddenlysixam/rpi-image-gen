@@ -1,0 +1,1089 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>rpi-image-gen Documentation</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 1200px; margin: 0 auto; padding: 20px; line-height: 1.6; }
+        .content { margin-bottom: 40px; }
+        .layer-list { margin-bottom: 30px; }
+        .layer-item { margin-bottom: 8px; }
+        .layer-item a { text-decoration: none; color: #007acc; font-weight: 500; }
+        .layer-item a:hover { text-decoration: underline; }
+        .layer-desc { color: #666; margin-left: 10px; }
+        /* Main content headers styling */
+        h1, h2, h3, h4, h5, h6 { color: #333; margin-top: 20px; margin-bottom: 10px; }
+        h1 a, h2 a, h3 a, h4 a, h5 a, h6 a { color: #333; text-decoration: none; }
+        h3 { color: #000; border-bottom: 1px solid #eee; padding-bottom: 5px; margin-top: 30px; margin-bottom: 15px; }
+        /* AsciiDoc table styling */
+        .tableblock { border-collapse: collapse; margin: 1.25em 0; table-layout: fixed !important; }
+        .tableblock.frame-all { border: 1px solid #dedede; }
+        .tableblock.grid-all th, .tableblock.grid-all td { border: 1px solid #dedede; }
+        .tableblock.stretch { table-layout: fixed !important; }
+        .tableblock.frame-all.grid-all.stretch { table-layout: fixed !important; }
+        .tableblock th, .tableblock td { padding: 0.5625em 0.625em; text-align: left; vertical-align: top; }
+        .tableblock th { background: #f8f9fa; font-weight: 600; color: rgba(0,0,0,.8); }
+        .tableblock tbody tr:nth-child(even) { background: #f8f8f7; }
+        .tableblock p { margin: 0; line-height: 1.6; }
+        .tableblock .halign-left { text-align: left; }
+        .tableblock .halign-center { text-align: center; }
+        .tableblock .halign-right { text-align: right; }
+        .tableblock .valign-top { vertical-align: top; }
+        .tableblock .valign-middle { vertical-align: middle; }
+        .tableblock .valign-bottom { vertical-align: bottom; }
+
+        /* Simple code block styling */
+        .listingblock pre {
+            background: #f8f9fa;
+            border: 1px solid #ddd;
+            padding: 12px;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-family: monospace;
+            font-size: 14px;
+        }
+        .listingblock pre code {
+            background: none;
+            border: none;
+            padding: 0;
+        }
+
+        /* AsciiDoc admonition blocks (NOTE, TIP, WARNING, etc.) */
+        .admonitionblock {
+            margin: 1.5em 0;
+            padding: 0.4em 0.6em;
+            border-left: 4px solid;
+            background: #f8f9fa;
+            border-radius: 0 4px 4px 0;
+        }
+
+        .admonitionblock .title {
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 0.85em;
+            margin-bottom: 0.25em;
+            letter-spacing: 0.5px;
+        }
+
+        .admonitionblock .content {
+            margin: 0;
+        }
+
+        /* Reduce spacing for paragraphs inside admonitions */
+        .admonitionblock p {
+            margin: 0.25em 0;
+        }
+
+        .admonitionblock p:first-child {
+            margin-top: 0;
+        }
+
+        .admonitionblock p:last-child {
+            margin-bottom: 0;
+        }
+
+        /* Specific admonition types */
+        .admonitionblock.note {
+            border-color: #17a2b8;
+            background: #d1ecf1;
+        }
+
+        .admonitionblock.note .title {
+            color: #0c5460;
+        }
+
+        .admonitionblock.tip {
+            border-color: #28a745;
+            background: #d4edda;
+        }
+
+        .admonitionblock.tip .title {
+            color: #155724;
+        }
+
+        .admonitionblock.important {
+            border-color: #ffc107;
+            background: #fff3cd;
+        }
+
+        .admonitionblock.important .title {
+            color: #856404;
+        }
+
+        .admonitionblock.warning,
+        .admonitionblock.caution {
+            border-color: #dc3545;
+            background: #f8d7da;
+        }
+
+        .admonitionblock.warning .title,
+        .admonitionblock.caution .title {
+            color: #721c24;
+        }
+    </style>
+</head>
+<body>
+    <div class="content">
+        <div id="toc" class="toc">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#_overview">Overview</a></li>
+<li><a href="#_core_architecture">Core Architecture</a>
+<ul class="sectlevel2">
+<li><a href="#_variable_naming_convention">Variable Naming Convention</a></li>
+<li><a href="#_layer_variable_declaration">Layer Variable Declaration</a>
+<ul class="sectlevel3">
+<li><a href="#_variable_declaration_metadata">Variable Declaration Metadata</a></li>
+<li><a href="#_variable_prefix">Variable Prefix</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#_configuration_file_support">Configuration File Support</a>
+<ul class="sectlevel2">
+<li><a href="#_yaml_configuration_format">YAML Configuration Format</a></li>
+<li><a href="#_ini_configuration_format">INI Configuration Format</a></li>
+<li><a href="#_configuration_includes">Configuration Includes</a>
+<ul class="sectlevel3">
+<li><a href="#_yaml_includes">YAML Includes</a></li>
+<li><a href="#_ini_includes">INI Includes</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#_variable_sources_and_precedence">Variable Sources and Precedence</a>
+<ul class="sectlevel2">
+<li><a href="#_command_line_overrides">Command Line Overrides</a></li>
+</ul>
+</li>
+<li><a href="#_variable_expansion">Variable Expansion</a>
+<ul class="sectlevel2">
+<li><a href="#_environment_variable_expansion">Environment Variable Expansion</a></li>
+<li><a href="#_cross_reference_expansion">Cross-Reference Expansion</a></li>
+<li><a href="#_environment_variable_dependencies">Environment Variable Dependencies</a></li>
+<li><a href="#_expansion_context">Expansion Context</a></li>
+</ul>
+</li>
+<li><a href="#_configuration_loading">Configuration Loading</a>
+<ul class="sectlevel2">
+<li><a href="#_processing_overview">Processing Overview</a></li>
+</ul>
+</li>
+<li><a href="#_command_line_interface">Command Line Interface</a>
+<ul class="sectlevel2">
+<li><a href="#_config_command">Config Command</a></li>
+<li><a href="#_config_generation">Config Generation</a></li>
+</ul>
+</li>
+<li><a href="#_integration_with_layer_system">Integration with Layer System</a>
+<ul class="sectlevel2">
+<li><a href="#_layer_variable_discovery">Layer Variable Discovery</a></li>
+<li><a href="#_variable_policies">Variable Policies</a></li>
+<li><a href="#_layer_build_order">Layer Build Order</a></li>
+</ul>
+</li>
+<li><a href="#_best_practices">Best Practices</a>
+<ul class="sectlevel2">
+<li><a href="#_configuration_organisation">Configuration Organisation</a></li>
+<li><a href="#_variable_naming">Variable Naming</a></li>
+<li><a href="#_file_structure">File Structure</a></li>
+<li><a href="#_variable_expansion_security">Variable Expansion Security</a></li>
+</ul>
+</li>
+<li><a href="#_error_handling_and_debugging">Error Handling and Debugging</a>
+<ul class="sectlevel2">
+<li><a href="#_common_configuration_issues">Common Configuration Issues</a></li>
+<li><a href="#_debugging_configuration">Debugging Configuration</a></li>
+<li><a href="#_output_interpretation">Output Interpretation</a></li>
+</ul>
+</li>
+<li><a href="#_migration_and_compatibility">Migration and Compatibility</a>
+<ul class="sectlevel2">
+<li><a href="#_ini_to_yaml_migration">INI to YAML Migration</a></li>
+<li><a href="#_backward_compatibility">Backward Compatibility</a></li>
+</ul>
+</li>
+<li><a href="#_performance_considerations">Performance Considerations</a>
+<ul class="sectlevel2">
+<li><a href="#_configuration_loading_performance">Configuration Loading Performance</a></li>
+</ul>
+</li>
+<li><a href="#_summary">Summary</a></li>
+</ul>
+</div>
+<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p><a href="../index.html">← Back to Main Documentation</a></p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_overview"><a class="anchor" href="#_overview"></a><a class="link" href="#_overview">Overview</a></h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>rpi-image-gen provides a flexible, hierarchical approach to managing build variables through multiple configuration sources with clear precedence rules. The system is built around the <code>IGconf_</code> prefix namespace and supports both INI and YAML file formats.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_core_architecture"><a class="anchor" href="#_core_architecture"></a><a class="link" href="#_core_architecture">Core Architecture</a></h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_variable_naming_convention"><a class="anchor" href="#_variable_naming_convention"></a><a class="link" href="#_variable_naming_convention">Variable Naming Convention</a></h3>
+<div class="paragraph">
+<p>All configuration variables in rpi-image-gen use the <code>IGconf_</code> prefix followed by a structured naming pattern:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>IGconf_&lt;section&gt;_&lt;key&gt;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Where:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>section</strong>: Logical grouping (e.g., <code>device</code>, <code>image</code>)</p>
+</li>
+<li>
+<p><strong>key</strong>: Specific configuration parameter (e.g., <code>class</code>, <code>storage_type</code>, <code>hostname</code>)</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Example variables:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-bash" data-lang="bash">IGconf_device_class=pi5
+IGconf_device_storage_type=sd
+IGconf_image_compression=zstd</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_layer_variable_declaration"><a class="anchor" href="#_layer_variable_declaration"></a><a class="link" href="#_layer_variable_declaration">Layer Variable Declaration</a></h3>
+<div class="paragraph">
+<p>Variables are declared by layer YAML files using metadata headers within comment blocks:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-yaml" data-lang="yaml"># METABEGIN
+# X-Env-Layer-Name: rpi5
+# X-Env-Layer-Category: device
+# X-Env-Layer-Desc: Raspberry Pi 5 specific device layer
+#
+# X-Env-VarPrefix: device
+#
+# X-Env-Var-class: pi5
+# X-Env-Var-class-Desc: Device class
+# X-Env-Var-class-Required: n
+# X-Env-Var-class-Valid: keywords:pi5
+# X-Env-Var-class-Set: y
+#
+# X-Env-Var-storage_type: sd
+# X-Env-Var-storage_type-Desc: Pi5 storage type
+# X-Env-Var-storage_type-Required: n
+# X-Env-Var-storage_type-Valid: sd,nvme
+# X-Env-Var-storage_type-Set: y
+# METAEND</code></pre>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_variable_declaration_metadata"><a class="anchor" href="#_variable_declaration_metadata"></a><a class="link" href="#_variable_declaration_metadata">Variable Declaration Metadata</a></h4>
+<div class="paragraph">
+<p>Each variable declaration includes several metadata fields:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>X-Env-Var-&lt;name&gt;</strong>: Default value for the variable</p>
+</li>
+<li>
+<p><strong>X-Env-Var-&lt;name&gt;-Desc</strong>: Human-readable description</p>
+</li>
+<li>
+<p><strong>X-Env-Var-&lt;name&gt;-Required</strong>: Whether the variable is required (<code>y</code>/<code>n</code>)</p>
+</li>
+<li>
+<p><strong>X-Env-Var-&lt;name&gt;-Valid</strong>: Validation rules (keywords, patterns, etc.)</p>
+</li>
+<li>
+<p><strong>X-Env-Var-&lt;name&gt;-Set</strong>: Variable assignment policy</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_variable_prefix"><a class="anchor" href="#_variable_prefix"></a><a class="link" href="#_variable_prefix">Variable Prefix</a></h4>
+<div class="paragraph">
+<p>The <code>X-Env-VarPrefix</code> field specifies the section name used in the <code>IGconf_</code> namespace:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>X-Env-VarPrefix: device</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Results in variables like:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-bash" data-lang="bash">IGconf_device_class=pi5
+IGconf_device_storage_type=sd</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_configuration_file_support"><a class="anchor" href="#_configuration_file_support"></a><a class="link" href="#_configuration_file_support">Configuration File Support</a></h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The configuration system supports both INI and YAML file formats with automatic format detection based on file extension.</p>
+</div>
+<div class="sect2">
+<h3 id="_yaml_configuration_format"><a class="anchor" href="#_yaml_configuration_format"></a><a class="link" href="#_yaml_configuration_format">YAML Configuration Format</a></h3>
+<div class="paragraph">
+<p>YAML provides the most flexible configuration format with native support for hierarchical data and includes:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-yaml" data-lang="yaml">include:
+  file: base.yaml
+
+device:
+  class: pi5
+  storage_type: sd
+  hostname: ${IGconf_device_class}-$(tr -dc 'a-z' &lt; /dev/urandom | head -c 6)
+
+image:
+  compression: zstd
+  boot_part_size: 200%
+  root_part_size: 300%</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_ini_configuration_format"><a class="anchor" href="#_ini_configuration_format"></a><a class="link" href="#_ini_configuration_format">INI Configuration Format</a></h3>
+<div class="paragraph">
+<p>INI format provides traditional section-based configuration:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-ini" data-lang="ini">!include base.cfg
+
+[device]
+class = pi5
+storage_type = sd
+hostname = ${IGconf_device_class}-$(tr -dc 'a-z' &lt; /dev/urandom | head -c 6)
+
+[image]
+compression = zstd
+boot_part_size = 200%
+root_part_size = 300%</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_configuration_includes"><a class="anchor" href="#_configuration_includes"></a><a class="link" href="#_configuration_includes">Configuration Includes</a></h3>
+<div class="paragraph">
+<p>Both formats support including other configuration files to promote reusability and modularity. The include precedence order is shown in the table below.</p>
+</div>
+<table class="tableblock frame-all grid-all stripes-even stretch">
+<colgroup>
+<col style="width: 8.3333%;">
+<col style="width: 50%;">
+<col style="width: 41.6667%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Priority</th>
+<th class="tableblock halign-left valign-top">Source</th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">1 (Highest)</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Parent directory of the including file</p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">2</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">&lt;src dir&gt;/config</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The source directory if specified via the command line</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">3 (Lowest)</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">&lt;built-in&gt;/config</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Default in-tree location, eg <code><code>/usr/share/rpi-image-gen/config/</code></code></p></td>
+</tr>
+</tbody>
+</table>
+<div class="sect3">
+<h4 id="_yaml_includes"><a class="anchor" href="#_yaml_includes"></a><a class="link" href="#_yaml_includes">YAML Includes</a></h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-yaml" data-lang="yaml">include:
+  file: shared/base.yaml</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_ini_includes"><a class="anchor" href="#_ini_includes"></a><a class="link" href="#_ini_includes">INI Includes</a></h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-ini" data-lang="ini">!include shared/base.cfg</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Therefore, included files are resolved using:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p><strong>Parent directory</strong></p>
+</li>
+<li>
+<p><strong>Search path</strong></p>
+</li>
+</ol>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_variable_sources_and_precedence"><a class="anchor" href="#_variable_sources_and_precedence"></a><a class="link" href="#_variable_sources_and_precedence">Variable Sources and Precedence</a></h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The configuration system supports multiple variable sources with a clear precedence hierarchy:</p>
+</div>
+<table class="tableblock frame-all grid-all stripes-even stretch">
+<colgroup>
+<col style="width: 8.3333%;">
+<col style="width: 50%;">
+<col style="width: 41.6667%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Priority</th>
+<th class="tableblock halign-left valign-top">Source</th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">1 (Highest)</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Command Line Overrides</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Variables specified after <code>--</code> on the command line</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">2</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Configuration Files</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">INI or YAML configuration files</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">3 (Lowest)</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Layer Defaults</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Default values declared in layer metadata</p></td>
+</tr>
+</tbody>
+</table>
+<div class="sect2">
+<h3 id="_command_line_overrides"><a class="anchor" href="#_command_line_overrides"></a><a class="link" href="#_command_line_overrides">Command Line Overrides</a></h3>
+<div class="paragraph">
+<p>Variables can be set directly on the command line as overrides after <code>--</code>, taking the highest precedence:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-bash" data-lang="bash">rpi-image-gen build -c config.yaml -- IGconf_device_class=pi5 IGconf_image_compression=xz</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_variable_expansion"><a class="anchor" href="#_variable_expansion"></a><a class="link" href="#_variable_expansion">Variable Expansion</a></h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The configuration system supports variable expansion in configuration values using shell-style syntax:</p>
+</div>
+<div class="sect2">
+<h3 id="_environment_variable_expansion"><a class="anchor" href="#_environment_variable_expansion"></a><a class="link" href="#_environment_variable_expansion">Environment Variable Expansion</a></h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-yaml" data-lang="yaml">device:
+  name: controllerbox
+  rev: 2
+  hostname: ${IGconf_device_name}-$(uuidgen | cut -d'-' -f1)
+
+image:
+  assetdir: ${WORKSPACE}/build/assets/${IGconf_device_name}-rev${IGconf_device_rev}
+
+ssh:
+  pubkey_user1=$(&lt; ${DEPLOY}/device/baseassets/id_rsa.pub)
+  pubkey_only=y</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_cross_reference_expansion"><a class="anchor" href="#_cross_reference_expansion"></a><a class="link" href="#_cross_reference_expansion">Cross-Reference Expansion</a></h3>
+<div class="paragraph">
+<p>Variables can reference other configuration variables:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-yaml" data-lang="yaml">device:
+  class: pi5
+  hostname: ${IGconf_device_class}-server
+
+image:
+  name: ${IGconf_device_class}-custom-image</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_environment_variable_dependencies"><a class="anchor" href="#_environment_variable_dependencies"></a><a class="link" href="#_environment_variable_dependencies">Environment Variable Dependencies</a></h3>
+<div class="paragraph">
+<p>Layer dependencies can use environment variable expansion to create dynamic dependency resolution:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-yaml" data-lang="yaml"># METABEGIN
+# X-Env-Layer-Name: arch-specific-tools
+# X-Env-Layer-Requires: base-layer,${ARCH}-toolchain,${DISTRO}-packages
+# METAEND</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This allows layers to dynamically depend on other layers based on build-time environment variables:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-bash" data-lang="bash"># Set environment variables before processing
+export ARCH=arm64
+export DISTRO=debian
+
+# Layer dependencies will be equivalent to:
+# X-Env-Layer-Requires: base-layer, arm64-toolchain, debian-packages</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This feature enables dynamic layer selection. For example, one usage could be to use the same layer across different build environments to support toolchain selection based on target architecture. By using variables in the 'parent' layer, dynamic dependency resolution pulls in an architecture specific toolchain 'child' layer.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>Layer discovery will fail if variables referenced in dependencies are not set in the environment.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Important</div>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>Environment variable dependencies are evaluated during layer discovery, not during layer variable expansion. This ensures dependencies are resolved before layer processing begins. Because of this, only variables <strong>already present</strong> in the environment can be used in layer dependencies.</p>
+</div>
+<div class="paragraph">
+<p>For example:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>System or custom environment variables (e.g., <code>USER</code>, <code>ARCH</code>, <code>DISTRO</code>)</p>
+</li>
+<li>
+<p>Configuration file variables or command line overrides</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>All dependencies are always included, i.e. variable names result in actual layer names at build-time. For example, <code>${ARCH}-toolchain</code> always results in a dependency, but the specific layer name depends on the <code>ARCH</code> environment variable value.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_expansion_context"><a class="anchor" href="#_expansion_context"></a><a class="link" href="#_expansion_context">Expansion Context</a></h3>
+<div class="paragraph">
+<p>During configuration processing, variables are expanded using:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p><strong>Previously loaded configuration values</strong></p>
+</li>
+<li>
+<p><strong>System environment variables</strong> (for shell-style expansion like <code>${HOME}</code>)</p>
+</li>
+<li>
+<p>A <strong>Strict Policy</strong> (using <code>bash</code> under <code>set -eu</code>). This means:</p>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>errexit (set -e)</strong>: Exit immediately if any command returns a non-zero exit status, including when variable expansion fails or returns an error.</p>
+</li>
+<li>
+<p><strong>nounset (set -u)</strong>: Treat unset variables as errors during expansion - attempting to expand a variable that hasn&#8217;t been set will exit with an error instead of expanding to an empty string.</p>
+</li>
+<li>
+<p>When these are combined, variable expansion is strict and fails quickly. Any attempt to expand an undefined variable will cause the build to exit immediately.</p>
+</li>
+</ul>
+</div>
+</li>
+</ol>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>There may be a need to handle non-alphanumeric characters in config files and/or command line arguments. Best practices advise encapsulating the text for a more robust approach, even if it&#8217;s not always technically necessary. For YAML files, use single quotes for literal strings. For example <code>password: 'Fo0bar!!'</code>. For INI files, quote values containing special characters. For example <code>password = "Fo0bar!!"</code>. For command line arguments, use single quotes to preserve the literal text. For example <code>rpi-image-gen build -c &lt;args&gt;&#8201;&#8212;&#8201;IGconf_device_user1pass='Fo0bar!!'</code>.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_configuration_loading"><a class="anchor" href="#_configuration_loading"></a><a class="link" href="#_configuration_loading">Configuration Loading</a></h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_processing_overview"><a class="anchor" href="#_processing_overview"></a><a class="link" href="#_processing_overview">Processing Overview</a></h3>
+<div class="paragraph">
+<p>The configuration system processes files using the following steps:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p><strong>Parse main configuration file</strong> - Automatically detects INI or YAML format</p>
+</li>
+<li>
+<p><strong>Process includes recursively</strong> - Follows include directives with circular dependency detection</p>
+</li>
+<li>
+<p><strong>Apply command line overrides</strong> - Processes variables specified after <code>--</code></p>
+</li>
+<li>
+<p><strong>Expand variables</strong> - Resolves variable references using configuration context</p>
+</li>
+<li>
+<p><strong>Set environment variables</strong> - Applies final values following precedence rules</p>
+</li>
+<li>
+<p><strong>Generate output</strong> - Either loads into environment or writes to file</p>
+</li>
+</ol>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_command_line_interface"><a class="anchor" href="#_command_line_interface"></a><a class="link" href="#_command_line_interface">Command Line Interface</a></h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_config_command"><a class="anchor" href="#_config_command"></a><a class="link" href="#_config_command">Config Command</a></h3>
+<div class="paragraph">
+<p>The <code>config</code> command provides direct access to configuration functionality:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-bash" data-lang="bash"># Load all sections into environment
+rpi-image-gen config myconfig.yaml
+
+# Load specific section
+rpi-image-gen config myconfig.yaml --section device
+
+# Write resolved config to file
+rpi-image-gen config myconfig.yaml --write-to build.env
+
+# Use command line overrides
+rpi-image-gen config myconfig.yaml -- IGconf_device_class=pi5 IGconf_image_compression=xz
+
+# Custom include search paths
+rpi-image-gen config myconfig.yaml --path "./config:./shared:./templates"
+
+# Disable variable expansion
+rpi-image-gen config myconfig.yaml --no-expand
+
+# Combine options with overrides
+rpi-image-gen config myconfig.yaml --section device --write-to build.env -- IGconf_device_class=pi5</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_config_generation"><a class="anchor" href="#_config_generation"></a><a class="link" href="#_config_generation">Config Generation</a></h3>
+<div class="paragraph">
+<p>Generate example configuration files:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-bash" data-lang="bash"># Generate boilerplate INI and YAML examples
+rpi-image-gen config --gen
+
+# Migrate INI to YAML format
+rpi-image-gen config legacy.cfg --migrate &gt; modern.yaml</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_integration_with_layer_system"><a class="anchor" href="#_integration_with_layer_system"></a><a class="link" href="#_integration_with_layer_system">Integration with Layer System</a></h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_layer_variable_discovery"><a class="anchor" href="#_layer_variable_discovery"></a><a class="link" href="#_layer_variable_discovery">Layer Variable Discovery</a></h3>
+<div class="paragraph">
+<p>The configuration system integrates with the layer management system to:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p><strong>Discover declared variables</strong> from layer metadata</p>
+</li>
+<li>
+<p><strong>Validate variable values</strong> against declared constraints</p>
+</li>
+<li>
+<p><strong>Apply variable policies</strong> (immediate, lazy, force, skip)</p>
+</li>
+<li>
+<p><strong>Resolve variable dependencies</strong> between layers</p>
+</li>
+</ol>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_variable_policies"><a class="anchor" href="#_variable_policies"></a><a class="link" href="#_variable_policies">Variable Policies</a></h3>
+<div class="paragraph">
+<p>Variables support different assignment policies:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>immediate</strong>: Set the variable if it is currently unset (first-wins strategy). This is the default behavior.</p>
+</li>
+<li>
+<p><strong>lazy</strong>: Applied after all layers are processed (last-wins strategy). Useful for defaults that can be overridden.</p>
+</li>
+<li>
+<p><strong>force</strong>: Always overwrite existing environment value, regardless of what was set before.</p>
+</li>
+<li>
+<p><strong>skip</strong>: Never set the variable.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Refer to the layer documentation for further details.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_layer_build_order"><a class="anchor" href="#_layer_build_order"></a><a class="link" href="#_layer_build_order">Layer Build Order</a></h3>
+<div class="paragraph">
+<p>Variables are processed in layer dependency order, ensuring that:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p><strong>Base layer variables</strong> are available to dependent layers</p>
+</li>
+<li>
+<p><strong>Variable expansion</strong> can reference previously set values</p>
+</li>
+<li>
+<p><strong>Validation</strong> occurs with complete variable context</p>
+</li>
+</ol>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_best_practices"><a class="anchor" href="#_best_practices"></a><a class="link" href="#_best_practices">Best Practices</a></h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_configuration_organisation"><a class="anchor" href="#_configuration_organisation"></a><a class="link" href="#_configuration_organisation">Configuration Organisation</a></h3>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p><strong>Use base configurations</strong> for common settings across builds</p>
+</li>
+<li>
+<p><strong>Layer-specific overrides</strong> in focused configuration files</p>
+</li>
+<li>
+<p><strong>Environment-specific values</strong> in separate configuration files</p>
+</li>
+<li>
+<p><strong>Runtime overrides</strong> via command-line arguments after <code>--</code></p>
+</li>
+</ol>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_variable_naming"><a class="anchor" href="#_variable_naming"></a><a class="link" href="#_variable_naming">Variable Naming</a></h3>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p><strong>Follow prefix conventions</strong> with logical section grouping</p>
+</li>
+<li>
+<p><strong>Use descriptive names</strong> that indicate purpose and scope</p>
+</li>
+<li>
+<p><strong>Consistent naming patterns</strong> within configuration sections</p>
+</li>
+</ol>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_file_structure"><a class="anchor" href="#_file_structure"></a><a class="link" href="#_file_structure">File Structure</a></h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>config/
+├── base.yaml              # Common base configuration
+├── environments/
+│   ├── development.yaml   # Development overrides
+│   ├── staging.yaml      # Staging overrides
+│   └── production.yaml   # Production overrides
+└── variants/
+    ├── local.yaml       # Local development settings
+    └── ci.yaml          # CI/CD specific settings</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_variable_expansion_security"><a class="anchor" href="#_variable_expansion_security"></a><a class="link" href="#_variable_expansion_security">Variable Expansion Security</a></h3>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p><strong>Validate input</strong> in configuration files to prevent injection</p>
+</li>
+<li>
+<p><strong>Limit variable scope</strong> to prevent unintended expansion</p>
+</li>
+<li>
+<p><strong>Use quotes</strong> for values containing special characters</p>
+</li>
+<li>
+<p><strong>Test expansion</strong> in controlled environments before production</p>
+</li>
+</ol>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_error_handling_and_debugging"><a class="anchor" href="#_error_handling_and_debugging"></a><a class="link" href="#_error_handling_and_debugging">Error Handling and Debugging</a></h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_common_configuration_issues"><a class="anchor" href="#_common_configuration_issues"></a><a class="link" href="#_common_configuration_issues">Common Configuration Issues</a></h3>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Circular includes</strong>: Detected automatically with clear error messages</p>
+</li>
+<li>
+<p><strong>Missing include files</strong>: Searches all configured paths before failing</p>
+</li>
+<li>
+<p><strong>Invalid YAML/INI syntax</strong>: Provides line numbers and context</p>
+</li>
+<li>
+<p><strong>Undefined variable expansion</strong>: Fails fast with variable name</p>
+</li>
+<li>
+<p><strong>Section/key conflicts</strong>: Resolved by precedence rules</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_debugging_configuration"><a class="anchor" href="#_debugging_configuration"></a><a class="link" href="#_debugging_configuration">Debugging Configuration</a></h3>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p><strong>Use <code>--write-to</code></strong> to see resolved variable values</p>
+</li>
+<li>
+<p><strong>Check precedence</strong> with CFG/OVR output prefixes</p>
+</li>
+<li>
+<p><strong>Validate includes</strong> by examining search path messages</p>
+</li>
+<li>
+<p><strong>Run interactively</strong> to allow a pseudo 'dry-run' stepped flow</p>
+</li>
+<li>
+<p><strong>Test expansion</strong> with simple configuration files</p>
+</li>
+</ol>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_output_interpretation"><a class="anchor" href="#_output_interpretation"></a><a class="link" href="#_output_interpretation">Output Interpretation</a></h3>
+<div class="paragraph">
+<p>Configuration loading outputs show variable sources:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>CFG IGconf_device_class=pi5         # From configuration file
+OVR IGconf_device_hostname=pi5-test  # From command line override</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Layer collection output shows variable policy and evaluated value:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code> [SET]  IGconf_device_class=pi5 (layer: rpi5)
+ [SKIP]  IGconf_device_hostname (already set)
+ [LAZY]  IGconf_device_variant=none (layer: device-base)</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_migration_and_compatibility"><a class="anchor" href="#_migration_and_compatibility"></a><a class="link" href="#_migration_and_compatibility">Migration and Compatibility</a></h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_ini_to_yaml_migration"><a class="anchor" href="#_ini_to_yaml_migration"></a><a class="link" href="#_ini_to_yaml_migration">INI to YAML Migration</a></h3>
+<div class="paragraph">
+<p>Use the built-in migration tool:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-bash" data-lang="bash">rpi-image-gen config legacy.cfg --migrate &gt; modern.yaml</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The migration tool:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Preserves include directives</strong> with updated syntax</p>
+</li>
+<li>
+<p><strong>Maintains section structure</strong> and variable relationships</p>
+</li>
+<li>
+<p><strong>Updates file extensions</strong> in include references</p>
+</li>
+<li>
+<p><strong>Adds migration comments</strong> for traceability</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_backward_compatibility"><a class="anchor" href="#_backward_compatibility"></a><a class="link" href="#_backward_compatibility">Backward Compatibility</a></h3>
+<div class="paragraph">
+<p>The configuration system maintains compatibility with:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Existing INI files</strong> through automatic format detection</p>
+</li>
+<li>
+<p><strong>Legacy include syntax</strong> (<code>!include</code> vs <code>include:</code>)</p>
+</li>
+<li>
+<p><strong>Environment variable patterns</strong> used by previous versions</p>
+</li>
+<li>
+<p><strong>Command-line interfaces</strong> with extended functionality</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_performance_considerations"><a class="anchor" href="#_performance_considerations"></a><a class="link" href="#_performance_considerations">Performance Considerations</a></h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_configuration_loading_performance"><a class="anchor" href="#_configuration_loading_performance"></a><a class="link" href="#_configuration_loading_performance">Configuration Loading Performance</a></h3>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Lazy evaluation</strong> of variable expansion where possible</p>
+</li>
+<li>
+<p><strong>Caching of included files</strong> to avoid repeated parsing</p>
+</li>
+<li>
+<p><strong>Minimal environment manipulation</strong> during loading</p>
+</li>
+<li>
+<p><strong>Efficient precedence resolution</strong> without redundant checks</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_summary"><a class="anchor" href="#_summary"></a><a class="link" href="#_summary">Summary</a></h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The rpi-image-gen configuration system provides a robust foundation for managing complex build configurations through:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Hierarchical variable organisation</strong> with the <code>IGconf_</code> namespace</p>
+</li>
+<li>
+<p><strong>Multiple configuration sources</strong> with clear precedence rules</p>
+</li>
+<li>
+<p><strong>Flexible file formats</strong> (INI and YAML) with include support</p>
+</li>
+<li>
+<p><strong>Variable expansion</strong> supporting cross-references and environment integration</p>
+</li>
+<li>
+<p><strong>Layer system integration</strong> for variable discovery and validation</p>
+</li>
+<li>
+<p><strong>Command-line tools</strong> for configuration management and debugging</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+
+    </div>
+
+    
+</body>
+</html>

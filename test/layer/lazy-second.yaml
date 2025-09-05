@@ -1,0 +1,16 @@
+# METABEGIN
+# X-Env-Layer-Name: test-lazy-second
+# X-Env-Layer-Desc: Second layer providing overriding lazy default for PATH variable
+# X-Env-Layer-Version: 1.0.0
+# X-Env-Layer-Category: test
+# X-Env-Layer-Requires: test-lazy-first 
+#
+# X-Env-VarPrefix: lazy
+#
+# X-Env-Var-path: /usr/second
+# X-Env-Var-path-Desc: Overriding lazy default path
+# X-Env-Var-path-Set: lazy
+# METAEND
+
+settings:
+  path: "${IGconf_lazy_path}" 

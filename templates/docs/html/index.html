@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>rpi-image-gen Documentation</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 1200px; margin: 0 auto; padding: 20px; line-height: 1.6; }
+        .content { margin-bottom: 40px; }
+        .layer-list { margin-bottom: 30px; }
+        .layer-item { margin-bottom: 8px; }
+        .layer-item a { text-decoration: none; color: #007acc; font-weight: 500; }
+        .layer-item a:hover { text-decoration: underline; }
+        .layer-desc { color: #666; margin-left: 10px; }
+        /* Main content headers styling */
+        h1, h2, h3, h4, h5, h6 { color: #333; margin-top: 20px; margin-bottom: 10px; }
+        h1 a, h2 a, h3 a, h4 a, h5 a, h6 a { color: #333; text-decoration: none; }
+        h3 { color: #000; border-bottom: 1px solid #eee; padding-bottom: 5px; margin-top: 30px; margin-bottom: 15px; }
+        /* AsciiDoc table styling */
+        .tableblock { border-collapse: collapse; margin: 1.25em 0; table-layout: fixed !important; }
+        .tableblock.frame-all { border: 1px solid #dedede; }
+        .tableblock.grid-all th, .tableblock.grid-all td { border: 1px solid #dedede; }
+        .tableblock.stretch { table-layout: fixed !important; }
+        .tableblock.frame-all.grid-all.stretch { table-layout: fixed !important; }
+        .tableblock th, .tableblock td { padding: 0.5625em 0.625em; text-align: left; vertical-align: top; }
+        .tableblock th { background: #f8f9fa; font-weight: 600; color: rgba(0,0,0,.8); }
+        .tableblock tbody tr:nth-child(even) { background: #f8f8f7; }
+        .tableblock p { margin: 0; line-height: 1.6; }
+        .tableblock .halign-left { text-align: left; }
+        .tableblock .halign-center { text-align: center; }
+        .tableblock .halign-right { text-align: right; }
+        .tableblock .valign-top { vertical-align: top; }
+        .tableblock .valign-middle { vertical-align: middle; }
+        .tableblock .valign-bottom { vertical-align: bottom; }
+
+        /* Simple code block styling */
+        .listingblock pre {
+            background: #f8f9fa;
+            border: 1px solid #ddd;
+            padding: 12px;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-family: monospace;
+            font-size: 14px;
+        }
+        .listingblock pre code {
+            background: none;
+            border: none;
+            padding: 0;
+        }
+
+        /* AsciiDoc admonition blocks (NOTE, TIP, WARNING, etc.) */
+        .admonitionblock {
+            margin: 1.5em 0;
+            padding: 0.4em 0.6em;
+            border-left: 4px solid;
+            background: #f8f9fa;
+            border-radius: 0 4px 4px 0;
+        }
+
+        .admonitionblock .title {
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 0.85em;
+            margin-bottom: 0.25em;
+            letter-spacing: 0.5px;
+        }
+
+        .admonitionblock .content {
+            margin: 0;
+        }
+
+        /* Reduce spacing for paragraphs inside admonitions */
+        .admonitionblock p {
+            margin: 0.25em 0;
+        }
+
+        .admonitionblock p:first-child {
+            margin-top: 0;
+        }
+
+        .admonitionblock p:last-child {
+            margin-bottom: 0;
+        }
+
+        /* Specific admonition types */
+        .admonitionblock.note {
+            border-color: #17a2b8;
+            background: #d1ecf1;
+        }
+
+        .admonitionblock.note .title {
+            color: #0c5460;
+        }
+
+        .admonitionblock.tip {
+            border-color: #28a745;
+            background: #d4edda;
+        }
+
+        .admonitionblock.tip .title {
+            color: #155724;
+        }
+
+        .admonitionblock.important {
+            border-color: #ffc107;
+            background: #fff3cd;
+        }
+
+        .admonitionblock.important .title {
+            color: #856404;
+        }
+
+        .admonitionblock.warning,
+        .admonitionblock.caution {
+            border-color: #dc3545;
+            background: #f8d7da;
+        }
+
+        .admonitionblock.warning .title,
+        .admonitionblock.caution .title {
+            color: #721c24;
+        }
+    </style>
+</head>
+<body>
+    <div class="content">
+        {{ content|safe }}
+    </div>
+
+    {% if layers %}
+    <h2>Available Layers</h2>
+    {% set categories = layers|groupby('category') %}
+    {% for category, category_layers in categories %}
+    <h3>{{ category|title }}</h3>
+    <div class="layer-list">
+        {% for layer in category_layers %}
+        <div class="layer-item">
+            <a href="{{ layer.filename }}">{{ layer.name }}</a><span class="layer-desc">- {{ layer.description }}</span>
+        </div>
+        {% endfor %}
+    </div>
+    {% endfor %}
+    {% endif %}
+</body>
+</html>

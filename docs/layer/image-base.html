@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>image-base - Layer Documentation</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 1200px; margin: 0 auto; padding: 20px; line-height: 1.6; }
+        .header { border-bottom: 2px solid #eee; padding-bottom: 20px; margin-bottom: 30px; }
+        .section { margin-bottom: 30px; }
+        .badge { display: inline-block; background: #007acc; color: white; padding: 2px 8px; border-radius: 3px; font-size: 12px; margin-right: 10px; }
+        .policy-immediate { background: #28a745; color: white; text-decoration: none; }
+        .policy-lazy { background: #ffc107; color: #212529; text-decoration: none; }
+        .policy-force { background: #dc3545; color: white; text-decoration: none; }
+        .policy-skip { background: #6c757d; color: white; text-decoration: none; }
+        .policy-immediate:hover { background: #1e7e34; }
+        .policy-lazy:hover { background: #e0a800; }
+        .policy-force:hover { background: #c82333; }
+        .policy-skip:hover { background: #545b62; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; table-layout: auto; }
+        th, td { text-align: left; padding: 8px 12px; border-bottom: 1px solid #ddd; }
+        th { background: #f8f9fa; font-weight: 600; }
+        td:nth-child(3) {
+            width: auto;
+        }
+        code { background: #f1f3f4; padding: 2px 4px; border-radius: 3px; font-family: 'Monaco', monospace; font-size: 14px; }
+        code.long-default { word-break: break-all; white-space: pre-wrap; display: block; min-width: 30ch; }
+        .back-link { margin-bottom: 20px; }
+        .back-link a { text-decoration: none; color: #007acc; }
+        .deps { display: flex; flex-wrap: wrap; gap: 5px; }
+        .dep-badge { background: #28a745; color: white; padding: 2px 6px; border-radius: 3px; font-size: 11px; text-decoration: none; }
+        .dep-badge:hover { background: #1e7e34; }
+        /* Main content headers styling */
+        h1, h2, h3, h4, h5, h6 { color: #333; margin-top: 20px; margin-bottom: 10px; }
+        /* Companion documentation content styling */
+        .companion-content h1, .companion-content h2, .companion-content h3, .companion-content h4, .companion-content h5, .companion-content h6 { color: #333; margin-top: 20px; margin-bottom: 10px; }
+        .companion-content p { margin: 10px 0; }
+        .companion-content ul, .companion-content ol { margin: 10px 0; padding-left: 30px; }
+        .companion-content blockquote { border-left: 4px solid #007acc; padding-left: 15px; margin: 15px 0; color: #666; background: #f8f9fa; padding: 10px 15px; }
+        .companion-content pre { background: #f8f9fa; padding: 15px; border-radius: 5px; overflow-x: auto; border-left: 4px solid #007acc; }
+        .companion-content table { border: 1px solid #ddd; }
+        .companion-content th, .companion-content td { border: 1px solid #ddd; }
+
+        /* AsciiDoc admonition blocks (NOTE, TIP, WARNING, etc.) */
+        .admonitionblock {
+            margin: 1.5em 0;
+            padding: 0.4em 0.6em;
+            border-left: 4px solid;
+            background: #f8f9fa;
+            border-radius: 0 4px 4px 0;
+        }
+
+        .admonitionblock .title {
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 0.85em;
+            margin-bottom: 0.25em;
+            letter-spacing: 0.5px;
+        }
+
+        .admonitionblock .content {
+            margin: 0;
+        }
+
+        /* Reduce spacing for paragraphs inside admonitions */
+        .admonitionblock p {
+            margin: 0.25em 0;
+        }
+
+        .admonitionblock p:first-child {
+            margin-top: 0;
+        }
+
+        .admonitionblock p:last-child {
+            margin-bottom: 0;
+        }
+
+        /* Specific admonition types */
+        .admonitionblock.note {
+            border-color: #17a2b8;
+            background: #d1ecf1;
+        }
+
+        .admonitionblock.note .title {
+            color: #0c5460;
+        }
+
+        .admonitionblock.tip {
+            border-color: #28a745;
+            background: #d4edda;
+        }
+
+        .admonitionblock.tip .title {
+            color: #155724;
+        }
+
+        .admonitionblock.important {
+            border-color: #ffc107;
+            background: #fff3cd;
+        }
+
+        .admonitionblock.important .title {
+            color: #856404;
+        }
+
+        .admonitionblock.warning,
+        .admonitionblock.caution {
+            border-color: #dc3545;
+            background: #f8d7da;
+        }
+
+        .admonitionblock.warning .title,
+        .admonitionblock.caution .title {
+            color: #721c24;
+        }
+    </style>
+</head>
+<body>
+    <div class="back-link">
+        <a href="index.html">← Back to Layer Index</a>
+    </div>
+
+    <div class="header">
+        <h1>image-base</h1>
+        <span class="badge">image</span>
+        <span class="badge">v1.0.0</span>
+        <p>Default image settings and build attributes.</p>
+    </div>
+
+    
+    <div class="section">
+        <h2>Additional Documentation</h2>
+        <div class="companion-content">
+            <div class="sect1">
+<h2 id="_common_attributes">Common Attributes</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Different image layers are provided to support image generation with a specific footprint while allowing for customisation.
+Unless otherwise stated, the following apply to all image layers:</p>
+</div>
+<div class="paragraph">
+<p><strong>Provider</strong></p>
+</div>
+<div class="paragraph">
+<p>rpi-image-gen uses <a href="https://github.com/pengutronix/genimage" target="_blank" rel="noopener">genimage</a> for creating filesystem images.</p>
+</div>
+<div class="paragraph">
+<p><strong>Default Partition Size</strong></p>
+</div>
+<div class="paragraph">
+<p>Each partition image encapsulated in a disk image has a default size. Typically this is 100% of the filesystem that is created and filled, which means there is no headroom if the filesystem is intended to be writable. Customisation of images should involve setting variables governing size accordingly if the default is not suitable. 100% is likely a suitable size if the partition contains a read-only filesystem such as squashfs.</p>
+</div>
+<div class="paragraph">
+<p><strong>mke2fs.conf</strong></p>
+</div>
+<div class="paragraph">
+<p>In order to ensure ext filesystems are created consistently, image creation involves <code>genimage</code> using a particular <code>mke2fs.conf</code>. Additional options may be passed to <code>mke2fs</code> via the <code>genimage</code> template.</p>
+</div>
+<div class="paragraph">
+<p><strong>vfat</strong></p>
+</div>
+<div class="paragraph">
+<p>When creating FAT filesystems, different options may be passed to <code>mkdosfs(8)</code> by <code>genimage</code> depending on needs.</p>
+</div>
+<div class="paragraph">
+<p><strong>Sparse Images</strong></p>
+</div>
+<div class="paragraph">
+<p>Image layers create sparse images by default. Sparse format means filesystem images with lots of empty space can be transferred and written to device storage in a much shorter time using fastboot when compared with primitive tools such as <code>dd</code>. Other utilities such as <code>bmaptool</code> provide a similar much-improved way for storage handling of large images.  Because <code>genimage</code> can create sparse images itself, this removes the need to use <a href="https://source.android.com" target="_blank" rel="noopener">AOSP</a> tools in the image creation flow.</p>
+</div>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Warning</div>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>Older versions of <code>genimage</code> can be problematic when creating sparse images. For example, <code>genimage</code> v16 currently shipping in Debian Bookworm does not create usable sparse images of vfat filesystems. Raspberry Pi provisioning tools such as <code>rpi-sb-provisioner</code> (<a href="https://github.com/raspberrypi/rpi-sb-provisioner" class="bare">https://github.com/raspberrypi/rpi-sb-provisioner</a>) rely on sparse image format, so it is recommended to use the most up-to-date version of <code>genimage</code> as possible.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+
+        </div>
+    </div>
+    
+
+    
+    <div class="section">
+        <h2>Relationships</h2>
+        
+        <p><strong>Depends on:</strong></p>
+        <div class="deps">
+            <a href="sys-build-base.html" class="dep-badge">sys-build-base</a>
+            <a href="sbom-base.html" class="dep-badge">sbom-base</a>
+            <a href="target-config.html" class="dep-badge">target-config</a>
+            <a href="artefact-base.html" class="dep-badge">artefact-base</a>
+            <a href="deploy-base.html" class="dep-badge">deploy-base</a>
+        </div>
+        
+        
+        <p><strong>Required by:</strong></p>
+        <div class="deps">
+            
+            <a href="image-rota.html" class="dep-badge">image-rota</a>
+            
+            <a href="image-rpios.html" class="dep-badge">image-rpios</a>
+            
+        </div>
+        
+        
+        
+        <p><strong>Requires Provider:</strong> device</p>
+        
+    </div>
+    
+
+    
+    <div class="section">
+        <h2>Configuration Variables</h2>
+        
+        <p><strong>References:</strong>
+        
+        <code>IGconf_sys_workroot</code>, 
+        
+        <code>IGconf_artefact_version</code>
+        
+        </p>
+        
+        
+        <p><strong>Declares</strong> (prefix: <code>image</code>):</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Variable</th>
+                    <th>Description</th>
+                    <th>Default</th>
+                    <th>Validation</th>
+                    <th>Policy</th>
+                </tr>
+            </thead>
+            <tbody>
+                
+                <tr>
+                    <td><code>IGconf_image_suffix</code></td>
+                    <td>The base suffix of generated raw image(s)</td>
+                    <td>
+                       
+                           
+                           <code>img</code>
+                           
+                       
+                    </td>
+                    <td>Non-empty string value</td>
+                    <td>
+                        <a href="variable-validation.html#set-policies" class="badge policy-immediate" title="Click for policy and validation help">immediate</a>
+                    </td>
+                </tr>
+                
+                <tr>
+                    <td><code>IGconf_image_compression</code></td>
+                    <td>Identifier for the compression scheme used when
+ deploying image assets.</td>
+                    <td>
+                       
+                           
+                           <code>none</code>
+                           
+                       
+                    </td>
+                    <td>Must be one of: none, zstd</td>
+                    <td>
+                        <a href="variable-validation.html#set-policies" class="badge policy-immediate" title="Click for policy and validation help">immediate</a>
+                    </td>
+                </tr>
+                
+                <tr>
+                    <td><code>IGconf_image_version</code></td>
+                    <td>Version string of generated images. This always maps
+ to the artefact version.</td>
+                    <td>
+                       
+                           
+                           <code class="long-default">${IGconf_artefact_version}</code>
+                           
+                       
+                    </td>
+                    <td>Non-empty string value</td>
+                    <td>
+                        <a href="variable-validation.html#set-policies" class="badge policy-force" title="Click for policy and validation help">force</a>
+                    </td>
+                </tr>
+                
+                <tr>
+                    <td><code>IGconf_image_name</code></td>
+                    <td>The base name for all generated images</td>
+                    <td>
+                       
+                           
+                           <code class="long-default">rpi-${IGconf_image_version}</code>
+                           
+                       
+                    </td>
+                    <td>Non-empty string value</td>
+                    <td>
+                        <a href="variable-validation.html#set-policies" class="badge policy-immediate" title="Click for policy and validation help">immediate</a>
+                    </td>
+                </tr>
+                
+                <tr>
+                    <td><code>IGconf_image_pmap</code></td>
+                    <td>Set the identifier string for the image Provisioning
+ Map. The Provisioning Map defines how the image will be provisioned on the
+ device for which it's intended. The pmap is an extension of the Image
+ Description JSON file generated by the build. Providing a pmap is optional,
+ but it is mandatory for provisioning the image using Raspberry Pi tools.</td>
+                    <td>
+                       
+                           <code>&lt;empty&gt;</code>
+                       
+                    </td>
+                    <td>String value (may be empty)</td>
+                    <td>
+                        <a href="variable-validation.html#set-policies" class="badge policy-lazy" title="Click for policy and validation help">lazy</a>
+                    </td>
+                </tr>
+                
+                <tr>
+                    <td><code>IGconf_image_outputdir</code></td>
+                    <td>Location of all image build artefacts.</td>
+                    <td>
+                       
+                           
+                           <code class="long-default">${IGconf_sys_workroot}/image-${IGconf_image_name}</code>
+                           
+                       
+                    </td>
+                    <td>Non-empty string value</td>
+                    <td>
+                        <a href="variable-validation.html#set-policies" class="badge policy-immediate" title="Click for policy and validation help">immediate</a>
+                    </td>
+                </tr>
+                
+                <tr>
+                    <td><code>IGconf_image_provider</code></td>
+                    <td>Image generation provider</td>
+                    <td>
+                       
+                           
+                           <code>genimage</code>
+                           
+                       
+                    </td>
+                    <td>Must be one of: genimage</td>
+                    <td>
+                        <a href="variable-validation.html#set-policies" class="badge policy-lazy" title="Click for policy and validation help">lazy</a>
+                    </td>
+                </tr>
+                
+                <tr>
+                    <td><code>IGconf_image_assetdir</code></td>
+                    <td>Image specific asset location. Use this directory
+ to hold image provider templates, geometry configuration, overlays, etc
+ particular to the image layout.</td>
+                    <td>
+                       
+                           
+                           <code>/dev/null</code>
+                           
+                       
+                    </td>
+                    <td>Non-empty string value</td>
+                    <td>
+                        <a href="variable-validation.html#set-policies" class="badge policy-lazy" title="Click for policy and validation help">lazy</a>
+                    </td>
+                </tr>
+                
+                <tr>
+                    <td><code>IGconf_image_pmapfile</code></td>
+                    <td>Full path to the Provisioning Map file. When
+ IGconf_image_pmap is specified, this provides the complete path to the pmap
+ file. If no pmap identifier is set, this variable remains empty.</td>
+                    <td>
+                       
+                           
+                           <code class="long-default">${IGconf_image_pmap:+${IGconf_image_assetdir}/device/provisionmap-${IGconf_image_pmap}.json}</code>
+                           
+                       
+                    </td>
+                    <td>String value (may be empty)</td>
+                    <td>
+                        <a href="variable-validation.html#set-policies" class="badge policy-lazy" title="Click for policy and validation help">lazy</a>
+                    </td>
+                </tr>
+                
+                <tr>
+                    <td><code>IGconf_image_prebuild</code></td>
+                    <td>Pre-build hook. If found and executable, this script
+ will be executed from its parent directory before the filesystem build
+ commences.
+ Example use: Image specific pre-build validation</td>
+                    <td>
+                       
+                           
+                           <code class="long-default">${IGconf_image_assetdir}/pre-build.sh</code>
+                           
+                       
+                    </td>
+                    <td>Non-empty string value</td>
+                    <td>
+                        <a href="variable-validation.html#set-policies" class="badge policy-lazy" title="Click for policy and validation help">lazy</a>
+                    </td>
+                </tr>
+                
+                <tr>
+                    <td><code>IGconf_image_postbuild</code></td>
+                    <td>Post-build hook. If found and executable, this script
+ will be executed from its parent directory after the filesystem build has
+ completed.
+ Example use: Installation of image specific assets</td>
+                    <td>
+                       
+                           
+                           <code class="long-default">${IGconf_image_assetdir}/post-build.sh</code>
+                           
+                       
+                    </td>
+                    <td>Non-empty string value</td>
+                    <td>
+                        <a href="variable-validation.html#set-policies" class="badge policy-lazy" title="Click for policy and validation help">lazy</a>
+                    </td>
+                </tr>
+                
+                <tr>
+                    <td><code>IGconf_image_preimage</code></td>
+                    <td>Pre-image hook. If found and executable, this script
+ will executed from its parent directory before image creation commences.
+ Example use: Creation of genimage templates</td>
+                    <td>
+                       
+                           
+                           <code class="long-default">${IGconf_image_assetdir}/pre-image.sh</code>
+                           
+                       
+                    </td>
+                    <td>Non-empty string value</td>
+                    <td>
+                        <a href="variable-validation.html#set-policies" class="badge policy-lazy" title="Click for policy and validation help">lazy</a>
+                    </td>
+                </tr>
+                
+                <tr>
+                    <td><code>IGconf_image_postimage</code></td>
+                    <td>Post-image hook. If found and executable, this script
+ will be executed from its parent directory after image creation has
+ completed.</td>
+                    <td>
+                       
+                           
+                           <code class="long-default">${IGconf_image_assetdir}/post-image.sh</code>
+                           
+                       
+                    </td>
+                    <td>Non-empty string value</td>
+                    <td>
+                        <a href="variable-validation.html#set-policies" class="badge policy-lazy" title="Click for policy and validation help">lazy</a>
+                    </td>
+                </tr>
+                
+            </tbody>
+        </table>
+        
+    </div>
+    
+
+    
+
+    <div class="section">
+        <h2>Attributes</h2>
+        <p><strong>File:</strong> <code>base/image-base.yaml</code></p>
+        
+    </div>
+</body>
+</html>

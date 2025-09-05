@@ -1,0 +1,12 @@
+# METABEGIN
+# X-Env-Layer-Name: fake-hwclock
+# X-Env-Layer-Desc: Persistent time management for non-RTC systems.
+# X-Env-Layer-Version: 1.0.0
+# METAEND
+---
+mmdebstrap:
+  packages:
+    - fake-hwclock
+  customize-hooks:
+    - date -d "@${SOURCE_DATE_EPOCH}" > $1/etc/fake-hwclock.data
+    - $BDEBSTRAP_HOOKS/enable-units "$1" fake-hwclock

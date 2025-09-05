@@ -1,0 +1,14 @@
+# METABEGIN
+# X-Env-Layer-Name: example-debstore
+# X-Env-Layer-Category: example
+# X-Env-Layer-Desc: Example layer showing how to install local Debian
+#  packages into the chroot.
+# METAEND
+---
+mmdebstrap:
+  customize-hooks:
+  - |-
+    mkdir -p $1/tmp/debs && cp -a pkgs/*.deb $1/tmp/debs
+    [ -n "$(ls -A $1/tmp/debs/*.deb 2>/dev/null)" ] && chroot $1 sh -c "apt install -y /tmp/debs/*.deb" || true
+  cleanup-hooks:
+  - rm -rf $1/tmp/debs

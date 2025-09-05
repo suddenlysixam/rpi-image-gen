@@ -1,0 +1,151 @@
+= rpi-image-gen - Execution Flow
+:toc: left
+:toclevels: 3
+:sectlinks:
+:sectanchors:
+
+link:../index.adoc[← Back to Main Documentation]
+
+== Overview
+
+The rpi-image-gen build process consists of five main stages executed sequentially:
+
+. **Parameter Assembly** - Input validation and configuration parsing
+. **Layer Processing** - Layer collection, validation, and dependency resolution
+. **Build Preparation** - Environment setup and bdebstrap configuration
+. **Filesystem Generation** - Filesystem creation followed by hooks and overlays
+. **Image Generation** - Disk image creation
+. **Deployment** - Installation of build assets
+
+== Philosophy
+
+When instructed to use a source directory via the CLI, rpi-image-gen **prioritises that directory** for config files and layers, while still allowing references to its built-in resources. Similar to how a C compiler searches local directories before system directories (`-I. -I/usr/include`), rpi-image-gen uses a **hierarchical search path**. This allows users to have complete _project encapsulation_ for their integration.
+
+=== Practical Example
+
+[source,bash]
+----
+# Local config can include built-in base
+# File: ./my-project/config/kiosk.yaml
+include:
+  file: bookworm-minbase.cfg  # Resolves to built-in config
+
+layer:
+  app: my-kiosk               # Resolves to ./my-project/layer/my-kiosk.yaml
+
+# Build with mixed local/built-in resources
+$ rpi-image-gen build -S ./my-project/ -c kiosk.cfg
+----
+
+This philosophy enables a user to have self-contained projects with external dependencies.
+
+== Stage 1: Parameter Assembly
+
+=== Purpose
+Validate input arguments, parse configuration files, and establish the initial environment for subsequent stages.
+
+=== Activities
+
+* **Input Validation and Override Processing**: CLI processing
+* **Config Parsing**: Configuration file parsing
+* **Environment Injection**: Path setup, initial internal setup
+* **Sanity Checks**: Validate input sources
+
+== Stage 2: Layer Processing
+
+=== Purpose
+Discover, validate, and order all layers specified in the configuration, and expand all configuration variables to their final values.
+
+=== Activities
+
+* **Layer Collection**: Extract layer references from config
+* **Layer Validation**: Generate layer configuration variables
+* **Dependency Resolution**: Resolve layer build order to determine the build sequence
+* **Variable Expansion**: Resolves configuration variables with defined policy handling
+
+== Stage 3: Build Preparation
+
+=== Purpose
+Set up the build environment and assemble bdebstrap parameters with the necessary configuration.
+
+=== Activities
+
+* **Path Configuration**: Paths updated to allow location of host binaries and tools
+* **APT Configuration**: Configure apt settings including:
+  ** Key directories
+  ** Cache settings
+  ** Proxy settings
+  ** Package options
+* **Command Assembly**: Constructs the initial bdebstrap command including:
+  ** Environment variables
+  ** Target settings
+  ** All compatible YAML layer files
+  ** Installing core hook runners for setup, essential, customize, and cleanup phases
+
+== Stage 4: Filesystem Generation
+
+=== Purpose
+Create the filesystem and generate the Software Bill of Materials.
+
+=== Activities
+
+* *Hook*`[pre-build.sh]`: Execute from within image and device asset directory.
+  ** _Example Use_ - Custom validation of pre-build settings
+* *Filesystem Generation*: Execute bdebstrap
+* *Overlays*: Apply static filesystem overlays from image and device `rootfs-overlay/` directories.
+* *Hook*`[post-build.sh]`: Execute from within image and device asset directory.
+  ** _Example Use_ - Custom installation of image or device specific assets, eg boot configuration files.
+* *SBOM*: Execute the Software Bill of Materials provider to create the SBOM file.
+
+== Stage 5: Image Generation
+
+=== Purpose
+
+Create disk images from the prepared filesystem using the provider.
+
+=== Activities
+
+* *Hook*`[pre-image.sh]`: Execute from within device and image asset directory.
+  ** _Example Use_ - Creating genimage templates, setting up image creation resources.
+* *Image Generation*: Execute the image provider to create images.
+* *Hook*`[post-image.sh]`: Execute from within device and image asset directory.
+  ** _Example Use_ - Custom packaging, signing with device keys, etc.
+
+== Stage 6: Deployment
+
+=== Purpose
+Install output assets from the build to a defined location for distribution.
+
+=== Activities
+
+Install and compress:
+
+* **Build**: Raw disk and sparse images, filesystem archives
+* **Audit**: SBOM, manifests
+
+== Hooks
+
+[IMPORTANT]
+====
+Hooks are optional but if a hook is to be executed, it must have executable permissions for the user performing the build.
+====
+
+=== Core
+
+rpi-image-gen executes its own `pre/post build/image` hooks for device and image regardless of the configuration. These hooks perform generic tasks, such as installing the image provisioning map. Depending on requirements, there may not be a need to use custom hooks at these stages.
+
+
+=== Device and Image Asset Directory
+A device or image layer may declare `IGconf_device_assetdir` or `IGconf_image_assetdir` respectively as a location of where to store device or image specific assets. These optional variables are referenced by rpi-image-gen. If the pre/post build and pre/post image hooks mentioned above are present in these locations, they will be executed. The hooks won't execute if the variables are not declared.
+
+=== bdebstrap
+
+rpi-image-gen extends the support of bdebstrap hooks to image, device and source directories. Hooks with filenames beginning with ```setup```,  ```essential```, ```customize``` and ```cleanup```, and which only contain alphanumeric characters, are supported and must exist in a sub-directory named```bdebstrap``` within the directory in order for them to be run at the respective stage of chroot creation. Their file extension is ignored. Sub-directories are not traversed.
+
+=== initramfs
+
+If ```initramfs-tools(7)``` is installed in the chroot, rpi-image-gen extends the support of initramfs scripts and hooks to image and device directories via their sub-directory ```device/initramfs-tools```. If present, the entire contents of this directory is recursively copied into the chroot. Mode and ownership attributes are preserved. Destination files will not be overwritten. rpi-image-gen performs this operation during the ```customize``` stage of chroot creation and guarantees it will take place after invocation of all image and device bdebstrap ```customize``` hooks.
+
+== Interactive Mode
+
+A CLI option allows execution to pause between major operations for user confirmation. This may be useful for inspecting log output prior to building.

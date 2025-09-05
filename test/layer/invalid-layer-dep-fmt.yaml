@@ -1,0 +1,11 @@
+# METABEGIN
+# X-Env-Layer-Name: test-invalid-dep-fmt
+# X-Env-Layer-Desc: Test layer with invalid dep format
+# X-Env-Layer-Version: 1.0.0
+# X-Env-Layer-Category: test
+# X-Env-Layer-Requires: layer1
+#  layer2
+# METAEND
+
+layer:
+  true

@@ -1,0 +1,11 @@
+# METABEGIN
+# X-Env-Layer-Name: test-invalid-valid-specifier
+# X-Env-Layer-Desc: Test layer with invalid validation type
+# X-Env-Layer-Version: 1.0.0
+# X-Env-Layer-Category: test
+# X-Env-VarPrefix: yaml
+# X-Env-Var-test: value
+# X-Env-Var-test-Desc: Test description
+# X-Env-Var-test-Valid: zzz
+# METAEND
+test:
