@@ -2,7 +2,7 @@
 # X-Env-Layer-Name: device-base
 # X-Env-Layer-Category: device
 # X-Env-Layer-Desc: Device defaults.
-# X-Env-Layer-Version: 1.0.0
+# X-Env-Layer-Version: 1.1.0
 # X-Env-Layer-Requires:
 # X-Env-Layer-RequiresProvider: device
 #
@@ -46,31 +46,6 @@
 # X-Env-Var-user1pass-Required: n
 # X-Env-Var-user1pass-Valid: regex:^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$
 # X-Env-Var-user1pass-Set: n
-#
-# X-Env-Var-locale1: en_GB.UTF-8
-# X-Env-Var-locale1-Desc: The default system locale.
-# X-Env-Var-locale1-Required: n
-# X-Env-Var-locale1-Valid: string
-# X-Env-Var-locale1-Set: y
-#
-# X-Env-Var-keyboard_keymap: gb
-# X-Env-Var-keyboard_keymap-Desc: The default system keyboard map.
-# X-Env-Var-keyboard_keymap-Required: n
-# X-Env-Var-keyboard_keymap-Valid: string
-# X-Env-Var-keyboard_keymap-Set: y
-#
-# X-Env-Var-keyboard_layout: English (UK)
-# X-Env-Var-keyboard_layout-Desc: The default system keyboard layout. See
-#  debconf-show keyboard-configuration keyboard-configuration/xkb-keymap
-# X-Env-Var-keyboard_layout-Required: n
-# X-Env-Var-keyboard_layout-Valid: string
-# X-Env-Var-keyboard_layout-Set: y
-#
-# X-Env-Var-timezone: Europe/London
-# X-Env-Var-timezone-Desc: The default system timezone defined by IANA.
-# X-Env-Var-timezone-Required: n
-# X-Env-Var-timezone-Valid: string
-# X-Env-Var-timezone-Set: y
 #
 # X-Env-Var-storage_type: sd
 # X-Env-Var-storage_type-Desc: Device storage media type.
