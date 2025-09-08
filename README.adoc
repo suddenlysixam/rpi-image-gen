@@ -13,7 +13,7 @@ rpi-image-gen is a tool for creating custom software images for Raspberry Pi dev
 git clone https://github.com/raspberrypi/rpi-image-gen.git
 cd rpi-image-gen
 sudo ./install_deps.sh
-./rpi-image-gen build -c ./config/bookworm-minbase.cfg
+./rpi-image-gen build -c ./config/bookworm-minbase.yaml
 ----
 
 The device image will be in `./work/image-deb12-arm64-min/deb12-arm64-min.img`

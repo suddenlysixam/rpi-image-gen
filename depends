@@ -20,6 +20,7 @@ dctrl-tools
 uuidgen:uuid-runtime
 fdisk
 python3-yaml
+python3-debian
 # doc gen only
 # python3-markdown
 # asciidoctor
