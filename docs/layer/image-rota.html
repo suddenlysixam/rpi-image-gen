@@ -123,7 +123,7 @@
     <div class="header">
         <h1>image-rota</h1>
         <span class="badge">image</span>
-        <span class="badge">v1.0.0</span>
+        <span class="badge">v2.0.0</span>
         <p>Rotational OTA and AB support with GPT.
  This layout supports redundancy of os and system slot components and
  provides seperate boot and user data partitions.</p>
@@ -138,6 +138,7 @@
         <p><strong>Depends on:</strong></p>
         <div class="deps">
             <a href="image-base.html" class="dep-badge">image-base</a>
+            <a href="device-base.html" class="dep-badge">device-base</a>
         </div>
         
         
@@ -151,6 +152,12 @@
     
     <div class="section">
         <h2>Configuration Variables</h2>
+        
+        <p><strong>References:</strong>
+        
+        <code>IGconf_device_storage_type</code>
+        
+        </p>
         
         
         <p><strong>Declares</strong> (prefix: <code>image</code>):</p>
@@ -227,6 +234,24 @@
                        
                     </td>
                     <td>Must be one of: clear, crypt</td>
+                    <td>
+                        <a href="variable-validation.html#set-policies" class="badge policy-immediate" title="Click for policy and validation help">immediate</a>
+                    </td>
+                </tr>
+                
+                <tr>
+                    <td><code>IGconf_image_ptable_protect</code></td>
+                    <td>Enable eMMC Power-On Write Protect of the partition
+ table. If enabled, the first 8MB of the boot storage device will be
+ protected. Applies to eMMC only.</td>
+                    <td>
+                       
+                           
+                           <code class="long-default">$( [ "${IGconf_device_storage_type:-}" = "emmc" ] && echo y || echo n )</code>
+                           
+                       
+                    </td>
+                    <td>Non-empty string value</td>
                     <td>
                         <a href="variable-validation.html#set-policies" class="badge policy-immediate" title="Click for policy and validation help">immediate</a>
                     </td>

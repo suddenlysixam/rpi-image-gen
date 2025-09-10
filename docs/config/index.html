@@ -163,6 +163,7 @@
 <li><a href="#_cross_reference_expansion">Cross-Reference Expansion</a></li>
 <li><a href="#_environment_variable_dependencies">Environment Variable Dependencies</a></li>
 <li><a href="#_expansion_context">Expansion Context</a></li>
+<li><a href="#_conditional_variables">Conditional Variables</a></li>
 </ul>
 </li>
 <li><a href="#_configuration_loading">Configuration Loading</a>
@@ -666,6 +667,60 @@ export DISTRO=debian
 </td>
 </tr>
 </table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_conditional_variables"><a class="anchor" href="#_conditional_variables"></a><a class="link" href="#_conditional_variables">Conditional Variables</a></h3>
+<div class="paragraph">
+<p>The expansion of variables during configuration processing means it&#8217;s possible to use conditional expressions to assign variables based on other variables via <em>parameter expansion</em>. This provides quite a powerful feature for adapting configuration based characteristics or other settings.</p>
+</div>
+<div class="paragraph">
+<p>For example:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-yaml" data-lang="yaml"># METABEGIN
+# X-Env-Layer-Name: image-rescue
+# X-Env-Layer-Requires: image-base,device-base
+# X-Env-Layer-Provides: image
+#
+# X-Env-VarRequires: IGconf_device_storage_type
+#
+# X-Env-VarPrefix: image
+#
+# X-Env-Var-ptable_protect: $( ["${IGconf_device_storage_type}" = "emmc"] &amp;&amp; echo y || echo n )
+# X-Env-Var-ptable_protect-Desc: Enable eMMC Power-On Write Protection of the partition table
+# X-Env-Var-ptable_protect-Required: n
+# X-Env-Var-ptable_protect-Valid: string
+# X-Env-Var-ptable_protect-Set: y
+# METAEND</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This results in <code>IGconf_image_ptable_protect=y</code> if <code>IGconf_device_storage_type=emmc</code>, else <code>IGconf_image_ptable_protect=n</code>. Because configuration variable validation operates on literal values prior to expansion, this will only pass validation if the variable being assigned is a derivative of type <code>X-Env-Var-X-Valid: string</code>.</p>
+</div>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Warning</div>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>Care must be taken when using parameter expansion if input variables to the expression are optional. Due to the strict expansion rules, variables referenced in conditional expressions are recommended to use the <code>:-</code> fallback syntax to avoid errors.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-yaml" data-lang="yaml"># X-Env-VarOptional: IGconf_device_storage_type
+# X-Env-Var-ptable_protect: $( ["${IGconf_device_storage_type:-}" = "emmc"] &amp;&amp; echo y || echo n )</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>References: <a href="https://www.gnu.org/software/bash/manual/html_node/Shell-Parameter-Expansion.html" target="_blank" rel="noopener">GNU Bash Manual</a></p>
 </div>
 </div>
 </div>
