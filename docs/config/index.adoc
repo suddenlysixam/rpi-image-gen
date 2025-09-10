@@ -296,6 +296,45 @@ During configuration processing, variables are expanded using:
 There may be a need to handle non-alphanumeric characters in config files and/or command line arguments. Best practices advise encapsulating the text for a more robust approach, even if it's not always technically necessary. For YAML files, use single quotes for literal strings. For example `password: 'Fo0bar!!'`. For INI files, quote values containing special characters. For example `password = "Fo0bar!!"`. For command line arguments, use single quotes to preserve the literal text. For example `rpi-image-gen build -c <args> -- IGconf_device_user1pass='Fo0bar!!'`.
 ====
 
+=== Conditional Variables
+
+The expansion of variables during configuration processing means it's possible to use conditional expressions to assign variables based on other variables via _parameter expansion_. This provides quite a powerful feature for adapting configuration based characteristics or other settings.
+
+For example:
+
+[source,yaml]
+----
+# METABEGIN
+# X-Env-Layer-Name: image-rescue
+# X-Env-Layer-Requires: image-base,device-base
+# X-Env-Layer-Provides: image
+#
+# X-Env-VarRequires: IGconf_device_storage_type
+#
+# X-Env-VarPrefix: image
+#
+# X-Env-Var-ptable_protect: $( ["${IGconf_device_storage_type}" = "emmc"] && echo y || echo n )
+# X-Env-Var-ptable_protect-Desc: Enable eMMC Power-On Write Protection of the partition table
+# X-Env-Var-ptable_protect-Required: n
+# X-Env-Var-ptable_protect-Valid: string
+# X-Env-Var-ptable_protect-Set: y
+# METAEND
+----
+
+This results in `IGconf_image_ptable_protect=y` if `IGconf_device_storage_type=emmc`, else `IGconf_image_ptable_protect=n`. Because configuration variable validation operates on literal values prior to expansion, this will only pass validation if the variable being assigned is a derivative of type `X-Env-Var-X-Valid: string`.
+
+[WARNING]
+====
+Care must be taken when using parameter expansion if input variables to the expression are optional. Due to the strict expansion rules, variables referenced in conditional expressions are recommended to use the `:-` fallback syntax to avoid errors.
+====
+
+[source,yaml]
+----
+# X-Env-VarOptional: IGconf_device_storage_type
+# X-Env-Var-ptable_protect: $( ["${IGconf_device_storage_type:-}" = "emmc"] && echo y || echo n )
+----
+
+References: https://www.gnu.org/software/bash/manual/html_node/Shell-Parameter-Expansion.html[GNU Bash Manual,window=_blank]
 
 == Configuration Loading
 

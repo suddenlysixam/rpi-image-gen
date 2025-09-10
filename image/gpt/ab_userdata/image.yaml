@@ -4,9 +4,11 @@
 # X-Env-Layer-Desc: Rotational OTA and AB support with GPT.
 #  This layout supports redundancy of os and system slot components and
 #  provides seperate boot and user data partitions.
-# X-Env-Layer-Version: 1.0.0
-# X-Env-Layer-Requires: image-base
+# X-Env-Layer-Version: 2.0.0
+# X-Env-Layer-Requires: image-base,device-base
 # X-Env-Layer-Provides: image
+#
+# X-Env-VarRequires: IGconf_device_storage_type
 #
 # X-Env-VarPrefix: image
 #
@@ -35,6 +37,15 @@
 # X-Env-Var-pmap-Required: n
 # X-Env-Var-pmap-Valid: clear,crypt
 # X-Env-Var-pmap-Set: y
+#
+# X-Env-Var-ptable_protect: $( [ "${IGconf_device_storage_type:-}" = "emmc" ] && echo y || echo n )
+# X-Env-Var-ptable_protect-Desc: Enable eMMC Power-On Write Protect of the partition
+#  table. If enabled, the first 8MB of the boot storage device will be
+#  protected. Applies to eMMC only.
+# X-Env-Var-ptable_protect-Required: n
+# X-Env-Var-ptable_protect-Valid: string
+# X-Env-Var-ptable_protect-Set: y
+#
 # METAEND
 ---
 mmdebstrap:
