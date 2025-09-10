@@ -351,6 +351,22 @@ class LayerManager:
 
         return None
 
+    def _get_env_config(self, layer_name: str) -> Optional[dict]:
+        """Get env configuration if present """
+        layer_path = self.layer_files.get(layer_name)
+        if not layer_path:
+            return None
+
+        yaml_data = self._load_layer_yaml(layer_path)
+        if not yaml_data:
+            return None
+
+        env = yaml_data.get('env')
+        if isinstance(env, dict):
+            return env
+
+        return None
+
     def _collect_all_variable_definitions(self, build_order: List[str]) -> Dict[str, List[EnvVariable]]:
         """Collect all variable definitions from all layers in dependency order."""
         variable_definitions = {}
@@ -689,6 +705,9 @@ class LayerManager:
         # Get mmdebstrap configuration
         mmdebstrap_config = self._get_mmdebstrap_config(layer_name) or {}
 
+        # Get env configuration
+        env_config = self._get_env_config(layer_name) or {}
+
         # Make file path relative to search paths
         file_path = self.layer_files.get(layer_name)
         relative_path = file_path
@@ -729,6 +748,7 @@ class LayerManager:
             'required_variables': required_variables,
             'variable_prefix': variable_prefix,
             'mmdebstrap': mmdebstrap_config,
+            'env': env_config,
             'file_path': relative_path,
             'companion_doc': companion_doc,
             'dependencies': dependencies,
