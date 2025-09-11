@@ -1012,9 +1012,26 @@ def _layer_main(args):
         print("Error: No action specified. Use -h or --help for available options.")
         exit(1)
 
-    # Create manager with specified paths and patterns
+    # Create default manager (non-doc-mode) for general operations
     search_paths = [p.strip() for p in args.path.split(':') if p.strip()]
-    manager = LayerManager(search_paths, args.patterns, show_loaded=bool(args.list))
+
+    # Use a doc-mode manager if listing so that layers with dynamic deps
+    # can be shown. Using doc-mode is more relaxed, but we still lint.
+    list_only = bool(args.list) and not any([
+        args.describe, args.validate, args.check, args.rdep,
+        args.build_order, args.show_paths, args.apply_env
+    ])
+
+    if list_only:
+        list_manager = LayerManager(search_paths, args.patterns, show_loaded=True, doc_mode=True)
+        print()
+        list_manager.show_search_paths()
+        print()
+        list_manager.list_layers()
+        return
+
+    # ..else generic instantiation.
+    manager = LayerManager(search_paths, args.patterns)
     print()
 
     if args.show_paths:
@@ -1023,9 +1040,11 @@ def _layer_main(args):
 
     if args.list:
         # Always show the search paths when listing layers
-        manager.show_search_paths()
+        # Use a doc-mode manager for listing so unresolved env-based layers are included
+        list_manager = LayerManager(search_paths, args.patterns, show_loaded=True, doc_mode=True)
+        list_manager.show_search_paths()
         print()
-        manager.list_layers()
+        list_manager.list_layers()
 
     if args.describe:
         layer_name = manager.resolve_layer_name(args.describe)
