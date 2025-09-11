@@ -385,22 +385,31 @@ class EnvLayer:
 
     @staticmethod
     def _evaluate_env_variables(text: str, doc_mode: bool = False) -> str:
-        """Evaluate ${VAR} environment variable substitutions in text."""
-        import re
+        """Expand ${VAR} placeholders using environment variables.
+        Raises on missing variables unless doc_mode=True (in which case placeholders are kept).
+        - Iteratively expands (with cap) to support nested placeholders.
+        """
         import os
+        # Vatiables much conform to this regex
+        pattern = re.compile(r'\$\{([A-Za-z_][A-Za-z0-9_]*)\}')
 
-        def replacer(match):
-            var_name = match.group(1)
-            env_value = os.environ.get(var_name)
-            if env_value is None:
-                if doc_mode:
-                    # In documentation mode, return the original placeholder
-                    return match.group(0)
-                else:
-                    raise ValueError(f"Environment variable '{var_name}' not found for dependency evaluation")
-            return env_value
+        previous = text
+        max_iterations = 10
 
-        return re.sub(r'\$\{([A-Za-z_][A-Za-z0-9_]*)\}', replacer, text)
+        for _ in range(max_iterations):
+            current = pattern.sub(lambda m: os.environ.get(m.group(1), m.group(0)), previous)
+            if current == previous:
+                break
+            previous = current
+
+        # If any ${...} remain:
+        if pattern.search(previous):
+            if doc_mode:
+                return previous
+            remaining = sorted({m.group(1) for m in pattern.finditer(previous)})
+            raise ValueError(f"Unresolved environment variables: {', '.join(remaining)}")
+
+        return previous
 
     @classmethod
     def _validate_layer_fields(cls, metadata_dict: Dict[str, str], filepath: str = "") -> None:
