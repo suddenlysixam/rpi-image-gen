@@ -1,0 +1,8 @@
+artefact:
+  context: build-vehicles
+  target_name: deb12-kbuild.tgz
+
+layer:
+  base: debian-bookworm-buildd
+  tools: kbuild-base
+

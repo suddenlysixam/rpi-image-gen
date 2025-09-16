@@ -1,0 +1,37 @@
+#!/bin/bash
+
+set -u
+
+# pkg name/rev and kversion is hard coded here. These would be dynamically set
+# via other build-time injects / params / variables, etc
+VERSION=6.12.45
+KVER=${VERSION}-v8-16k
+KPKG=linux-image-${KVER}_${VERSION}-2_arm64.deb
+
+if [ -e "../$KPKG" ] ; then
+   if [ -e "$1/etc/default/raspi-firmware" ] ; then
+      # Disable raspi-firmware kernel hooks
+      sed -i \
+         -e "s|KERNEL=\([^ ]*\)|KERNEL=no|" \
+         -e "s|INITRAMFS=\([^ ]*\)|INITRAMFS=no|"  "$1/etc/default/raspi-firmware"
+   fi
+
+   # Install custom kernel and assets
+   dpkg --root="$1" -i "../$KPKG"
+   mkdir -p $1/boot/firmware/overlays
+   cp $1/boot/vmlinuz-${KVER} $1/boot/firmware/kernel_2712.img
+   cp $1/usr/lib/linux-image-${KVER}/broadcom/*.dtb $1/boot/firmware/
+   cp $1/usr/lib/linux-image-${KVER}/overlays/*.dtb* $1/boot/firmware/overlays/
+
+   # Lock out any linux-image-* pkg to prevent installation via apt.
+   # Obviously, this is undesirable if expecting to use apt to install or
+   # upgrade a pkg conforming to this name in the field.
+   # For illustrative purposes only, e.g. if a [custom] kernel pkg is only ever
+   # envisaged being locally installed, such as here at build time.
+   mkdir -p $1/etc/apt/preferences.d/
+   cat <<-EOF > $1/etc/apt/preferences.d/99-kernel-lock
+		Package: linux-image-*
+		Pin: release *
+		Pin-Priority: -1
+	EOF
+fi
