@@ -1,0 +1,169 @@
+:toc: left
+:toclevels: 2
+:sectlinks:
+
+
+= Example: Custom Linux kernel
+
+This example demonstrates using rpi-image-gen to build a filesystem tarball that provides the foundation of a container image whose purpose is to be a reusable vehicle with which to customise and cross-compile the Linux kernel. Unless explicitly stated, run all steps on a build server (for example, a high-performance x86_64 machine) because building the kernel from source requires significant CPU and I/O resources.
+
+The container offers a reusable, self-contained build environment suitable for CI pipelines and varied development workflows. By running tools in the container rather than on the host, you can reuse the environment at any time and maintain host isolation.
+
+== Container Setup and Kernel Build
+
+=== Filesystem foundation
+
+Build the filesystem tarball using this configuration. The result is a compressed tar archive with binaries whose architecture matches that of the build machine. This file forms the base of the container image.
+
+[source,bash]
+----
+$ rpi-image-gen build -c ./examples/custom_kernel/config/kbuild.yaml
+----
+
+=== Prepare kernel source
+
+Prepare the Linux source tree. This can be from git, a local directory, tarball extraction, etc. This location will be bind-mounted into the container.
+
+[source,bash]
+----
+$ git clone --depth=1 --branch rpi-6.12.y https://github.com/raspberrypi/linux ./work/linux
+----
+
+=== Container image creation
+
+Using podman, import the tarball to use as the container image.
+
+[source,bash]
+----
+$ podman import ./work/build-vehicles/deb12-kbuild.tgz chroot:deb12-kbuild
+----
+
+NOTE: It's possible to use other container managers instead of podman, e.g. docker.
+
+=== Run the container
+
+Start the container, making the kernel source available to it.
+
+[source,bash]
+----
+$ podman run -it --userns=keep-id -e HOME=/home/build -w /home/build --user build -v ./work/:/home/build/work chroot:deb12-kbuild /bin/bash -l
+----
+
+`--userns=keep-id`
+This sets the user namespace mode for the container, mapping the user on the host build machine to the user in the container. Without such a mapping, the user in the container won't be able to write to the bind-mounted directory.
+
+`/home/build` is the home account of the build user (see layer `build-user`).
+
+You're now running in the container:
+
+[source,bash]
+----
+build@b2de4ac17059:~$
+----
+
+=== Configure and build the kernel
+
+Change directory to the kernel source and configure it.
+
+[source,bash]
+----
+build@b2de4ac17059:~$ cd ./work/linux
+build@b2de4ac17059:~/work/linux$ make KERNEL=kernel_2712 ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE bcm2712_defconfig
+----
+
+Use menuconfig to tailor the kernel to your needs, then build.
+
+[source,bash]
+----
+build@b2de4ac17059:~/work/linux$ make KERNEL=kernel_2712 ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE -j$(nproc) Image modules dtbs
+----
+
+NOTE: The rpi-image-gen toolchain layers ensure `ARCH` and `CROSS_COMPILE` are set appropriately in the container run-time environment.
+
+=== Package the kernel
+
+Create a Debian package bundle using the mechanism provided by the kernel source.
+
+[source,bash]
+----
+build@b2de4ac17059:~/work/linux$ make ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE -j$(nproc) bindeb-pkg DPKG_FLAGS=-d
+----
+
+Packages are created in the parent directory.
+
+=== Rebuilding the kernel
+
+Exit the container if you're finished building ...
+
+[source,bash]
+----
+build@b2de4ac17059:~/work/linux$ exit
+logout
+----
+
+...Or, if you want to rerun menuconfig and rebuild (or modify the source and rebuild, etc.), you can restart the container and resume where you left off.
+
+[source,bash]
+----
+$ podman ps -a
+CONTAINER ID  IMAGE                          COMMAND       CREATED         STATUS                         PORTS       NAMES
+b2de4ac17059  localhost/chroot:deb12-kbuild  /bin/bash -l  22 minutes ago  Exited (0) About a minute ago              infallible_leavitt
+
+$ podman start b2de4ac17059
+b2de4ac17059
+
+$ podman exec -it b2de4ac17059 /bin/bash -l
+build@b2de4ac17059:~$ cd ./work/linux/
+build@b2de4ac17059:~/work/linux$ make KERNEL=kernel_2712 ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE -j$(nproc) menuconfig
+
+
+*** End of the configuration.
+*** Execute 'make' to start the build or try 'make help'.
+
+build@b2de4ac17059:~/work/linux$ make KERNEL=kernel_2712 ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE -j$(nproc) Image modules dtbs
+  CALL    scripts/checksyscalls.sh
+  ....
+  ....
+----
+Repackage, rebuild, etc., as appropriate.
+
+TIP: When first running the container, specify a name such as `--name kernel-build` so it can be restarted with `podman start -ai kernel-build` instead of using the container ID.
+
+== Install and Image Creation
+
+The packaging stage will have created the following.
+
+[source,bash]
+----
+$ ls -1 ./work/*.deb
+./work/linux-headers-6.12.45-v8-16k_6.12.45-2_arm64.deb
+./work/linux-image-6.12.45-v8-16k_6.12.45-2_arm64.deb
+./work/linux-libc-dev_6.12.45-2_arm64.deb
+----
+
+These constitute:
+
+. Headers and build files for compiling out-of-tree kernel modules against this exact kernel.
+. The kernel image plus its modules, device tree binaries, metadata, etc.
+. Userspace kernel UAPI headers.
+
+Installing your local linux-image deb rather than one from apt as part of an rpi-image-gen image build is straight-forward. However, there are a few things to be aware of:
+
+* If it's a custom version, hooks that are usually triggered by an official Raspberry Pi linux-image pkg install (e.g. those in pkg `raspi-firmware`) may not run.
+* You may not require or wish certain Raspberry Pi pkg hooks to run. Disabling that functionality can usually be done by overriding options (e.g. `/etc/default/raspi-firmware`).
+* When using a custom kernel package, users become responsible for installation tasks that are normally handled automatically by official Raspberry Pi packages, such as copying Device Tree blobs to the boot firmware's expected location.
+* It may be necessary to prevent installation of other kernel packages to prevent them from overwriting your custom kernel's boot files, Device Tree blobs, or kernel modules.
+
+=== Image build with a custom kernel package
+
+Installation of the custom linux-image deb can be performed using `dpkg` via a bdebstrap hook. See `bdebstrap/customize01-kernelinst`. Ensure the linux-image-* package generated by your build is copied to the root of this example directory, and that its name matches the script before running the rpi-image-gen command to create the final image.
+
+
+[source,bash]
+----
+$ rpi-image-gen build -S ./examples/custom_kernel/ -c example.yaml
+----
+
+There is no initramfs generated or installed in this image, so when booted on your device the kernel will start and mount the root device immediately. The example includes apt pinning syntax to prevent any `linux-image-*` packages from being installed via apt which would conflict with files installed by the local package. This is purely for illustrative purposes but may be relevant if the intention is to only install Linux kernel packages locally or at build time.
+
+

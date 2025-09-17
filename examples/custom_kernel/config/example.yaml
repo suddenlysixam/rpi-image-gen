@@ -1,0 +1,11 @@
+device:
+  layer: custom-rpi5
+
+image:
+  layer: image-example
+  boot_part_size: 200%
+  root_part_size: 300%
+  name: deb12-arm64-kcustom
+
+layer:
+  base: bookworm-minbase
