@@ -2,7 +2,7 @@
 # X-Env-Layer-Name: device-base
 # X-Env-Layer-Category: device
 # X-Env-Layer-Desc: Device defaults.
-# X-Env-Layer-Version: 1.1.0
+# X-Env-Layer-Version: 1.2.0
 # X-Env-Layer-Requires:
 # X-Env-Layer-RequiresProvider: device
 #
@@ -58,7 +58,7 @@
 #  the image is intended. The output raw image file size will be a multiple of
 #  this value.
 # X-Env-Var-sector_size-Required: n
-# X-Env-Var-sector_size-Valid: int:512-512
+# X-Env-Var-sector_size-Valid: capacity
 # X-Env-Var-sector_size-Set: y
 #
 # X-Env-Var-assetdir: /dev/null
