@@ -16,6 +16,15 @@
 # X-Env-Var-required-Required: true
 # X-Env-VarRequires: NONEXISTENT_VAR
 # X-Env-VarRequires-Valid: string
+# X-Env-Var-storageA: 8GB
+# X-Env-Var-storageA-Desc: Invalid capacity (1000 based)
+# X-Env-Var-storageA-Valid: capacity
+# X-Env-Var-storageB: 100%
+# X-Env-Var-storageB-Desc: Invalid capacity (size type)
+# X-Env-Var-storageB-Valid: capacity
+# X-Env-Var-storageC: 511
+# X-Env-Var-storageC-Desc: Invalid capacity (below min without prefix)
+# X-Env-Var-storageC-Valid: capacity
 # METAEND
 
 test:

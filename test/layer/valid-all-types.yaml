@@ -27,6 +27,18 @@
 # X-Env-VarRequires-Valid: regex:^/.*,string
 # X-Env-VarOptional: EDITOR,LANG
 # X-Env-VarOptional-Valid: string,string
+# X-Env-Var-headroom: 200%
+# X-Env-Var-headroom-Desc: Size with percentage support
+# X-Env-Var-headroom-Valid: size
+# X-Env-Var-storageA: 8GiB
+# X-Env-Var-storageA-Desc: Storage device capacity (binary prefix)
+# X-Env-Var-storageA-Valid: capacity
+# X-Env-Var-storageB: 1T
+# X-Env-Var-storageB-Desc: Storage device capacity
+# X-Env-Var-storageB-Valid: capacity
+# X-Env-Var-storageC: 512
+# X-Env-Var-storageC-Desc: Storage device capacity (digit)
+# X-Env-Var-storageC-Valid: capacity
 # METAEND
 
 application:

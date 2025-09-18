@@ -190,6 +190,82 @@ SIZES:
     50%          (percentage; any positive integer)"""
 
 
+class CapacityValidator(BaseValidator):
+    def __init__(self):
+        # Accept: K, M, G, T, (1024-based) and KiB, MiB, GiB, TiB
+        # Reject: KB, MB, GB, TB (1000-based decimal units)
+        # Pattern matches: numbers + optional binary unit suffix
+        self.capacity_re = re.compile(r"^[0-9]+(?:[KMGT]|[KMGT]iB)?$")
+
+    def validate(self, value: Optional[str]) -> list[str]:
+        if value is None:
+            return ["Value cannot be None"]
+
+        if not isinstance(value, str):
+            return ["Capacity must be a string with optional binary unit suffix"]
+
+        # Reject percentage values
+        if '%' in value:
+            return ["Capacity doesn't support percentage values - use 'size' validator for percentages"]
+
+        # Reject decimal units (KB, MB, GB, TB)
+        if re.search(r'[KMGTPEZY]B$', value):
+            return [f"Value '{value}' uses decimal units (KB/MB/GB/TB) - capacity requires binary units (K/M/G/T or KiB/MiB/GiB/TiB)"]
+
+        if not self.capacity_re.fullmatch(value):
+            return [f"Value '{value}' is not a valid capacity format - use integer with optional binary unit (K, M, G, T or KiB, MiB, etc.)"]
+
+        # Check plain numbers (no suffix)
+        if value.isdigit():
+            num = int(value)
+
+            # Must be at least 512 (bytes)
+            if num < 512:
+                return [f"Value '{num}' is too small for storage capacity - minimum is 512 (bytes)"]
+
+            # Check binary alignment
+            if num <= 1024:
+                if 1024 % num != 0:
+                    return [f"Value '{num}' is not binary-aligned - should divide evenly into 1024, or use binary units"]
+            else:
+                if num % 1024 != 0:
+                    return [f"Value '{num}' is not binary-aligned - should be a multiple of 1024, or use binary units"]
+
+        return []
+
+    def describe(self) -> str:
+        return "Storage capacity: bytes (512+) or binary units (K, M, G, T, KiB, MiB, etc.)"
+
+    @classmethod
+    def get_help_text(cls) -> str:
+        return """capacity               - Storage capacity in binary units (1024-based)
+
+BINARY CAPACITY UNITS:
+  capacity must be specified with binary (1024-based) units for storage devices
+    8K / 8KiB    (8 × 1024 bytes = 8,192 bytes)
+    128M / 128MiB (128 × 1024² bytes = 134,217,728 bytes)
+    4G / 4GiB    (4 × 1024³ bytes = 4,294,967,296 bytes)
+    2T / 2TiB    (2 × 1024⁴ bytes)
+
+  Supported units: K, M, G, T (short form)
+                   KiB, MiB, GiB, TiB (explicit binary)
+
+  Rejected units:  KB, MB, GB, TB (decimal 1000-based)
+
+PLAIN NUMBERS (no suffix):
+  Accepted with requirements:
+    Minimum: 512 (typical sector size in bytes)
+    Binary alignment: must be 512, 1024, 2048, 4096, etc.
+
+  Examples:
+    512
+    4MiB
+    8G
+
+  This validator is designed for storage device capacity where binary
+  units align with filesystem blocks, sectors, and hardware reality."""
+
+
 # === VALIDATOR FACTORY ===
 
 def parse_validator(rule_str: str) -> BaseValidator:
@@ -224,13 +300,15 @@ def parse_validator(rule_str: str) -> BaseValidator:
         return EnumValidator(options)
     elif rule_str == "size":
         return SizeValidator()
+    elif rule_str == "capacity":
+        return CapacityValidator()
     elif "," in rule_str:
         # Comma-separated enum
         options = [x.strip() for x in rule_str.split(",") if x.strip()]
         return EnumValidator(options)
     else:
         # Single value without comma - reject unless it's a known type
-        if rule_str in ["string", "string-or-empty", "string-or-unset", "bool", "int", "size"]:
+        if rule_str in ["string", "string-or-empty", "string-or-unset", "bool", "int", "size", "capacity"]:
             raise ValueError(f"Unknown validation rule: {rule_str}")
         else:
             raise ValueError(f"Single value '{rule_str}' must use trailing comma ('{rule_str},') or keywords: prefix ('keywords:{rule_str}')")
