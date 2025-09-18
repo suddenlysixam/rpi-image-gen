@@ -110,10 +110,10 @@
         <h2 id="set-policies">Set Policies</h2>
         <p>Set policies determine when and how environment variables are applied during the build process:</p>
 
-        {% for policy in validation.set_policies %}
-        <h3><span class="policy-badge policy-{{ policy.class }}">{{ policy.name }}</span> {{ policy.name.title() }}{% if policy.name == 'immediate' %} (Default){% endif %}</h3>
+        {%- for policy in validation.set_policies %}
+        <h3><span class="policy-badge policy-{{ policy.class }}">{{ policy.name }}</span> {{ policy.name.title() }}{% if policy.name == 'immediate' %} (Default){%- endif %}</h3>
         <p>{{ policy.description }}</p>
-        {% endfor %}
+        {%- endfor %}
 
         <div class="tip">
             <strong>Policy Aliases:</strong><br>
@@ -125,37 +125,37 @@
     <div class="section">
         <h2>Validation Types</h2>
 
-        {% if validation.basic_types %}
+        {%- if validation.basic_types %}
         <h3>Basic Types</h3>
-        {% for type in validation.basic_types %}
+        {%- for type in validation.basic_types %}
         <div class="example">
             <strong>{{ type.description }}</strong>
         </div>
-        {% endfor %}
-        {% endif %}
+        {%- endfor %}
+        {%- endif %}
 
-        {% for type in validation.advanced_types %}
+        {%- for type in validation.advanced_types %}
         <h3>{{ type.title.split(' - ')[0] if ' - ' in type.title else type.name.title() + ' Types' }}</h3>
         <div class="example">
             <strong>{{ type.title }}</strong>
-            {% if type.details %}
-            {% for detail in type.details %}
-            {% if detail.strip() %}
+            {%- if type.details %}
+            {%- for detail in type.details %}
+            {%- if detail.strip() %}
             <br>{{ detail }}
-            {% endif %}
-            {% endfor %}
-            {% endif %}
+            {%- endif %}
+            {%- endfor %}
+            {%- endif %}
         </div>
-        {% endfor %}
+        {%- endfor %}
     </div>
 
     <div class="section">
         <h2>Placeholders</h2>
         <p>Auto-substituted in variable values:</p>
         <div class="example">
-            {% for placeholder in validation.placeholders %}
+            {%- for placeholder in validation.placeholders %}
             <strong><code>{{ placeholder.name }}</code></strong> - {{ placeholder.description }}<br>
-            {% endfor %}
+            {%- endfor %}
             <em>Escape with <code>\${NAME}</code> to keep the literal text.</em>
         </div>
     </div>
