@@ -38,8 +38,8 @@ cat genimage.cfg.in.$IGconf_image_rootfs_type | sed \
 
 
 # Install provision map and set UUIDs
-if igconf isset image_pmap ; then
-   cp ./device/provisionmap-${IGconf_image_pmap}.json ${IGconf_image_outputdir}/provisionmap.json
+if [ -f "$IGconf_image_pmapfile" ] ; then
+   cp ${IGconf_image_pmapfile} ${IGconf_image_outputdir}/provisionmap.json
    sed -i \
       -e "s|<CRYPT_UUID>|$CRYPT_UUID|g" ${IGconf_image_outputdir}/provisionmap.json
 fi

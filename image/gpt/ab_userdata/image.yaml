@@ -36,7 +36,7 @@
 #  System partitions will be provisioned encrypted (crypt).
 # X-Env-Var-pmap-Required: n
 # X-Env-Var-pmap-Valid: clear,crypt
-# X-Env-Var-pmap-Set: y
+# X-Env-Var-pmap-Set: force
 #
 # X-Env-Var-ptable_protect: $( [ "${IGconf_device_storage_type:-}" = "emmc" ] && echo y || echo n )
 # X-Env-Var-ptable_protect-Desc: Enable eMMC Power-On Write Protect of the partition
