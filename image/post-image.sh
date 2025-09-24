@@ -13,7 +13,8 @@ if [ -f ${1}/genimage.cfg ] ; then
       fi
    done
 
-   [[ -n "${IGconf_image_pmapfile:-}" ]] && opts+=('-m' "${IGconf_image_pmapfile}")
+   pmap="${IGconf_image_outputdir}/provisionmap.json"
+   [[ -f "$pmap" ]] && opts+=('-m' "$pmap")
 
    # Generate description for IDP
    image2json -g ${1}/genimage.cfg "${opts[@]}" > ${1}/image.json

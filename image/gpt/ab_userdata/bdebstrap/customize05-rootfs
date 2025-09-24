@@ -7,8 +7,8 @@ install -m 0644 -D ../device/slot.rules $1/etc/udev/rules.d/90-rpi-slot.rules
 
 
 # Install provision map
-if igconf isset image_pmap ; then
-   cp ../device/provisionmap-${IGconf_image_pmap}.json ${IGconf_image_outputdir}/provisionmap.json
+if [ -f "$IGconf_image_pmapfile" ] ; then
+   cp ${IGconf_image_pmapfile} ${IGconf_image_outputdir}/provisionmap.json
 else
    die "No pmap. Unable to generate slot mapping."
 fi
