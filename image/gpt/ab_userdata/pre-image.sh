@@ -12,6 +12,24 @@ genimg_in=$2
 . ${genimg_in}/img_uuids
 
 
+# mke2fs cmdline args
+MKE2FS_ARGS=()
+case "$IGconf_device_sector_size" in
+   4096)
+      MKE2FS_ARGS+=("-b" "-4096")
+      ;;
+esac
+
+MKE2FS_SYSTEM=("-U" "$SYSTEM_UUID")
+MKE2FS_DATA=()
+
+MKE2FS_SYSTEM+=("${MKE2FS_ARGS[@]}")
+MKE2FS_DATA+=("${MKE2FS_ARGS[@]}")
+
+MKE2FS_ARGS_SYSTEM="${MKE2FS_SYSTEM[*]}"
+MKE2FS_ARGS_DATA="${MKE2FS_DATA[*]}"
+
+
 # Set up the partition layout for tryboot support. Partition numbering
 # relates directly to the layout in genimage.cfg.in
 
@@ -34,7 +52,9 @@ cat genimage.cfg.in | sed \
    -e "s|<DATA_SIZE>|$IGconf_image_data_part_size|g" \
    -e "s|<SECTOR_SIZE>|$IGconf_device_sector_size|g" \
    -e "s|<SLOTP>|'$(readlink -ef slot-post-process.sh)'|g" \
-   -e "s|<MKE2FSCONF>|'$(readlink -ef mke2fs.conf)'|g" \
    -e "s|<BOOT_LABEL>|$BOOT_LABEL|g" \
    -e "s|<SYSTEM_UUID>|$SYSTEM_UUID|g" \
+   -e "s|<MKE2FS_CONF>|'$(readlink -ef mke2fs.conf)'|g" \
+   -e "s|<MKE2FS_SYSTEM>|$MKE2FS_ARGS_SYSTEM|g" \
+   -e "s|<MKE2FS_DATA>|$MKE2FS_ARGS_DATA|g" \
    > ${genimg_in}/genimage.cfg

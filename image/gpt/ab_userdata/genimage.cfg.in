@@ -97,9 +97,9 @@ image boot.vfat {
 image system.ext4 {
    ext4 {
       use-mke2fs = true
-      mke2fs-conf = <MKE2FSCONF>
+      mke2fs-conf = <MKE2FS_CONF>
       label = "SYSTEM"
-      extraargs = "-U <SYSTEM_UUID>"
+      extraargs = "<MKE2FS_SYSTEM>"
    }
    size = <SYSTEM_SIZE>
    mountpoint = "/"
@@ -111,6 +111,7 @@ image data.ext4 {
    ext4 {
       use-mke2fs = true
       label = "USERDATA"
+      extraargs = "<MKE2FS_DATA>"
    }
    size = <DATA_SIZE>
    mountpoint = "/data"
