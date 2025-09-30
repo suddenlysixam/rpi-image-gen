@@ -1,8 +1,8 @@
 # METABEGIN
-# X-Env-Layer-Name: vimrc-config
+# X-Env-Layer-Name: vimrc_config
 # METAEND
 ---
-name: vimrc-config
+name: vimrc_config
 docs: Turn on syntax highlighting for all users.
 hooks:
   bdebstrap:

@@ -1,8 +1,8 @@
 # METABEGIN
-# X-Env-Layer-Name: dns-server-base
+# X-Env-Layer-Name: dns_server_base
 # METAEND
 ---
-name: dns-server-base
+name: dns_server_base
 docs: Install DNS tools and vim
 packages:
   install:

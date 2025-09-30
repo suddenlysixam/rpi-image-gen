@@ -10,6 +10,6 @@ image:
   root_part_size: 300%
 
 layers:
-  desktop-base: {}
-  dns-server-base: {}
-  vimrc-config: {}
+  desktop_base: {}
+  dns-server_base: {}
+  vimrc_config: {}
