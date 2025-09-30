@@ -1,8 +1,16 @@
 # Build Raspberry Pi OS Desktop (Bookworm, 64-bit) for self-hosted DNS server
-include:
-  file: config/bookworm-minbase.yaml
+device:
+  layer: rpi4
 
+image:
+  layer: image-rpios
+  name: rpios-desktop-dns
+  compression: zstd
+  boot_part_size: 200%
+  root_part_size: 300%
+
+# Apply our layers (defined in site-layers/)
 layers:
+  - desktop-base
   - dns-server-base
   - vimrc-config
-  - desktop-base
