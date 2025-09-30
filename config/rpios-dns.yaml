@@ -11,5 +11,5 @@ image:
 
 layers:
   desktop_base: {}
-  dns-server_base: {}
+  dns_server_base: {}
   vimrc_config: {}
