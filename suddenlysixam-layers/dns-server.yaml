@@ -1,0 +1,8 @@
+# METABEGIN
+# X-Env-Layer-Name: dns-server
+# X-Env-Layer-Requires: bookworm-minbase,
+#  desktop-base,
+#  dns-server-base,
+#  vimrc-config,
+# METAEND
+---

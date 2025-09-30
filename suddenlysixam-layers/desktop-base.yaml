@@ -1,3 +1,7 @@
+# METABEGIN
+# X-Env-Layer-Name: desktop-base
+# METAEND
+---
 name: desktop-base
 docs: Desktop
 packages:

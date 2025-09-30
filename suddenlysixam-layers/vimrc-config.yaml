@@ -1,3 +1,7 @@
+# METABEGIN
+# X-Env-Layer-Name: vimrc-config
+# METAEND
+---
 name: vimrc-config
 docs: Turn on syntax highlighting for all users.
 hooks:
