@@ -9,5 +9,7 @@ image:
   boot_part_size: 200%
   root_part_size: 300%
 
-layer:
-  custom: dns-server
+layers:
+  desktop-base: {}
+  dns-server-base: {}
+  vimrc-config: {}
