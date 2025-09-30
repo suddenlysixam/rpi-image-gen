@@ -1,0 +1,14 @@
+name: desktop-base
+docs: Desktop
+packages:
+  install:
+    # Raspberry Pi OS desktop bits (Bookworm)
+    - raspberrypi-ui-mods
+    - lightdm
+    - xserver-xorg
+    - policykit-1
+    - gvfs
+    - gvfs-backends
+    - pi-bluetooth
+    - pulseaudio
+    - network-manager
