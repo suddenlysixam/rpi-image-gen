@@ -8,4 +8,6 @@ esac
 
 copy_exec /usr/bin/od
 copy_exec /usr/bin/sed
-copy_exec /usr/bin/rpi-slot
+copy_exec /usr/bin/rpi-slot-label
+copy_exec /usr/bin/rpi-slot-static
+copy_file config /boot/slot.map || true

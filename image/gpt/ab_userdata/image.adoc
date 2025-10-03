@@ -1,0 +1,33 @@
+= image-rota
+
+== Slot Selection (run-time)
+
+Handled entirely by layer `rpi-ab-slot-mapper`.
+
+== Slot Pairing (build-time)
+
+=== Definition
+
+This layer generates an image which has bit-for-bit identical A/B slot members:
+
+- Both `a.boot` and `b.boot` contain the exact same vfat filesystem.
+- Both `a.system` and `b.system` contain the exact same ext4 filesystem.
+- Filesystem UUIDs are intentionally identical across slots.
+- GPT partition GUIDs (PARTUUID) are unique per partition.
+- GPT partition labels (PARTLABEL) are unique per partition.
+
+=== Rationale and benefits
+
+- Faster image creation: only a single slot pair is produced.
+- Simpler updates: only a single slot pair is built, tested, and distributed.
+- Update generation: operating on a single slot pair is unambiguous.
+- Smaller CI/storage footprint: fewer images to store.
+
+=== Requirements and constraints
+
+- Does not use `UUID=` anywhere. Duplicate filesystem UUIDs make `/dev/disk/by-uuid/*` ambiguous.
+- Uses stable identifiers instead, e.g. `/dev/disk/by-slot/{active,other}/{boot,system}`.
+
+=== Encrypted (LUKS) Provisioning Map layouts
+
+- Identical content inside LUKS is supported. Slot mapping can use GPT labels or static map triplets to identify `mapper:<name>:<part>` slot components.
