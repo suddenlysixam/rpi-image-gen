@@ -29,13 +29,12 @@ cat genimage.cfg.in | sed \
    -e "s|<IMAGE_DIR>|$IGconf_image_outputdir|g" \
    -e "s|<IMAGE_NAME>|$IGconf_image_name|g" \
    -e "s|<IMAGE_SUFFIX>|$IGconf_image_suffix|g" \
-   -e "s|<FW_SIZE>|$IGconf_image_boot_part_size|g" \
+   -e "s|<BOOT_SIZE>|$IGconf_image_boot_part_size|g" \
    -e "s|<SYSTEM_SIZE>|$IGconf_image_system_part_size|g" \
+   -e "s|<DATA_SIZE>|$IGconf_image_data_part_size|g" \
    -e "s|<SECTOR_SIZE>|$IGconf_device_sector_size|g" \
    -e "s|<SLOTP>|'$(readlink -ef slot-post-process.sh)'|g" \
    -e "s|<MKE2FSCONF>|'$(readlink -ef mke2fs.conf)'|g" \
-   -e "s|<BOOTA_LABEL>|$BOOTA_LABEL|g" \
-   -e "s|<BOOTB_LABEL>|$BOOTB_LABEL|g" \
-   -e "s|<SYSTEMA_UUID>|$SYSTEMA_UUID|g" \
-   -e "s|<SYSTEMB_UUID>|$SYSTEMB_UUID|g" \
+   -e "s|<BOOT_LABEL>|$BOOT_LABEL|g" \
+   -e "s|<SYSTEM_UUID>|$SYSTEM_UUID|g" \
    > ${genimg_in}/genimage.cfg

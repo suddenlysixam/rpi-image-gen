@@ -123,12 +123,99 @@
     <div class="header">
         <h1>image-rota</h1>
         <span class="badge">image</span>
-        <span class="badge">v2.0.0</span>
+        <span class="badge">v3.1.0</span>
         <p>Rotational OTA and AB support with GPT.
- This layout supports redundancy of os and system slot components and
- provides seperate boot and user data partitions.</p>
+ This layout supports redundancy of boot and system slot components and
+ provides a seperate user data partition.</p>
     </div>
 
+    
+    <div class="section">
+        <h2>Additional Documentation</h2>
+        <div class="companion-content">
+            <div class="sect1">
+<h2 id="_slot_selection_run_time">Slot Selection (run-time)</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Handled entirely by layer <code>rpi-ab-slot-mapper</code>.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_slot_pairing_build_time">Slot Pairing (build-time)</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_definition">Definition</h3>
+<div class="paragraph">
+<p>This layer generates an image which has bit-for-bit identical A/B slot members:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Both <code>a.boot</code> and <code>b.boot</code> contain the exact same vfat filesystem.</p>
+</li>
+<li>
+<p>Both <code>a.system</code> and <code>b.system</code> contain the exact same ext4 filesystem.</p>
+</li>
+<li>
+<p>Filesystem UUIDs are intentionally identical across slots.</p>
+</li>
+<li>
+<p>GPT partition GUIDs (PARTUUID) are unique per partition.</p>
+</li>
+<li>
+<p>GPT partition labels (PARTLABEL) are unique per partition.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_rationale_and_benefits">Rationale and benefits</h3>
+<div class="ulist">
+<ul>
+<li>
+<p>Faster image creation: only a single slot pair is produced.</p>
+</li>
+<li>
+<p>Simpler updates: only a single slot pair is built, tested, and distributed.</p>
+</li>
+<li>
+<p>Update generation: operating on a single slot pair is unambiguous.</p>
+</li>
+<li>
+<p>Smaller CI/storage footprint: fewer images to store.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_requirements_and_constraints">Requirements and constraints</h3>
+<div class="ulist">
+<ul>
+<li>
+<p>Does not use <code>UUID=</code> anywhere. Duplicate filesystem UUIDs make <code>/dev/disk/by-uuid/*</code> ambiguous.</p>
+</li>
+<li>
+<p>Uses stable identifiers instead, e.g. <code>/dev/disk/by-slot/{active,other}/{boot,system}</code>.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_encrypted_luks_provisioning_map_layouts">Encrypted (LUKS) Provisioning Map layouts</h3>
+<div class="ulist">
+<ul>
+<li>
+<p>Identical content inside LUKS is supported. Slot mapping can use GPT labels or static map triplets to identify <code>mapper:&lt;name&gt;:&lt;part&gt;</code> slot components.</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+
+        </div>
+    </div>
     
 
     
@@ -139,6 +226,7 @@
         <div class="deps">
             <a href="image-base.html" class="dep-badge">image-base</a>
             <a href="device-base.html" class="dep-badge">device-base</a>
+            <a href="rpi-ab-slot-mapper.html" class="dep-badge">rpi-ab-slot-mapper</a>
         </div>
         
         
@@ -206,6 +294,22 @@
                 </tr>
                 
                 <tr>
+                    <td><code>IGconf_image_data_part_size</code></td>
+                    <td>Data partition retained across rotations.</td>
+                    <td>
+                       
+                           
+                           <code>256M</code>
+                           
+                       
+                    </td>
+                    <td>Size value with optional unit (bytes, k/m/g/s) or percentage</td>
+                    <td>
+                        <a href="variable-validation.html#set-policies" class="badge policy-immediate" title="Click for policy and validation help">immediate</a>
+                    </td>
+                </tr>
+                
+                <tr>
                     <td><code>IGconf_image_assetdir</code></td>
                     <td>Image specific asset directory</td>
                     <td>
@@ -233,9 +337,9 @@
                            
                        
                     </td>
-                    <td>Must be one of: clear, crypt</td>
+                    <td>Must be one of: clear, hybrid</td>
                     <td>
-                        <a href="variable-validation.html#set-policies" class="badge policy-force" title="Click for policy and validation help">force</a>
+                        <a href="variable-validation.html#set-policies" class="badge policy-immediate" title="Click for policy and validation help">immediate</a>
                     </td>
                 </tr>
                 
@@ -278,14 +382,6 @@
         <h3>Packages</h3>
         <p>Installs:</p>
         <ul>
-            
-            <li><code>sed</code></li>
-            
-            <li><code>coreutils</code></li>
-            
-            <li><code>initramfs-tools</code></li>
-            
-            <li><code>rpi-blockutils</code></li>
             
             <li><code>dosfstools</code></li>
             

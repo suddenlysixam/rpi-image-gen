@@ -1,0 +1,93 @@
+#!/bin/sh
+# shellcheck shell=sh
+
+set -u
+
+# Map GPT PARTLABEL to slot for udev IMPORT.
+# This script is boot critical and must be compatible with minimal shell
+# environments such as klibc, and be as POSIX compliant as possible.
+
+err() {
+   msg="ERROR: $*"
+   if [ -w /dev/kmsg ]; then
+      echo "$msg" > /dev/kmsg 2>/dev/null || :
+   fi
+   echo "$msg" >&2
+}
+
+die() { err "$@"; exit 1; }
+
+prefix=disk/by-slot
+udev_fmt=0
+
+ID_PART_ENTRY_NAME=${ID_PART_ENTRY_NAME-}
+DEVNAME=${DEVNAME-}
+
+
+while getopts "d:l:u" opt; do
+   case $opt in
+      d) DEVNAME="$OPTARG";;
+      l) ID_PART_ENTRY_NAME="$OPTARG";;
+      u) udev_fmt=1;;
+      *) ;;
+   esac
+done
+
+[ -n "$DEVNAME" ] || die "missing dev"
+[ -n "$ID_PART_ENTRY_NAME" ] || die "missing label"
+
+
+read_dt_u32() {
+   # shellcheck disable=SC2046
+   # shellcheck disable=SC2312
+   set -- $(od -An -tu1 -N4 "$1" 2>/dev/null)
+   [ $# -eq 4 ] || return 1
+   echo $(( $1*16777216 + $2*65536 + $3*256 + $4 ))
+}
+
+
+# Determine boot device to infer active slot suffix
+BOOT_MODE=$(read_dt_u32 /proc/device-tree/chosen/bootloader/boot-mode) || die "no boot-mode"
+BOOT_PARTN=$(read_dt_u32 /proc/device-tree/chosen/bootloader/partition) || die "no boot-part"
+case $BOOT_MODE in
+   1) BOOT_DEV=mmcblk0;;
+   6) BOOT_DEV=nvme0n1;;
+   *) die "unsupported bootmode $BOOT_MODE";;
+esac
+
+BOOT_BLKDEV="/dev/${BOOT_DEV}p${BOOT_PARTN}"
+test -b "$BOOT_BLKDEV" || die "Invalid boot blkdev $BOOT_BLKDEV"
+
+
+# Establish expected labels using the boot device label
+BOOT_LABEL=$(blkid -s PARTLABEL -o value "$BOOT_BLKDEV" 2>/dev/null)
+
+suffix=""; alt_suffix=""
+case "$BOOT_LABEL" in
+   boot*_a|boot-a|boota|boota*) suffix="${BOOT_LABEL#boot}"; alt_suffix="${suffix%a}b" ;;
+   boot*_b|boot-b|bootb|bootb*) suffix="${BOOT_LABEL#boot}"; alt_suffix="${suffix%b}a" ;;
+   *) die "bad boot label $BOOT_LABEL";;
+esac
+
+ACTIVE_BOOT="boot${suffix}"
+ACTIVE_SYS="system${suffix}"
+ALT_BOOT="boot${alt_suffix}"
+ALT_SYS="system${alt_suffix}"
+
+
+# Process incoming
+case "$ID_PART_ENTRY_NAME" in
+   "$ACTIVE_BOOT")       slot="active/boot" ;;
+   "$ACTIVE_SYS")     slot="active/system" ;;
+   "$ALT_BOOT")   slot="other/boot" ;;
+   "$ALT_SYS") slot="other/system" ;;
+   *) exit 0 ;; # valid device but ignored
+esac
+
+if [ "$udev_fmt" -eq 1 ]; then
+   echo "SLOT=${prefix}/${slot}"
+else
+   echo "${prefix}/${slot}"
+fi
+
+exit 0

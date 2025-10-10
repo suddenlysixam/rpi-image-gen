@@ -2,10 +2,10 @@
 # X-Env-Layer-Name: image-rota
 # X-Env-Layer-Category: image
 # X-Env-Layer-Desc: Rotational OTA and AB support with GPT.
-#  This layout supports redundancy of os and system slot components and
-#  provides seperate boot and user data partitions.
-# X-Env-Layer-Version: 2.0.0
-# X-Env-Layer-Requires: image-base,device-base
+#  This layout supports redundancy of boot and system slot components and
+#  provides a seperate user data partition.
+# X-Env-Layer-Version: 3.1.0
+# X-Env-Layer-Requires: image-base,device-base,rpi-ab-slot-mapper
 # X-Env-Layer-Provides: image
 #
 # X-Env-VarRequires: IGconf_device_storage_type
@@ -24,6 +24,12 @@
 # X-Env-Var-system_part_size-Valid: size
 # X-Env-Var-system_part_size-Set: y
 #
+# X-Env-Var-data_part_size: 256M
+# X-Env-Var-data_part_size-Desc: Data partition retained across rotations.
+# X-Env-Var-data_part_size-Required: n
+# X-Env-Var-data_part_size-Valid: size
+# X-Env-Var-data_part_size-Set: y
+#
 # X-Env-Var-assetdir: ${DIRECTORY}
 # X-Env-Var-assetdir-Desc: Image specific asset directory
 # X-Env-Var-assetdir-Required: n
@@ -35,8 +41,8 @@
 #  All partitions will be provisioned unencrypted (clear).
 #  System partitions will be provisioned encrypted (crypt).
 # X-Env-Var-pmap-Required: n
-# X-Env-Var-pmap-Valid: clear,crypt
-# X-Env-Var-pmap-Set: force
+# X-Env-Var-pmap-Valid: clear,hybrid
+# X-Env-Var-pmap-Set: y
 #
 # X-Env-Var-ptable_protect: $( [ "${IGconf_device_storage_type:-}" = "emmc" ] && echo y || echo n )
 # X-Env-Var-ptable_protect-Desc: Enable eMMC Power-On Write Protect of the partition
@@ -50,9 +56,5 @@
 ---
 mmdebstrap:
   packages:
-    - sed
-    - coreutils
-    - initramfs-tools
-    - rpi-blockutils
     - dosfstools
     - e2fsprogs
