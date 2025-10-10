@@ -73,6 +73,10 @@ b.system=mapper:cryptroot:1
 
 The helper resolves these to absolute devices, detects which `*.boot` matches the current boot partition, and maps it to one of the by-slot links above.
 
+== tryboot
+
+The helper `rpi-slot-tryboot` prints a Raspberry Pi tryboot config fragment to stdout, derived from `/dev/disk/by-slot/{active,other}/boot`.
+
 == Initramfs
 
 A script sets the root device to `/dev/disk/by-slot/active/system` at runtime. If this alias is not a block device, the system reboots immediately.
