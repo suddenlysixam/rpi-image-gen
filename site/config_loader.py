@@ -122,7 +122,17 @@ class ConfigLoader:
             # Merge: current overrides included
             merged = {**included_sections}
             for sect, mapping in curr_sections.items():
-                merged.setdefault(sect, {}).update(mapping)
+                if sect not in merged:
+                    merged[sect] = {}
+                for k, v in mapping.items():
+                    if sect in included_sections and k in included_sections[sect]:
+                        prev = included_sections[sect][k]
+                        if prev != v:
+                            print(
+                                f"OVR {path}: overrides [{sect}].{k} to '{v}' from '{prev}' (inherited)",
+                                file=sys.stderr,
+                            )
+                    merged[sect][k] = v
             return merged
 
         self.data = _load_yaml_recursive(Path(self.cfg_path).resolve(), set())
