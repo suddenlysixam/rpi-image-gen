@@ -14,6 +14,10 @@ This layer is intended to be reusable across different A/B image layouts. It mak
 
 Devices booting from SD, eMMC and NVMe are supported.
 
+== Supported Block Devices
+
+Only eligible block devices are considered for slot assignment. An eligible block device is one which is 'boot‑disk–backed'. A device is considered boot‑disk–backed if its block‑device lineage (sysfs slaves chain) ultimately resolves to the boot disk’s kernel device (`$BOOT_DEV`, e.g., `mmcblk0` or `nvme0n1`). For non‑DM devices, this means the device is a partition of the boot disk. For DM devices, this means the device has the boot disk as an ancestor.
+
 == Why two schemes?
 
 Hardware and images vary:
