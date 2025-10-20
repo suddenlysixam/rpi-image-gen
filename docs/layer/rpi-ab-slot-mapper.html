@@ -161,6 +161,14 @@
 </div>
 </div>
 <div class="sect1">
+<h2 id="_supported_block_devices">Supported Block Devices</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Only eligible block devices are considered for slot assignment. An eligible block device is one which is 'boot‑disk–backed'. A device is considered boot‑disk–backed if its block‑device lineage (sysfs slaves chain) ultimately resolves to the boot disk’s kernel device (<code>$BOOT_DEV</code>, e.g., <code>mmcblk0</code> or <code>nvme0n1</code>). For non‑DM devices, this means the device is a partition of the boot disk. For DM devices, this means the device has the boot disk as an ancestor.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
 <h2 id="_why_two_schemes">Why two schemes?</h2>
 <div class="sectionbody">
 <div class="paragraph">
