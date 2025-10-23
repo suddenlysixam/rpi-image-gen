@@ -76,14 +76,12 @@
                   }
                ]
             }
-         }
+         },
+         "partitions": [
+            {
+               "image": "persistent"
+            }
+         ]
       }
-   },
-   {
-      "partitions": [
-         {
-            "image": "data"
-         }
-      ]
    }
 ]
