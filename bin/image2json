@@ -9,7 +9,7 @@ import sys
 import subprocess
 
 
-VERSION = "2.1.0"
+VERSION = "2.2.0"
 
 
 IMAGE_KEYS = {"IGconf_device_class",
@@ -44,9 +44,7 @@ top_template = {
 
 partition_template =  {
     "name": "default",
-    "partition-type": None,
-    "in-partition-table": "false",
-    "fstab": {}
+    "in-partition-table": "true",
 }
 
 
@@ -291,8 +289,10 @@ def parse_genimage_config(config_path):
         if "image" in pattr:
             piname = pattr["image"]
             if piname in images:
-                # Found. Merge
-                partitions[pname] = {**images[piname], **pattr}
+                # Found. Merge, initialising from template
+                base = copy.deepcopy(partition_template)
+                base["name"] = pname
+                partitions[pname] = {**base, **images[piname], **pattr}
 
                 # Tag image type
                 for t in gtypes:
@@ -334,6 +334,38 @@ def parse_genimage_config(config_path):
     ptable = json.loads(res.stdout)
     for p in ptable["partitiontable"]["partitions"]:
         p.pop("node", None)
+
+    # Populate genimage partition entries with GPT attributes
+    def insert_gptattr(genimage_partitions, table_json):
+        try:
+            label = table_json.get("partitiontable", {}).get("label", "").lower()
+        except Exception:
+            label = ""
+        if label != "gpt":
+            return genimage_partitions
+
+        disk_parts = table_json.get("partitiontable", {}).get("partitions", [])
+
+        # Relies on ordering: genimage partitions are emitted in config order
+        # and sfdisk JSON lists partitions in on-disk order. In this flow they
+        # correspond positionally (1-1) provided in-partition-table != false.
+        idx = 0
+        for _pname, pdata in genimage_partitions.items():
+            if idx >= len(disk_parts):
+                break
+            # Only populate partitions that are indicated as present by genimage
+            if str(pdata.get("in-partition-table", "true")).lower() != "false":
+                gpt_name = disk_parts[idx].get("name")
+                if gpt_name:
+                    pdata["partition-label"] = gpt_name
+                gpt_uuid = disk_parts[idx].get("uuid")
+                if gpt_uuid:
+                    pdata["partition-uuid"] = gpt_uuid
+            idx += 1
+
+        return genimage_partitions
+
+    partitions = insert_gptattr(partitions, ptable)
 
     return (disk_attr, partitions, ptable)
 
