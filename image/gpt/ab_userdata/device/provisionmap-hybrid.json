@@ -86,7 +86,7 @@
    {
       "partitions": [
          {
-            "image": "data"
+            "image": "persistent"
          }
       ]
    }
