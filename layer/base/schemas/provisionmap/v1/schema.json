@@ -25,6 +25,7 @@
       "additionalProperties": false,
       "properties": {
         "image": { "type": "string", "minLength": 1 },
+        "comment": { "type": "string" },
         "static": {
           "type": "object",
           "additionalProperties": false,
