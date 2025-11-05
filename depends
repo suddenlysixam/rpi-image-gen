@@ -5,10 +5,8 @@ mke2fs:e2fsprogs
 grep
 rsync
 curl
-genimage
 mtools
 mmdebstrap
-bdebstrap
 podman
 zstd
 pv
@@ -22,6 +20,18 @@ fdisk
 python3-yaml
 python3-debian
 python3-jsonschema
+# pkg buildsys
+python3-pip
+dpkg-dev
+make
+build-essential
+autoconf
+automake
+libtool
+autopoint
+flex
+gettext
+pkg-config
 # doc gen only
 # python3-markdown
 # asciidoctor

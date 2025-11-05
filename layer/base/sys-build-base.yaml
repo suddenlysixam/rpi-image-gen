@@ -65,5 +65,11 @@
 # X-Env-Var-apt_cachedir-Valid: string-or-empty
 # X-Env-Var-apt_cachedir-Set: force
 #
+# X-Env-Var-buildroot: ${IGconf_sys_workroot}/build
+# X-Env-Var-buildroot-Desc: Global build root directory for source builds.
+# X-Env-Var-buildroot-Required: n
+# X-Env-Var-buildroot-Valid: string
+# X-Env-Var-buildroot-Set: y
+#
 # METAEND
 ---
