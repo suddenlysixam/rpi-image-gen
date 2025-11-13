@@ -231,6 +231,12 @@ collect_layers()
 
    ctx[LAYER_ORDER]="$layer_order"
    ctx[FINALENV]="$finalenv"
+
+   # Write bootstrap information
+   local bdir=$(get_var IGconf_sys_bootstrapdir "${ctx[FINALENV]}") || die
+   mkdir -p "$bdir"
+   cp "${ctx[FINALENV]}"   "${bdir}/config.env"
+   cp "${ctx[LAYER_ORDER]}" "${bdir}/layer.order"
 }
 
 
@@ -551,7 +557,7 @@ main() {
          cli_parse_build ctx "$@"
          shift $?
          path_refresh
-         dependencies_check "$IGTOP/depends" || exit 1
+         dependencies_check --category all "$IGTOP/depends" || exit 1
          run_stage parameter_assembly "$@"
          run_stage collect_layers
          run_stage prepare_build_config
@@ -564,7 +570,7 @@ main() {
          cli_parse_clean ctx "$@"
          shift $?
          path_refresh
-         dependencies_check "$IGTOP/depends" || exit 1
+         dependencies_check --category all "$IGTOP/depends" || exit 1
          run_stage parameter_assembly "$@"
          run_stage collect_layers
          run_stage clean_worktree
@@ -574,21 +580,21 @@ main() {
          cli_parse_layer ctx "$@"
          shift $?
          path_refresh
-         dependencies_check "$IGTOP/depends" || exit 1
+         dependencies_check --category all "$IGTOP/depends" || exit 1
          exec "$IGTOP/bin/ig" layer --path "${ctx[LAYER_PATH]}" "$@"
          ;;
 
       metadata)
          cli_parse_metadata ctx "$@"
          shift $?
-         dependencies_check "$IGTOP/depends" || exit 1
+         dependencies_check --category all "$IGTOP/depends" || exit 1
          exec "$IGTOP/bin/ig" metadata "$@"
          ;;
 
       config)
          cli_parse_config ctx "$@"
          shift $?
-         dependencies_check "$IGTOP/depends" || exit 1
+         dependencies_check --category all "$IGTOP/depends" || exit 1
          exec "$IGTOP/bin/ig" config "$@"
          ;;
 

@@ -71,5 +71,13 @@
 # X-Env-Var-buildroot-Valid: string
 # X-Env-Var-buildroot-Set: y
 #
+# X-Env-Var-bootstrapdir: ${IGconf_sys_workroot}/bootstrap
+# X-Env-Var-bootstrapdir-Desc: Directory for bootstrap artefacts (e.g. env, layer
+#  order, metadata) used to resume the build in a containerised (or later)
+#  invocation.
+# X-Env-Var-bootstrapdir-Required: n
+# X-Env-Var-bootstrapdir-Valid: string
+# X-Env-Var-bootstrapdir-Set: y
+#
 # METAEND
 ---
