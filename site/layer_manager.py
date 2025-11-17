@@ -5,6 +5,7 @@ import argparse
 from pathlib import Path
 from typing import Dict, List, Optional, Set, Tuple
 from collections import OrderedDict
+from dataclasses import dataclass
 import yaml
 
 
@@ -15,6 +16,12 @@ from env_types import VariableResolver, EnvVariable
 from logger import log_warning, log_success, log_failure, log_error
 
 
+@dataclass(frozen=True)
+class LayerSearchRoot:
+    tag: str
+    path: Path
+
+
 # Handles discovery, dependency resolution, and orchestration
 class LayerManager:
     def __init__(self, search_paths: Optional[List[str]] = None, file_patterns: Optional[List[str]] = None, *, show_loaded: bool = False, doc_mode: bool = False):
@@ -23,10 +30,14 @@ class LayerManager:
         if file_patterns is None:
             file_patterns = ['*.yaml', '*.yml']
 
-        self.search_paths = [Path(p).resolve() for p in search_paths]
+        self.search_roots = self._build_search_roots(search_paths)
+        self.search_paths = [root.path for root in self.search_roots]
         self.file_patterns = file_patterns
         self.layers: Dict[str, Metadata] = {}  # layer_name -> Metadata object
         self.layer_files: Dict[str, str] = {}  # layer_name -> file_path
+        self.layer_tags: Dict[str, str] = {}  # layer_name -> search path tag
+        self.layer_relpaths: Dict[str, str] = {}  # layer_name -> relative path under tagged root
+        self.tag_to_path: Dict[str, Path] = {root.tag: root.path for root in self.search_roots}
         self.show_loaded = show_loaded
         self.doc_mode = doc_mode  # When True, load all layers regardless of environment variables
         # provider index will be built after layers are loaded
@@ -44,6 +55,49 @@ class LayerManager:
 
         # now that self.layers is populated, build provider index
         self._build_provider_index()
+
+    def _build_search_roots(self, raw_paths: List[str]) -> List[LayerSearchRoot]:
+        roots: List[LayerSearchRoot] = []
+        seen_tags: Set[str] = set()
+        auto_index = 0
+
+        for entry in raw_paths:
+            entry = (entry or '').strip()
+            if not entry:
+                continue
+
+            if '=' in entry:
+                tag, path = entry.split('=', 1)
+                tag = tag.strip()
+                path = path.strip()
+            else:
+                tag = ''
+                path = entry.strip()
+
+            explicit_tag = bool(tag)
+
+            if explicit_tag:
+                if tag in seen_tags:
+                    raise ValueError(f"Duplicate layer path tag '{tag}'")
+            else:
+                while True:
+                    candidate = f"root{auto_index}"
+                    auto_index += 1
+                    if candidate not in seen_tags:
+                        tag = candidate
+                        break
+
+            if not path:
+                continue
+
+            resolved = Path(path).expanduser().resolve()
+            seen_tags.add(tag)
+            roots.append(LayerSearchRoot(tag=tag, path=resolved))
+
+        if not roots:
+            roots.append(LayerSearchRoot(tag="root0", path=Path('./layer').resolve()))
+        return roots
+
 
     def _build_provider_index(self):
         """Index providers to unique layer names"""
@@ -63,7 +117,8 @@ class LayerManager:
         """Discover and load all layer files, creating Metadata objects for each"""
         loaded_layers = set()
 
-        for search_path in self.search_paths:
+        for root in self.search_roots:
+            search_path = root.path
             if not search_path.exists():
                 continue
 
@@ -89,12 +144,17 @@ class LayerManager:
                     continue
 
                 layer_name = layer_info['name']
+                abs_file = Path(metadata_file).resolve()
 
                 # lint on load
                 lint_results = meta.lint_metadata_syntax()
                 if lint_results:  # Any syntax errors found
                     if self.show_loaded:
-                        relative_path = Path(metadata_file).relative_to(search_path)
+                        relative_path = abs_file
+                        try:
+                            relative_path = abs_file.relative_to(search_path)
+                        except ValueError:
+                            pass
                         log_warning(f"  Skipped layer: {layer_name} from {relative_path} (syntax errors)")
                     continue  # Don't add
 
@@ -102,24 +162,34 @@ class LayerManager:
                 if layer_name in self.layers:
                     prev_path = self.layer_files[layer_name]
                     raise ValueError(
-                        f"Duplicate layer name '{layer_name}' found in:\n  {prev_path}\n  {metadata_file}"
+                        f"Duplicate layer name '{layer_name}' found in:\n  {prev_path}\n  {abs_file}"
                     )
 
                 self.layers[layer_name] = meta
-                self.layer_files[layer_name] = metadata_file
+                self.layer_files[layer_name] = str(abs_file)
+                self.layer_tags[layer_name] = root.tag
+                try:
+                    rel_path = abs_file.relative_to(search_path)
+                except ValueError:
+                    rel_path = abs_file
+                self.layer_relpaths[layer_name] = str(rel_path)
                 loaded_layers.add(layer_name)
 
                 if self.show_loaded:
-                    relative_path = Path(metadata_file).relative_to(search_path)
+                    relative_path = rel_path
                     metadata_type = 'x-env-layer' if meta.has_layer_info() else 'standard'
                     print(f"  Loaded layer: {layer_name} from {relative_path} ({metadata_type})")
-
     def get_layer_info(self, layer_name: str) -> Optional[dict]:
         if layer_name not in self.layers:
             return None
         return self.layers[layer_name].get_layer_info()
 
-
+    def get_layer_relative_spec(self, layer_name: str) -> Optional[str]:
+        tag = self.layer_tags.get(layer_name)
+        rel_path = self.layer_relpaths.get(layer_name)
+        if tag and rel_path is not None:
+            return f"{tag}:{rel_path}"
+        return None
 
     def get_dependencies(self, layer_name: str) -> List[str]:
         """Get hard deps"""
@@ -578,9 +648,10 @@ class LayerManager:
 
     def show_search_paths(self):
         print("Layer search paths:")
-        for i, path in enumerate(self.search_paths, 1):
+        for i, root in enumerate(self.search_roots, 1):
+            path = root.path
             exists = "✓" if path.exists() else "✗"
-            print(f"  {i}. {exists} {path}")
+            print(f"  {i}. {exists} {root.tag}={path}")
 
     def resolve_layer_name(self, layer_identifier: str) -> Optional[str]:
         # Direct layer name lookup
@@ -896,11 +967,11 @@ mmdebstrap:
 # CLI integration
 def LayerManager_register_parser(subparsers, root=None):
     if root:
-        default_paths = f'{root}/layer:{root}/device:{root}/image'
-        help_text = 'Colon-separated search paths for layers'
+        default_paths = f'layer={root}/layer:device={root}/device:image={root}/image'
+        help_text = 'Colon-separated search paths for layers (use tag=/path to name each root)'
     else:
-        default_paths = './layer:./device:./image'
-        help_text = 'Colon-separated search paths for layers'
+        default_paths = 'layer=./layer:device=./device:image=./image'
+        help_text = 'Colon-separated search paths for layers (use tag=/path to name each root)'
 
     # Use terminal width for help formatting
     terminal_width = shutil.get_terminal_size().columns
@@ -944,6 +1015,8 @@ def LayerManager_register_parser(subparsers, root=None):
                        help='Show build order for layers (use layer names)')
     parser.add_argument('--full-paths', action='store_true',
                        help='Include full file paths when showing build order')
+    parser.add_argument('--rel-paths', action='store_true',
+                       help='Write tag:relative paths to --output for container remapping')
     parser.add_argument('--output', metavar='FILE',
                        help='Write build-order list to file (works with --build-order)')
     parser.add_argument('--show-paths', action='store_true',
@@ -1023,7 +1096,11 @@ def _layer_main(args):
     ])
 
     if list_only:
-        list_manager = LayerManager(search_paths, args.patterns, show_loaded=True, doc_mode=True)
+        try:
+            list_manager = LayerManager(search_paths, args.patterns, show_loaded=True, doc_mode=True)
+        except ValueError as exc:
+            print(f'Error: {exc}')
+            exit(1)
         print()
         list_manager.show_search_paths()
         print()
@@ -1031,7 +1108,11 @@ def _layer_main(args):
         return
 
     # ..else generic instantiation.
-    manager = LayerManager(search_paths, args.patterns)
+    try:
+        manager = LayerManager(search_paths, args.patterns)
+    except ValueError as exc:
+        print(f'Error: {exc}')
+        exit(1)
     print()
 
     if args.show_paths:
@@ -1041,7 +1122,11 @@ def _layer_main(args):
     if args.list:
         # Always show the search paths when listing layers
         # Use a doc-mode manager for listing so unresolved env-based layers are included
-        list_manager = LayerManager(search_paths, args.patterns, show_loaded=True, doc_mode=True)
+        try:
+            list_manager = LayerManager(search_paths, args.patterns, show_loaded=True, doc_mode=True)
+        except ValueError as exc:
+            print(f'Error: {exc}')
+            exit(1)
         list_manager.show_search_paths()
         print()
         list_manager.list_layers()
@@ -1068,13 +1153,7 @@ def _layer_main(args):
                 print(f"Requires Provider: {requires_list}")
 
             layer_path = manager.layer_files.get(layer_name, "<unknown>")
-            rel_layer_path = layer_path
-            for sp in manager.search_paths:
-                try:
-                    rel_layer_path = Path(layer_path).relative_to(sp)
-                    break
-                except Exception:
-                    continue
+            rel_layer_path = manager.layer_relpaths.get(layer_name, layer_path)
             print(f"  Path: {rel_layer_path}")
 
             if layer_info['depends']:
@@ -1090,13 +1169,7 @@ def _layer_main(args):
                         seen.add(dep)
 
                         dep_path = manager.layer_files.get(dep, "<unknown>")
-                        rel_path = dep_path
-                        for sp in manager.search_paths:
-                            try:
-                                rel_path = Path(dep_path).resolve().relative_to(sp)
-                                break
-                            except Exception:
-                                continue
+                        rel_path = manager.layer_relpaths.get(dep, dep_path)
                         print(f"{pad}- {dep}: {rel_path}")
 
                         # recurse into dependencies of this dependency
@@ -1184,20 +1257,36 @@ def _layer_main(args):
             name_width = max(len(l) for l in build_order) if args.full_paths else 0
 
             for i, layer in enumerate(build_order, 1):
+                abs_path = manager.layer_files.get(layer, "<unknown>")
+                rel_spec = manager.get_layer_relative_spec(layer)
+
+                rel_display = None
                 if args.full_paths:
-                    path = manager.layer_files.get(layer, "<unknown>")
                     display_line = (
                         f"  {i:{num_width}d}. "
                         f"{layer:<{name_width}}  "
-                        f"{path}"
+                        f"{abs_path}"
                     )
-                    file_line = f"{layer}=\"{path}\""
+                    if args.rel_paths and rel_spec:
+                        rel_indent = " " * (num_width + 6)
+                        rel_display = f"{rel_indent}{rel_spec}"
                 else:
                     display_line = f"  {i:{num_width}d}. {layer}"
+                    if args.rel_paths and rel_spec:
+                        display_line = f"{display_line}  {rel_spec}"
+
+                if args.rel_paths and rel_spec:
+                    file_line = f"{layer}=\"{rel_spec}\""
+                elif args.full_paths:
+                    file_line = f"{layer}=\"{abs_path}\""
+                else:
                     file_line = layer
 
                 print(display_line)
                 output_display.append(display_line)
+                if rel_display:
+                    print(rel_display)
+                    output_display.append(rel_display)
                 output_file.append(file_line)
         else:
             print("No layers to build")

@@ -205,3 +205,36 @@ ask () {
       echo "Please answer yes or no."
    done
 }
+
+
+map_tagged_path() {
+   local raw=$1
+   [[ $raw == *:* ]] || { printf '%s\n' "$raw"; return 0; }
+
+   local tag=${raw%%:*}
+   local rest=${raw#*:}
+   local base
+
+   case $tag in
+      IGROOT_*)
+         [[ -n ${IGTOP:-} ]] || die "IGTOP not set for '$raw'"
+         base="$IGTOP/${tag#IGROOT_}"
+         ;;
+      SRCROOT_*)
+         [[ -n ${ctx[SRC_DIR]:-} ]] || die "ctx[SRC_DIR] not set for '$raw'"
+         base="${ctx[SRC_DIR]}/${tag#SRCROOT_}"
+         ;;
+      *)
+         printf '%s\n' "$raw"
+         return 0
+         ;;
+   esac
+
+   if [[ -z $rest || $rest == "." ]]; then
+      printf '%s\n' "$base"
+   elif [[ $rest == /* ]]; then
+      printf '%s\n' "$(realpath -m "$rest")"
+   else
+      printf '%s\n' "$(realpath -m "$base/$rest")"
+   fi
+}

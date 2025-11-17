@@ -50,7 +50,7 @@ path_refresh()
    # Defaults
    ctx[EXEC_PATH]="$IGTOP/bin:$PATH"
    ctx[PYTHON_PATH]="${PYTHONPATH:-}"
-   ctx[LAYER_PATH]="$IGTOP/device:$IGTOP/image:$IGTOP/layer"
+   ctx[LAYER_PATH]="IGROOT_device=$IGTOP/device:IGROOT_image=$IGTOP/image:IGROOT_layer=$IGTOP/layer"
    ctx[CONFIG_PATH]="$IGTOP/config"
 
    # Plug src dir into paths
@@ -60,7 +60,7 @@ path_refresh()
 
       for d in device image layer; do
          [[ -d "${ctx[SRC_DIR]}/$d" ]] && \
-            ctx[LAYER_PATH]="${ctx[SRC_DIR]}/$d:${ctx[LAYER_PATH]}"
+            ctx[LAYER_PATH]="SRCROOT_${d}=${ctx[SRC_DIR]}/$d:${ctx[LAYER_PATH]}"
          done
 
          [[ -d "${ctx[SRC_DIR]}/config" ]] && \
@@ -213,7 +213,7 @@ collect_layers()
    runenv "${ctx[IGENVF]}" ig layer \
       --path "${ctx[LAYER_PATH]}" \
       --build-order "${layers[@]}" \
-      --full-paths --output "$layer_order" \
+      --rel-paths --output "$layer_order" \
       || die "Layer build-order failed"
 
    # Expand and resolve all variables with a strict policy
@@ -342,38 +342,40 @@ prepare_build_config()
    msg "FINAL ENV"
    mapfile_kv "${ctx[FINALENV]}" process_conf_opt
 
-   # Only load layers that contain an mmdebstrap mapping
+   # Translate layer paths and load those that contain an mmdebstrap mapping
    msg "\nMMDEBSTRAP"
    local total=0 added=0 skipped=0
+   local specs="${ctx[TMPDIR]}/layer.resolved"
+
+   : > $specs
+   while IFS='=' read -r layer filepath; do
+      [[ -n $layer && -n $filepath ]] || continue
+      [[ $layer == \#* ]] && continue
+      filepath=${filepath#\"}
+      filepath=${filepath%\"}
+      [[ -n $filepath ]] || continue
+
+      ((total++))
+      local resolved=$(map_tagged_path "$filepath") || die "Failed to resolve $filepath"
+      [[ -f $resolved ]] || die "Layer $layer ($resolved) not found"
+      printf '%s="%s"\n' "$layer" "$resolved" >> "$specs"
+   done < "${ctx[LAYER_ORDER]}"
 
    while IFS=: read -r layer yaml; do
       _bdebstrap+=( --config "$yaml" )
       msg "Loaded $layer"
       ((added++))
-   done < <(python3 - "${ctx[LAYER_ORDER]}" <<'PY'
+   done < <(python3 - "$specs" <<'PY'
 import sys, yaml, pathlib
-layer_file = sys.argv[1]
-with open(layer_file, 'r') as f:
-   for line in f:
-      line = line.strip()
-      if '=' not in line or line.startswith('#'):
-         continue
-
-      layer, filepath = line.split('=', 1)
-      filepath = filepath.strip('"')
-
-      try:
-         if pathlib.Path(filepath).is_file():
-            data = yaml.safe_load(pathlib.Path(filepath).read_bytes())
-            if isinstance(data, dict) and data.get("mmdebstrap"):
-               print(f"{layer}:{filepath}")
-      except:
-         pass
+for raw in pathlib.Path(sys.argv[1]).read_text().splitlines():
+    layer, path = raw.split('=', 1)
+    path = path.strip().strip('"')
+    data = yaml.safe_load(pathlib.Path(path).read_bytes())
+    if isinstance(data, dict) and data.get("mmdebstrap"):
+        print(f"{layer}:{path}")
 PY
 )
-
-   total=$(wc -l < "${ctx[LAYER_ORDER]}" | tr -d ' ')
-   skipped=$((total - added))
+   local skipped=$((total - added))
    msg "Loaded ${added}/${total}, skipped $skipped"
 
    # Store variable name so we can get it by nameref. ctx is an associative
