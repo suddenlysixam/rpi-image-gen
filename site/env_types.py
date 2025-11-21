@@ -177,6 +177,16 @@ class XEnv:
         return f"{cls.LAYER_PREFIX}Provides"
 
     @classmethod
+    def layer_type(cls) -> str:
+        """Build layer type field: X-Env-Layer-Type"""
+        return f"{cls.LAYER_PREFIX}Type"
+
+    @classmethod
+    def layer_generator(cls) -> str:
+        """Build layer generator field: X-Env-Layer-Generator"""
+        return f"{cls.LAYER_PREFIX}Generator"
+
+    @classmethod
     def layer_requires_provider(cls) -> str:
         """Build layer requires provider field: X-Env-Layer-RequiresProvider"""
         return f"{cls.LAYER_PREFIX}RequiresProvider"
@@ -300,7 +310,8 @@ class EnvLayer:
     def __init__(self, name: str, description: str = "", version: str = "1.0.0",
                  category: str = "general", deps: List[str] = None,
                  provides: List[str] = None, requires_provider: List[str] = None,
-                 conflicts: List[str] = None, config_file: str = ""):
+                 conflicts: List[str] = None, layer_type: str = "static",
+                 generator: str = "", config_file: str = ""):
         self.name = name
         self.description = description
         self.version = version
@@ -309,6 +320,8 @@ class EnvLayer:
         self.provides = provides or []
         self.requires_provider = requires_provider or []
         self.conflicts = conflicts or []
+        self.layer_type = layer_type
+        self.generator = generator
         self.config_file = config_file
 
     @classmethod
@@ -326,6 +339,12 @@ class EnvLayer:
         description = metadata_dict.get(XEnv.layer_description(), "")
         version = metadata_dict.get(XEnv.layer_version(), "1.0.0")
         category = metadata_dict.get(XEnv.layer_category(), "general")
+        layer_type = metadata_dict.get(XEnv.layer_type(), "static").strip().lower() or "static"
+        generator = metadata_dict.get(XEnv.layer_generator(), "").strip()
+        if layer_type not in ("static", "dynamic"):
+            raise ValueError(f"Invalid layer type '{layer_type}' in {filepath}")
+        if layer_type == "dynamic" and not generator:
+            raise ValueError(f"Layer '{layer_name}' marked dynamic but no X-Env-Layer-Generator specified")
 
         # Parse dependency lists
         requires_str = metadata_dict.get(XEnv.layer_requires(), "")
@@ -353,6 +372,8 @@ class EnvLayer:
             provides=provides,
             requires_provider=requires_provider,
             conflicts=conflicts,
+            layer_type=layer_type,
+            generator=generator,
             config_file=config_file
         )
 
@@ -450,6 +471,8 @@ class EnvLayer:
             "description": self.description,
             "version": self.version,
             "category": self.category,
+            "type": self.layer_type,
+            "generator": self.generator,
             "depends": self.deps,
             "optional_depends": [],  # Not currently supported
             "conflicts": self.conflicts,
