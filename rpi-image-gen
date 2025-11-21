@@ -47,25 +47,47 @@ trap 'rm -rf "${ctx[TMPDIR]}"' EXIT
 # Refresh path variables. These may change after CLI parse.
 path_refresh()
 {
-   # Defaults
-   ctx[EXEC_PATH]="$IGTOP/bin:$PATH"
-   ctx[PYTHON_PATH]="${PYTHONPATH:-}"
-   ctx[LAYER_PATH]="$IGTOP/device:$IGTOP/image:$IGTOP/layer"
-   ctx[CONFIG_PATH]="$IGTOP/config"
+   for required in bin config device image layer; do
+      if ! path=$(map_path "IGROOT:$required"); then
+         die "Failed to resolve IGROOT:$required"
+      fi
+      [[ -d $path ]] || die "IGROOT:$required missing ($path)"
+   done
 
-   # Plug src dir into paths
+   # Defaults
+   ctx[EXEC_PATH]="${PATH:-}"
+
+   ctx[PYTHON_PATH]="${PYTHONPATH:-}"
+
+   ctx[CONFIG_PATH]="$(map_path 'IGROOT:config')"
+
+   printf -v ctx[LAYER_PATH] '%s:%s:%s' \
+      "IGROOT_device=$(map_path 'IGROOT:device')" \
+      "IGROOT_image=$(map_path 'IGROOT:image')" \
+      "IGROOT_layer=$(map_path 'IGROOT:layer')"
+
+   # Plug src dirs into paths
    if [[ ! "$IGTOP" -ef "${ctx[SRC_DIR]}" ]]; then
-      [[ -d "${ctx[SRC_DIR]}/bin"    ]] && \
-         ctx[EXEC_PATH]="${ctx[SRC_DIR]}/bin:${ctx[EXEC_PATH]}"
+      local src_bin
+      if src_bin=$(map_path 'SRCROOT:bin' 2>/dev/null) && [[ -d $src_bin ]]; then
+         ctx[EXEC_PATH]="${src_bin}:${ctx[EXEC_PATH]}"
+      fi
 
       for d in device image layer; do
-         [[ -d "${ctx[SRC_DIR]}/$d" ]] && \
-            ctx[LAYER_PATH]="${ctx[SRC_DIR]}/$d:${ctx[LAYER_PATH]}"
-         done
+         local sub="${ctx[SRC_DIR]}/$d"
+         [[ -d $sub ]] || continue
+         ctx[LAYER_PATH]="SRCROOT_${d}=${sub}:${ctx[LAYER_PATH]}"
+      done
 
-         [[ -d "${ctx[SRC_DIR]}/config" ]] && \
-            ctx[CONFIG_PATH]="${ctx[SRC_DIR]}/config:${ctx[CONFIG_PATH]}"
+      local src_cfg
+      if src_cfg=$(map_path 'SRCROOT:config' 2>/dev/null) && [[ -d $src_cfg ]]; then
+         ctx[CONFIG_PATH]="${src_cfg}:${ctx[CONFIG_PATH]}"
+      fi
    fi
+
+   # Built-in executables always take precedence
+   ctx[EXEC_PATH]="$(map_path 'IGROOT:bin'):${ctx[EXEC_PATH]}"
+
    PATH=${ctx[EXEC_PATH]}
    export PATH
 }
@@ -125,8 +147,10 @@ parameter_assembly()
       || die "Config parse failed"
 
    # Inject extras
-   printf 'LAYER_HOOKS="%s"\n'  "$IGTOP/layer-hooks"      >> "${ctx[IGENVF]}"
-   printf 'RPI_TEMPLATES="%s"\n' "$IGTOP/templates/rpi" >> "${ctx[IGENVF]}"
+   printf 'IGTOP="%s"\n'         "$IGTOP"               >> "${ctx[IGENVF]}"
+   printf 'SRC_DIR="%s"\n'       "${ctx[SRC_DIR]}"      >> "${ctx[IGENVF]}"
+   printf 'LAYER_HOOKS="%s"\n'   '$IGTOP/layer-hooks'   >> "${ctx[IGENVF]}"
+   printf 'RPI_TEMPLATES="%s"\n' '$IGTOP/templates/rpi' >> "${ctx[IGENVF]}"
 
    # Toolchain base detection
    if dpkg-architecture >/dev/null 2>&1; then
@@ -213,7 +237,7 @@ collect_layers()
    runenv "${ctx[IGENVF]}" ig layer \
       --path "${ctx[LAYER_PATH]}" \
       --build-order "${layers[@]}" \
-      --full-paths --output "$layer_order" \
+      --rel-paths --output "$layer_order" \
       || die "Layer build-order failed"
 
    # Expand and resolve all variables with a strict policy
@@ -255,18 +279,12 @@ prepare_build_config()
    set_kv() {
       local key="$1" val="$2"
       case $key in
-         IGconf_device_assetdir|\
          IGconf_device_hostname|\
-         IGconf_image_assetdir|\
          IGconf_image_name|\
          IGconf_image_outputdir|\
          IGconf_sys_workroot|\
          IGconf_target_dir|\
          IGconf_target_path|\
-         *prebuild|*postbuild|*preimage|*postimage|\
-         IGconf_sbom_hook|\
-         IGconf_deploy_dir|\
-         IGconf_deploy_hook|\
          IGconf_sys_workroot|\
          IGconf_sys_cachedir)
             declare -g "$key"="$val"
@@ -286,10 +304,7 @@ prepare_build_config()
    bootstrap_build_tools
 
    # Create initial bdebstrap env
-   _bdebstrap=( --force
-                --env PATH="$PATH"
-                --env IGTOP="$IGTOP"
-                --env SRC_DIR="${ctx[SRC_DIR]}" )
+   _bdebstrap=( --force --env PATH="$PATH" )
 
    # Sane defaults
    _bdebstrap+=( --name     "${IGconf_image_name:-rpi-image-gen}" )
@@ -342,38 +357,40 @@ prepare_build_config()
    msg "FINAL ENV"
    mapfile_kv "${ctx[FINALENV]}" process_conf_opt
 
-   # Only load layers that contain an mmdebstrap mapping
+   # Translate layer paths and load those that contain an mmdebstrap mapping
    msg "\nMMDEBSTRAP"
    local total=0 added=0 skipped=0
+   local specs="${ctx[TMPDIR]}/layer.resolved"
+
+   : > $specs
+   while IFS='=' read -r layer filepath; do
+      [[ -n $layer && -n $filepath ]] || continue
+      [[ $layer == \#* ]] && continue
+      filepath=${filepath#\"}
+      filepath=${filepath%\"}
+      [[ -n $filepath ]] || continue
+
+      ((total++))
+      local resolved=$(map_path "$filepath") || die "Failed to resolve $filepath"
+      [[ -f $resolved ]] || die "Layer $layer ($resolved) not found"
+      printf '%s="%s"\n' "$layer" "$resolved" >> "$specs"
+   done < "${ctx[LAYER_ORDER]}"
 
    while IFS=: read -r layer yaml; do
       _bdebstrap+=( --config "$yaml" )
       msg "Loaded $layer"
       ((added++))
-   done < <(python3 - "${ctx[LAYER_ORDER]}" <<'PY'
+   done < <(python3 - "$specs" <<'PY'
 import sys, yaml, pathlib
-layer_file = sys.argv[1]
-with open(layer_file, 'r') as f:
-   for line in f:
-      line = line.strip()
-      if '=' not in line or line.startswith('#'):
-         continue
-
-      layer, filepath = line.split('=', 1)
-      filepath = filepath.strip('"')
-
-      try:
-         if pathlib.Path(filepath).is_file():
-            data = yaml.safe_load(pathlib.Path(filepath).read_bytes())
-            if isinstance(data, dict) and data.get("mmdebstrap"):
-               print(f"{layer}:{filepath}")
-      except:
-         pass
+for raw in pathlib.Path(sys.argv[1]).read_text().splitlines():
+    layer, path = raw.split('=', 1)
+    path = path.strip().strip('"')
+    data = yaml.safe_load(pathlib.Path(path).read_bytes())
+    if isinstance(data, dict) and data.get("mmdebstrap"):
+        print(f"{layer}:{path}")
 PY
 )
-
-   total=$(wc -l < "${ctx[LAYER_ORDER]}" | tr -d ' ')
-   skipped=$((total - added))
+   local skipped=$((total - added))
    msg "Loaded ${added}/${total}, skipped $skipped"
 
    # Store variable name so we can get it by nameref. ctx is an associative
@@ -384,18 +401,9 @@ PY
 }
 
 
-hook() {
-   local script=$1; shift
-   runhook "$script" "${ctx[FINALENV]}" "$@"
-}
-
-
 ###############################################################################
 # Stage 4: Filesystem generation
-#   pre-build hooks
 #   run bdebstrap
-#   apply rootfs overlays
-#   post-build hooks
 #   SBOM
 ###############################################################################
 generate_filesystem()
@@ -404,42 +412,22 @@ generate_filesystem()
 
    msg "\nFILESYSTEM"
 
-   hook "$IGTOP/image/pre-build.sh"
-   hook "$IGTOP/device/pre-build.sh"
-
-   hook "${IGconf_image_prebuild:-}"
-   hook "${IGconf_device_prebuild:-}"
-
    local -n _benv="${ctx[ENV_BDEBSTRAP]}" # via nameref
 
    rund "${ctx[SRC_DIR]}" podman unshare bdebstrap \
       "${_benv[@]}" \
-      --setup-hook     '${IGTOP}/bin/runner setup "$@"' \
-      --essential-hook '${IGTOP}/bin/runner essential "$@"' \
-      --customize-hook '${IGTOP}/bin/runner customize "$@"' \
-      --cleanup-hook   '${IGTOP}/bin/runner cleanup "$@"'
+      --setup-hook     'runner setup "$@"' \
+      --extract-hook   'runner extract "$@"' \
+      --essential-hook 'runner essential "$@"' \
+      --customize-hook 'runner customize "$@"' \
+      --cleanup-hook   'runner cleanup "$@"'
+
+   runenv "${ctx[FINALENV]}" podman unshare runner post-build
 
    [[ ${ctx[INTERACTIVE]} == y ]] && \
-      { ask "Filesystem complete. Apply overlays and run post-build?" y || exit 0 ; }
+      { ask "Filesystem complete. Proceed to SBOM?" y || exit 0 ; }
 
-   if [[ -d $IGconf_target_path ]]; then
-      for d in "${IGconf_image_assetdir:-}" "${IGconf_device_assetdir:-}"; do
-         if src=$(realpath -e "${d}/device/rootfs-overlay" 2>/dev/null); then
-            run podman unshare rsync -a -- "${src}/" "${IGconf_target_path}/"
-         fi
-      done
-   fi
-
-   hook "${IGconf_image_postbuild:-}"  "$IGconf_target_path"
-   hook "${IGconf_device_postbuild:-}" "$IGconf_target_path"
-
-   hook "$IGTOP/image/post-build.sh"  "$IGconf_target_path"
-   hook "$IGTOP/device/post-build.sh" "$IGconf_target_path"
-
-   [[ ${ctx[INTERACTIVE]} == y ]] && \
-      { ask "Post-build complete. Proceed to SBOM?" y || exit 0 ; }
-
-   hook "${IGconf_sbom_hook:-}" "${IGconf_target_path}" "${IGconf_target_dir}"
+   runenv "${ctx[FINALENV]}" podman unshare runner sbom
 }
 
 
@@ -456,25 +444,24 @@ generate_images() {
 
    [[ ${ctx[INTERACTIVE]} == y ]] && { ask "Generate image(s)?" y || exit 0 ; }
 
+   local filesystem=$(get_var IGconf_target_path "${ctx[FINALENV]}") || die "no filesystem"
+   local output_path=$(get_var IGconf_image_outputdir "${ctx[FINALENV]}") || die "no out path"
+
    msg "\nIMAGE"
 
-   hook "$IGTOP/device/pre-image.sh" "${IGconf_target_path}" "${IGconf_image_outputdir}"
-   hook "$IGTOP/image/pre-image.sh"  "${IGconf_target_path}" "${IGconf_image_outputdir}"
+   runenv "${ctx[FINALENV]}" podman unshare runner pre-image
 
-   hook "${IGconf_device_preimage:-}" "${IGconf_target_path}" "${IGconf_image_outputdir}"
-   hook "${IGconf_image_preimage:-}" "${IGconf_target_path}" "${IGconf_image_outputdir}"
-
-   if [[ "$provider" == genimage && -d "${IGconf_target_path:-}" ]] ; then
+   if [[ "$provider" == genimage && -d "$filesystem" ]] ; then
       mkdir -p "${ctx[TMPDIR]}/genimage"
       local cfg
-      for cfg in "${IGconf_image_outputdir}"/genimage*.cfg; do
+      for cfg in "${output_path}"/genimage*.cfg; do
          [[ -f $cfg ]] || continue
          runenv "${ctx[FINALENV]}" \
             podman unshare env genimage \
-            --rootpath   "$IGconf_target_path" \
+            --rootpath   "$filesystem" \
             --tmppath    "${ctx[TMPDIR]}/genimage" \
-            --inputpath  "$IGconf_image_outputdir" \
-            --outputpath "$IGconf_image_outputdir" \
+            --inputpath  "$output_path" \
+            --outputpath "$output_path" \
             --loglevel=1 \
             --config     "$cfg"  \
             | pv -t -F 'Generating image...%t' \
@@ -482,11 +469,7 @@ generate_images() {
       done
    fi
 
-   hook "${IGconf_device_postimage:-}" "${IGconf_image_outputdir}"
-   hook "${IGconf_image_postimage:-}"  "${IGconf_image_outputdir}"
-
-   hook "$IGTOP/device/post-image.sh" "${IGconf_image_outputdir}"
-   hook "$IGTOP/image/post-image.sh"  "${IGconf_image_outputdir}"
+   runenv "${ctx[FINALENV]}" podman unshare runner post-image
 }
 
 
@@ -496,10 +479,9 @@ generate_images() {
 #   Install build assets for distribution
 ###############################################################################
 deploy() {
-   [[ -z "${IGconf_deploy_dir:-}" ]] && return 0
    [[ ${ctx[INTERACTIVE]} == y ]] && { ask "Deploy assets?" y || exit 0 ; }
    msg "\nDEPLOY"
-   hook "$IGconf_deploy_hook"
+   runenv "${ctx[FINALENV]}" podman unshare runner deploy
 }
 
 

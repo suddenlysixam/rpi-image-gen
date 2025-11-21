@@ -70,39 +70,5 @@
 # X-Env-Var-assetdir-Valid: string
 # X-Env-Var-assetdir-Set: lazy
 #
-# X-Env-Var-prebuild: ${IGconf_device_assetdir}/pre-build.sh
-# X-Env-Var-prebuild-Desc: Pre-build hook. If found and executable, this script
-#  will be executed from its parent directory before the filesystem build
-#  commences.
-#  Example use: Device specific pre-build validation
-# X-Env-Var-prebuild-Required: n
-# X-Env-Var-prebuild-Valid: string
-# X-Env-Var-prebuild-Set: lazy
-#
-# X-Env-Var-postbuild: ${IGconf_device_assetdir}/post-build.sh
-# X-Env-Var-postbuild-Desc: Post-build hook. If found and executable, this script
-#  will be executed from its parent directory after the filesystem build has
-#  completed.
-#  Example use: Installation of device specific assets
-# X-Env-Var-postbuild-Required: n
-# X-Env-Var-postbuild-Valid: string
-# X-Env-Var-postbuild-Set: lazy
-#
-# X-Env-Var-preimage: ${IGconf_device_assetdir}/pre-image.sh
-# X-Env-Var-preimage-Desc: Pre-image hook. If found and executable, this script
-#  will executed from its parent directory before image creation commences.
-# X-Env-Var-preimage-Required: n
-# X-Env-Var-preimage-Valid: string
-# X-Env-Var-preimage-Set: lazy
-#
-# X-Env-Var-postimage: ${IGconf_device_assetdir}/post-image.sh
-# X-Env-Var-postimage-Desc: Post-image hook. If found and executable, this script
-#  will be executed from its parent directory after image creation has
-#  completed.
-#  Example use: Signing image assets with device specific keys.
-# X-Env-Var-postimage-Required: n
-# X-Env-Var-postimage-Valid: string
-# X-Env-Var-postimage-Set: lazy
-#
 # METAEND
 ---
