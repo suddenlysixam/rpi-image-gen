@@ -7,6 +7,9 @@ IGTOP=$(readlink -f "$(dirname "$0")/../../")
 LAYERS="${IGTOP}/test/layer"
 
 PATH="$IGTOP/bin:$PATH"
+PATH="$LAYERS/tools:$PATH"
+DYN_LAYER_DIR=$(mktemp -d -t dynamic-layers.XXXXXX)
+trap 'rm -rf "$DYN_LAYER_DIR"' EXIT
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -52,9 +55,15 @@ run_test() {
     ((TOTAL_TESTS++))
     print_test "$test_name"
 
+    # Automatically inject dynamic layer search path when needed
+    local patched_command="$command"
+    local layer_spec="--path TMPROOT_layer=$DYN_LAYER_DIR:$LAYERS"
+    patched_command=${patched_command//--path "$LAYERS"/$layer_spec}
+    patched_command=${patched_command//--path $LAYERS/$layer_spec}
+
     # Run the command and capture both stdout and stderr
     local output
-    output=$(eval "$command" 2>&1)
+    output=$(eval "$patched_command" 2>&1)
     local actual_exit_code=$?
 
     if [ "$actual_exit_code" -eq "$expected_exit_code" ]; then
@@ -131,6 +140,10 @@ run_test "valid-basic-describe" \
     0 \
     "Valid basic metadata should describe successfully"
 
+run_test "valid-dynamic-layer" \
+    "ig metadata --validate ${LAYERS}/dynamic-valid.yaml" \
+    0 \
+    "Dynamic layer with generator should validate successfully"
 
 # Valid all-types metadata
 setup_test_env
@@ -185,6 +198,10 @@ run_test "invalid-no-prefix-validate" \
     1 \
     "Metadata with variables but no prefix should fail to validate"
 
+run_test "invalid-dynamic-missing-generator" \
+    "ig metadata --validate ${LAYERS}/invalid-dynamic-missing-generator.yaml" \
+    1 \
+    "Dynamic layer without a generator should fail to validate"
 
 # Invalid - malformed syntax
 run_test "invalid-malformed-parse" \
@@ -697,5 +714,11 @@ run_test "env-var-deps-apply-env" \
     0 \
     "Environment variable dependencies should work with apply-env"
 
+print_header "LAYER MANAGER TESTS"
+
+run_test "layer-manager-dynamic-generation" \
+    "python3 ${LAYERS}/test_dynamic_layer_manager.py" \
+    0 \
+    "LayerManager should generate dynamic layers into dynamic root"
 
 print_summary

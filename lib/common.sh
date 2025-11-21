@@ -236,6 +236,10 @@ map_path() {
          [[ -n ${IGconf_image_assetdir:-} ]] || return 1
          base=${IGconf_image_assetdir}
          ;;
+      TMPROOT_layer)
+         [[ -n ${ctx[DYN_LAYER_DIR]:-} ]] || return 1
+         base=${ctx[DYN_LAYER_DIR]}
+         ;;
       *)
          printf '%s\n' "$raw"
          return 0

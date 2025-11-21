@@ -2,6 +2,8 @@ import os
 import glob
 import shutil
 import argparse
+import shlex
+import subprocess
 from pathlib import Path
 from typing import Dict, List, Optional, Set, Tuple
 from collections import OrderedDict
@@ -43,6 +45,7 @@ class LayerManager:
         # provider index will be built after layers are loaded
         self.provider_index: Dict[str, str] = {}
         self.provider_conflicts: Dict[str, Set[str]] = {}
+        self.generated_root: Optional[Path] = None
 
         # Tracks write-out order
         self.write_log: OrderedDict[str, str] = OrderedDict()
@@ -122,6 +125,10 @@ class LayerManager:
             if not search_path.exists():
                 continue
 
+            if root.tag == 'TMPROOT_layer':
+                # Reserved for generated output only
+                continue
+
             # Find all matching files
             all_files = []
             for pattern in self.file_patterns:
@@ -142,6 +149,9 @@ class LayerManager:
                     continue
                 if not layer_info:
                     continue
+
+                layer_type = (layer_info.get('type') or 'static').lower()
+                generator_cmd = (layer_info.get('generator') or '').strip()
 
                 layer_name = layer_info['name']
                 abs_file = Path(metadata_file).resolve()
@@ -165,13 +175,29 @@ class LayerManager:
                         f"Duplicate layer name '{layer_name}' found in:\n  {prev_path}\n  {abs_file}"
                     )
 
+                if layer_type == 'dynamic':
+                    generated_root = self._ensure_generated_root()
+                    if not generator_cmd:
+                        raise ValueError(f"Layer '{layer_name}' marked dynamic but no generator defined")
+                    try:
+                        rel_path = abs_file.relative_to(search_path)
+                    except ValueError:
+                        rel_path = Path(layer_name).with_suffix('.yaml')
+                    output_file = generated_root / rel_path
+                    output_file.parent.mkdir(parents=True, exist_ok=True)
+                    self._run_layer_generator(layer_name, generator_cmd, abs_file, output_file)
+                    abs_file = output_file.resolve()
+                    tag = 'TMPROOT_layer'
+                else:
+                    tag = root.tag
+                    try:
+                        rel_path = abs_file.relative_to(search_path)
+                    except ValueError:
+                        rel_path = abs_file
+
                 self.layers[layer_name] = meta
                 self.layer_files[layer_name] = str(abs_file)
-                self.layer_tags[layer_name] = root.tag
-                try:
-                    rel_path = abs_file.relative_to(search_path)
-                except ValueError:
-                    rel_path = abs_file
+                self.layer_tags[layer_name] = tag
                 self.layer_relpaths[layer_name] = str(rel_path)
                 loaded_layers.add(layer_name)
 
@@ -179,6 +205,30 @@ class LayerManager:
                     relative_path = rel_path
                     metadata_type = 'x-env-layer' if meta.has_layer_info() else 'standard'
                     print(f"  Loaded layer: {layer_name} from {relative_path} ({metadata_type})")
+    def _ensure_generated_root(self) -> Path:
+        if self.generated_root is not None:
+            return self.generated_root
+
+        tmp_path = self.tag_to_path.get('TMPROOT_layer')
+        if tmp_path is None:
+            raise ValueError('Dynamic layer requested but TMPROOT_layer root tag not provided in path')
+
+        tmp_path.mkdir(parents=True, exist_ok=True)
+        self.generated_root = tmp_path
+        return tmp_path
+
+    def _run_layer_generator(self, layer_name: str, generator_cmd: str, input_path: Path, output_path: Path) -> None:
+        cmd = shlex.split(generator_cmd)
+        if not cmd:
+            raise ValueError(f"Generator command for layer '{layer_name}' is empty")
+        cmd = cmd + [str(input_path), str(output_path)]
+        try:
+            subprocess.run(cmd, check=True)
+        except FileNotFoundError as exc:
+            raise ValueError(f"Generator '{generator_cmd}' for layer '{layer_name}' not found") from exc
+        except subprocess.CalledProcessError as exc:
+            raise ValueError(f"Generator '{generator_cmd}' for layer '{layer_name}' failed with exit code {exc.returncode}") from exc
+
     def get_layer_info(self, layer_name: str) -> Optional[dict]:
         if layer_name not in self.layers:
             return None
@@ -1143,6 +1193,9 @@ def _layer_main(args):
             print(f"Version: {layer_info['version']}")
             print(f"Category: {layer_info['category']}")
             print(f"Description: {layer_info['description']}")
+            print(f"Type: {layer_info['type']}")
+            if layer_info.get('type') == 'dynamic' and layer_info.get('generator'):
+                print(f"Generator: {layer_info['generator']}")
 
             if layer_info.get('provides'):
                 provides_list = ', '.join(layer_info['provides'])
@@ -1154,7 +1207,7 @@ def _layer_main(args):
 
             layer_path = manager.layer_files.get(layer_name, "<unknown>")
             rel_layer_path = manager.layer_relpaths.get(layer_name, layer_path)
-            print(f"  Path: {rel_layer_path}")
+            print(f"Path: {rel_layer_path}")
 
             if layer_info['depends']:
                 print("Depends:")

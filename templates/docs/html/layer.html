@@ -351,6 +351,10 @@
     <div class="section">
         <h2>Attributes</h2>
         <p><strong>File:</strong> <code>{{ layer.file_path }}</code></p>
+        <p><strong>Type:</strong> <code>{{ layer.layer_info.type }}</code></p>
+        {% if layer.layer_info.type == 'dynamic' and layer.layer_info.generator %}
+        <p><strong>Generator:</strong> <code>{{ layer.layer_info.generator }}</code></p>
+        {% endif %}
         {% if layer.layer_info.conflicts %}
         <p><strong>Conflicts:</strong> {{ layer.layer_info.conflicts|join(', ') }}</p>
         {% endif %}
