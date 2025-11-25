@@ -145,6 +145,7 @@
 <li><a href="#_x_env_metadata">X-Env Metadata</a>
 <ul class="sectlevel2">
 <li><a href="#_metadata_structure">Metadata Structure</a></li>
+<li><a href="#_static_vs_dynamic_layers">Static vs Dynamic Layers</a></li>
 <li><a href="#_layer_attributes">Layer Attributes</a></li>
 <li><a href="#_dependencies_and_providers">Dependencies and Providers</a>
 <ul class="sectlevel3">
@@ -304,6 +305,65 @@ mmdebstrap:
 </div>
 </div>
 <div class="sect2">
+<h3 id="_static_vs_dynamic_layers"><a class="anchor" href="#_static_vs_dynamic_layers"></a><a class="link" href="#_static_vs_dynamic_layers">Static vs Dynamic Layers</a></h3>
+<div class="paragraph">
+<p>Layers are static unless explicitly marked dynamic. To render a layer at build time add:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code># X-Env-Layer-Type: dynamic
+# X-Env-Layer-Generator: myscript</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The loader then:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Checks for the existence of a temporary directory specified by tag <code>TMPROOT_layer=&lt;tmpdir&gt;</code> on the layer search path (<code>rpi-image-gen</code> does this automatically).</p>
+</li>
+<li>
+<p>Runs the generator with two arguments, <code>&lt;template-path&gt; &lt;output-path&gt;</code>, where the output is written to <code>TMPROOT_layer/path/to/&lt;layer-name&gt;.yaml</code>. The <code>path/to</code> portion matches the layer’s path under its original search root, so dynamic layers mirror the same directory structure as static layers when reported via tagged paths.</p>
+</li>
+<li>
+<p>Reads all mmdebstrap/env content from the generated file while continuing to use the original <code># X-Env-*</code> metadata for naming, dependencies, documentation, etc.</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>Generators must write a complete layer to the output path. A trivial generator could copy the template directly to the output (e.g. <code>cp</code> works fine). More more complex generators may inject snapshot timestamps, merge user data, or pull content from other sources. If the generator writes nothing, the layer still 'exists' (metadata is intact) but it contains no YAML body information (packages, hooks, etc) and <code>--describe</code> output will reflect that. Dynamic layers provide a way to manipulate the layer YAML at build time. Modifications made by the generator only affect the YAML body. The original <code># X-Env-*</code> metadata is always taken from the template.</p>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Important</div>
+</td>
+<td class="content">
+<div class="paragraph">
+<p><code>X-Env-Layer-Generator</code> must resolve to an executable (on PATH or via a relative/absolute path).</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+<div class="paragraph">
+<p><code>rpi-image-gen</code> ships its own generators in <code>bin/generators</code>. If a source directory was specified at build time, <code>&lt;SRCROOT&gt;/bin/generators</code> is automatically included in <code>PATH</code> if present.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
 <h3 id="_layer_attributes"><a class="anchor" href="#_layer_attributes"></a><a class="link" href="#_layer_attributes">Layer Attributes</a></h3>
 <div class="paragraph">
 <p><code>X-Env-Layer-Name</code>: Layer name</p>
@@ -328,6 +388,12 @@ mmdebstrap:
 </div>
 <div class="paragraph">
 <p><code>X-Env-Layer-Conflicts</code>: Layers that cannot be used together with this one</p>
+</div>
+<div class="paragraph">
+<p><code>X-Env-Layer-Type</code>: Static (default) or dynamic</p>
+</div>
+<div class="paragraph">
+<p><code>X-Env-Layer-Generator</code>: If dynamic, the generator invoked by the loader</p>
 </div>
 </div>
 <div class="sect2">
