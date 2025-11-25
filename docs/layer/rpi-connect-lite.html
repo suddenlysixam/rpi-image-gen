@@ -126,8 +126,6 @@
         <span class="badge">v1.0.0</span>
         <p>Raspberry Pi Connect client with remote shell access</p>
     </div>
-
-    
     <div class="section">
         <h2>Additional Documentation</h2>
         <div class="companion-content">
@@ -238,37 +236,20 @@
 
         </div>
     </div>
-    
-
-    
     <div class="section">
         <h2>Relationships</h2>
-        
         <p><strong>Depends on:</strong></p>
         <div class="deps">
             <a href="systemd-min.html" class="dep-badge">systemd-min</a>
             <a href="rpi-user-credentials.html" class="dep-badge">rpi-user-credentials</a>
         </div>
-        
-        
-        
         <p><strong>Provides:</strong> rpi-connect-client</p>
-        
-        
     </div>
-    
-
-    
     <div class="section">
         <h2>Configuration Variables</h2>
-        
         <p><strong>References:</strong>
-        
         <code>IGconf_device_user1</code>
-        
         </p>
-        
-        
         <p><strong>Declares</strong> (prefix: <code>connect</code>):</p>
         <table>
             <thead>
@@ -281,77 +262,46 @@
                 </tr>
             </thead>
             <tbody>
-                
                 <tr>
                     <td><code>IGconf_connect_authkey</code></td>
                     <td>Auth key generated via Raspberry Pi Connect account
  Settings. This can hold a path to the key file or the key itself.</td>
                     <td>
-                       
                            <code>&lt;disabled&gt;</code>
-                       
                     </td>
                     <td>Non-empty string value</td>
                     <td>
                         <a href="variable-validation.html#set-policies" class="badge policy-skip" title="Click for policy and validation help">skip</a>
                     </td>
                 </tr>
-                
                 <tr>
                     <td><code>IGconf_connect_on</code></td>
                     <td>Enable Raspberry Pi Connect on system startup</td>
                     <td>
-                       
-                           
                            <code>y</code>
-                           
-                       
                     </td>
                     <td>Boolean value - accepts: true/false, 1/0, yes/no, y/n (case insensitive)</td>
                     <td>
                         <a href="variable-validation.html#set-policies" class="badge policy-immediate" title="Click for policy and validation help">immediate</a>
                     </td>
                 </tr>
-                
             </tbody>
         </table>
-        
     </div>
-    
-
-    
     <div class="section">
         <h2>mmdebstrap</h2>
-
-        
-
-        
-
-        
-
-        
         
         <h3>Packages</h3>
         <p>Installs:</p>
         <ul>
-            
             <li><code>rpi-connect-lite</code></li>
-            
         </ul>
-        
-
-        
-
-        
-
-        
     </div>
-    
 
     <div class="section">
         <h2>Attributes</h2>
         <p><strong>File:</strong> <code>rpi/device/services/rpi-connect-lite.yaml</code></p>
-        
+        <p><strong>Type:</strong> <code>static</code></p>
     </div>
 </body>
 </html>

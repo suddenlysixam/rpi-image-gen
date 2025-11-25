@@ -127,8 +127,6 @@
         <p>Immutable GPT A/B layout for rotational OTA updates,
  boot/system redundancy, and a shared persistent data partition.</p>
     </div>
-
-    
     <div class="section">
         <h2>Additional Documentation</h2>
         <div class="companion-content">
@@ -374,12 +372,8 @@
 
         </div>
     </div>
-    
-
-    
     <div class="section">
         <h2>Relationships</h2>
-        
         <p><strong>Depends on:</strong></p>
         <div class="deps">
             <a href="image-base.html" class="dep-badge">image-base</a>
@@ -387,26 +381,13 @@
             <a href="rpi-ab-slot-mapper.html" class="dep-badge">rpi-ab-slot-mapper</a>
             <a href="systemd-min.html" class="dep-badge">systemd-min</a>
         </div>
-        
-        
-        
         <p><strong>Provides:</strong> image</p>
-        
-        
     </div>
-    
-
-    
     <div class="section">
         <h2>Configuration Variables</h2>
-        
         <p><strong>References:</strong>
-        
         <code>IGconf_device_storage_type</code>
-        
         </p>
-        
-        
         <p><strong>Declares</strong> (prefix: <code>image</code>):</p>
         <table>
             <thead>
@@ -419,72 +400,51 @@
                 </tr>
             </thead>
             <tbody>
-                
                 <tr>
                     <td><code>IGconf_image_boot_part_size</code></td>
                     <td>Boot partition size per-slot.</td>
                     <td>
-                       
-                           
                            <code>96M</code>
-                           
-                       
                     </td>
                     <td>Size value with optional unit (bytes, k/m/g/s) or percentage</td>
                     <td>
                         <a href="variable-validation.html#set-policies" class="badge policy-immediate" title="Click for policy and validation help">immediate</a>
                     </td>
                 </tr>
-                
                 <tr>
                     <td><code>IGconf_image_system_part_size</code></td>
                     <td>System partition size per-slot.</td>
                     <td>
-                       
-                           
                            <code>512M</code>
-                           
-                       
                     </td>
                     <td>Size value with optional unit (bytes, k/m/g/s) or percentage</td>
                     <td>
                         <a href="variable-validation.html#set-policies" class="badge policy-immediate" title="Click for policy and validation help">immediate</a>
                     </td>
                 </tr>
-                
                 <tr>
                     <td><code>IGconf_image_data_part_size</code></td>
                     <td>Writable data partition retained across
  slot rotations.</td>
                     <td>
-                       
-                           
                            <code>1G</code>
-                           
-                       
                     </td>
                     <td>Size value with optional unit (bytes, k/m/g/s) or percentage</td>
                     <td>
                         <a href="variable-validation.html#set-policies" class="badge policy-immediate" title="Click for policy and validation help">immediate</a>
                     </td>
                 </tr>
-                
                 <tr>
                     <td><code>IGconf_image_assetdir</code></td>
                     <td>Image specific asset directory</td>
                     <td>
-                       
-                           
                            <code>${DIRECTORY}</code>
-                           
-                       
                     </td>
                     <td>Non-empty string value</td>
                     <td>
                         <a href="variable-validation.html#set-policies" class="badge policy-immediate" title="Click for policy and validation help">immediate</a>
                     </td>
                 </tr>
-                
                 <tr>
                     <td><code>IGconf_image_pmap</code></td>
                     <td>Provisioning Map type for this image layout.
@@ -494,77 +454,44 @@
  cryptdata: Only the data partition will be provisioned encrypted.
  crypthybrid: B:system OS partition will be provisioned encrypted (dev only).</td>
                     <td>
-                       
-                           
                            <code>clear</code>
-                           
-                       
                     </td>
                     <td>Must be one of: clear, crypt, cryptslots, cryptdata, crypthybrid</td>
                     <td>
                         <a href="variable-validation.html#set-policies" class="badge policy-immediate" title="Click for policy and validation help">immediate</a>
                     </td>
                 </tr>
-                
                 <tr>
                     <td><code>IGconf_image_ptable_protect</code></td>
                     <td>Enable eMMC Power-On Write Protect of the partition
  table. If enabled, the first 8MB of the boot storage device will be
  protected. Applies to eMMC only.</td>
                     <td>
-                       
-                           
                            <code class="long-default">$( [ "${IGconf_device_storage_type:-}" = "emmc" ] && echo y || echo n )</code>
-                           
-                       
                     </td>
                     <td>Non-empty string value</td>
                     <td>
                         <a href="variable-validation.html#set-policies" class="badge policy-immediate" title="Click for policy and validation help">immediate</a>
                     </td>
                 </tr>
-                
             </tbody>
         </table>
-        
     </div>
-    
-
-    
     <div class="section">
         <h2>mmdebstrap</h2>
-
-        
-
-        
-
-        
-
-        
         
         <h3>Packages</h3>
         <p>Installs:</p>
         <ul>
-            
             <li><code>dosfstools</code></li>
-            
             <li><code>e2fsprogs</code></li>
-            
         </ul>
-        
-
-        
-
-        
-
-        
     </div>
-    
 
     <div class="section">
         <h2>Attributes</h2>
         <p><strong>File:</strong> <code>gpt/ab_userdata/image.yaml</code></p>
-        
+        <p><strong>Type:</strong> <code>static</code></p>
     </div>
 </body>
 </html>
