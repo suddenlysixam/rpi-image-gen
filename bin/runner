@@ -184,7 +184,7 @@ case "$phase" in
       ;;
    customize)
       run_phase_scripts "$phase" "$@"
-      apply_overlays "$phase" "$IGconf_target_path"
+      apply_overlays "$phase" "$@"
       run_hook_phase "$phase" "$@"
       ;;
    extract|essential|cleanup)
