@@ -43,6 +43,8 @@ declare -A ctx=(
 [[ -d "${ctx[TMPDIR]}" ]] || die "Failed to create temp directory"
 trap 'rm -rf "${ctx[TMPDIR]}"' EXIT
 
+ctx[DYN_LAYER_DIR]="${ctx[TMPDIR]}/layers"
+mkdir -p "${ctx[DYN_LAYER_DIR]}"
 
 # Refresh path variables. These may change after CLI parse.
 path_refresh()
@@ -73,6 +75,10 @@ path_refresh()
          ctx[EXEC_PATH]="${src_bin}:${ctx[EXEC_PATH]}"
       fi
 
+      if src_bin=$(map_path 'SRCROOT:bin/generators' 2>/dev/null) && [[ -d $src_bin ]]; then
+         ctx[EXEC_PATH]="${src_bin}:${ctx[EXEC_PATH]}"
+      fi
+
       for d in device image layer; do
          local sub="${ctx[SRC_DIR]}/$d"
          [[ -d $sub ]] || continue
@@ -85,8 +91,11 @@ path_refresh()
       fi
    fi
 
+   ctx[LAYER_PATH]="TMPROOT_layer=${ctx[DYN_LAYER_DIR]}:${ctx[LAYER_PATH]}"
+
    # Built-in executables always take precedence
    ctx[EXEC_PATH]="$(map_path 'IGROOT:bin'):${ctx[EXEC_PATH]}"
+   ctx[EXEC_PATH]="$(map_path 'IGROOT:bin/generators'):${ctx[EXEC_PATH]}"
 
    PATH=${ctx[EXEC_PATH]}
    export PATH

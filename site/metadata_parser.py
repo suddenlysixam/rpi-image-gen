@@ -96,6 +96,8 @@ SUPPORTED_FIELD_PATTERNS = {
     XEnv.layer_requires(): {"type": "single", "description": "Required layer dependencies"},
     XEnv.layer_conflicts(): {"type": "single", "description": "Conflicting layers"},
     XEnv.layer_category(): {"type": "single", "description": "Layer category"},
+    XEnv.layer_type(): {"type": "single", "description": "Layer type (static or dynamic)"},
+    XEnv.layer_generator(): {"type": "single", "description": "Generator executable for dynamic layers"},
     XEnv.layer_provides(): {"type": "single", "description": "Capabilities provided by this layer"},
     XEnv.layer_requires_provider(): {"type": "single", "description": "Capabilities required (virtual)"},
 
