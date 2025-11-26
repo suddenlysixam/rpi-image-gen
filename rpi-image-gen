@@ -436,6 +436,7 @@ generate_filesystem()
    [[ ${ctx[INTERACTIVE]} == y ]] && \
       { ask "Filesystem complete. Proceed to SBOM?" y || exit 0 ; }
 
+   msg "\nSBOM"
    runenv "${ctx[FINALENV]}" podman unshare runner sbom
 }
 
