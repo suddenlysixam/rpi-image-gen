@@ -25,7 +25,6 @@ add_dir 'IGROOT:scripts/bdebstrap'   # built-in hooks
 
 # Execute these hooks at the appropriate phase
 declare -A HOOK_PHASES=(
-   # Filesystem
    [setup]="\
 IGROOT_device:pre-build.sh IGROOT_image:pre-build.sh \
 DEVICE_ASSET:pre-build.sh IMAGE_ASSET:pre-build.sh \
@@ -38,7 +37,6 @@ DEVICE_ASSET:post-build.sh IMAGE_ASSET:post-build.sh \
 IGROOT:post-build.sh \
 SRCROOT:post-build.sh"
 
-   # Image
    [pre-image]="\
 IGROOT_device:pre-image.sh IGROOT_image:pre-image.sh \
 DEVICE_ASSET:pre-image.sh IMAGE_ASSET:pre-image.sh \
@@ -52,6 +50,13 @@ IGROOT:post-image.sh \
 SRCROOT:post-image.sh"
 
    [sbom]='VAR:IGconf_sbom_hook'
+
+   [finalize]="\
+IGROOT_device:finalize.sh IGROOT_image:finalize.sh \
+DEVICE_ASSET:finalize.sh IMAGE_ASSET:finalize.sh \
+IGROOT:finalize.sh \
+SRCROOT:finalize.sh"
+
    [deploy]='VAR:IGconf_deploy_hook'
 )
 
@@ -170,6 +175,9 @@ phase_args() {
       deploy)
          [[ -n ${IGconf_deploy_dir:-} ]] && set -- "$@" "$IGconf_deploy_dir"
          ;;
+      finalize)
+         set -- "$@" "${IGconf_target_dir:?"required for $phase"}"
+         ;;
       *)
    esac
    printf '%s\0' "$@"
@@ -196,7 +204,7 @@ case "$phase" in
    pre-image|post-image)
       run_hook_phase "$phase" "$@"
       ;;
-   sbom|deploy)
+   sbom|finalize|deploy)
       run_hook_phase "$phase" "$@"
       ;;
    *)

@@ -504,7 +504,7 @@ $ rpi-image-gen build -S ./my-project/ -c kiosk.cfg</code></pre>
 <div class="sect2">
 <h3 id="_overview_2"><a class="anchor" href="#_overview_2"></a><a class="link" href="#_overview_2">Overview</a></h3>
 <div class="paragraph">
-<p><code>rpi-image-gen</code> supports different classifications of hook, and runs all hooks in <em>phases</em> throughout stages 4, 5 and 6 via script <code>bin/runner</code>. Runner is responsible for invoking all hook scripts outside of layer declarations and is the single entry point every hook runs through. <code>bdebstrap</code> invokes it for each lifecycle phase (setup, customize, etc.) and the main script calls it for image, SBOM, and deploy phases. Runner:</p>
+<p><code>rpi-image-gen</code> supports different classifications of hook, and runs all hooks in <em>phases</em> via script <code>bin/runner</code>. Runner is responsible for invoking all hook scripts outside of layer declarations and is the single entry point every hook runs through. <code>bdebstrap</code> invokes it for each lifecycle phase (setup, customize, etc.) and the main script calls it for image, SBOM, and deploy phases. Runner:</p>
 </div>
 <div class="ulist">
 <ul>
@@ -548,7 +548,7 @@ $ rpi-image-gen build -S ./my-project/ -c kiosk.cfg</code></pre>
 <td class="tableblock halign-left valign-top"><p class="tableblock">setup</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">bdebstrap</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">bundle</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">After directory creation, before any packages are downloaded or installed</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">After build output directory creation, before any packages are downloaded or installed</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">pre-build</p></td>
@@ -590,7 +590,7 @@ $ rpi-image-gen build -S ./my-project/ -c kiosk.cfg</code></pre>
 <td class="tableblock halign-left valign-top"><p class="tableblock">sbom</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">main</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">single</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">After post-build, before pre-image. Layer driven.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">After post-build</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">pre-image</p></td>
@@ -605,10 +605,16 @@ $ rpi-image-gen build -S ./my-project/ -c kiosk.cfg</code></pre>
 <td class="tableblock halign-left valign-top"><p class="tableblock">After image generation</p></td>
 </tr>
 <tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">finalize</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">main</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">single</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">After sbom and image generation, before deploy</p></td>
+</tr>
+<tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">deploy</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">main</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">single</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Final stage, after post-image</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Final stage</p></td>
 </tr>
 </tbody>
 </table>

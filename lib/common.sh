@@ -240,6 +240,10 @@ map_path() {
          [[ -n ${ctx[DYN_LAYER_DIR]:-} ]] || return 1
          base=${ctx[DYN_LAYER_DIR]}
          ;;
+      TARGETDIR)
+         [[ -n ${IGconf_target_dir:-} ]] || return 1
+         base=${IGconf_target_dir}
+         ;;
       *)
          printf '%s\n' "$raw"
          return 0
