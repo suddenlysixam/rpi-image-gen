@@ -132,7 +132,7 @@ Hooks are optional but if a hook is to be executed, it must have executable perm
 
 === Overview
 
-`rpi-image-gen` supports different classifications of hook, and runs all hooks in _phases_ throughout stages 4, 5 and 6 via script `bin/runner`. Runner is responsible for invoking all hook scripts outside of layer declarations and is the single entry point every hook runs through. `bdebstrap` invokes it for each lifecycle phase (setup, customize, etc.) and the main script calls it for image, SBOM, and deploy phases. Runner:
+`rpi-image-gen` supports different classifications of hook, and runs all hooks in _phases_ via script `bin/runner`. Runner is responsible for invoking all hook scripts outside of layer declarations and is the single entry point every hook runs through. `bdebstrap` invokes it for each lifecycle phase (setup, customize, etc.) and the main script calls it for image, SBOM, and deploy phases. Runner:
 
 * Resolves hook locations from tagged specs (`IGROOT:*`, `DEVICE_ASSET:*`, `VAR:IGconf_*`) so the same path resolves regardless of environment (e.g. host vs container).
 * Executes phase-specific hooks in a deterministic order.
@@ -145,17 +145,18 @@ Hooks are optional but if a hook is to be executed, it must have executable perm
 [cols="1,1,1,4", options="header"]
 |===
 | Phase      | Context   | Classification | Execution
-| setup      | bdebstrap | bundle         | After directory creation, before any packages are downloaded or installed
+| setup      | bdebstrap | bundle         | After build output directory creation, before any packages are downloaded or installed
 | pre-build  | bdebstrap | single         | Within setup phase
 | extract    | bdebstrap | bundle         | After `Essential:yes` packages have been extracted, before installing them
 | essential  | bdebstrap | bundle         | After `Essential:yes` packages have been installed, before installing remaining packages
 | customize  | bdebstrap | bundle         | After all packages are installed, before cleanup commences
 | cleanup    | bdebstrap | bundle         | After customize
 | post-build | main      | single         | After bdebstrap, before sbom
-| sbom       | main      | single         | After post-build, before pre-image. Layer driven.
+| sbom       | main      | single         | After post-build
 | pre-image  | main      | single         | After sbom, before image generation
 | post-image | main      | single         | After image generation
-| deploy     | main      | single         | Final stage, after post-image
+| finalize   | main      | single         | After sbom and image generation, before deploy
+| deploy     | main      | single         | Final stage
 |===
 
 === Hook Classification: bundle
