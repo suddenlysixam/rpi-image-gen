@@ -44,8 +44,8 @@ IGROOT:pre-image.sh \
 SRCROOT:pre-image.sh"
 
    [post-image]="\
-DEVICE_ASSET:post-image.sh|IGROOT_device:post-image.sh \
-IMAGE_ASSET:post-image.sh|IGROOT_image:post-image.sh \
+DEVICE_ASSET:post-image.sh IGROOT_device:post-image.sh \
+IMAGE_ASSET:post-image.sh IGROOT_image:post-image.sh \
 IGROOT:post-image.sh \
 SRCROOT:post-image.sh"
 
