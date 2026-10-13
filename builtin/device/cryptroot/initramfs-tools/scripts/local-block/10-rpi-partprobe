@@ -15,7 +15,7 @@ esac
 
 . /scripts/functions
 
-. /conf/conf.d/rpi-cryptroot
+. /etc/rpi/cryptroot.conf
 
 # Called repeatedly while waiting for a block device
 for dev in ${PARTPROBE_DEVICES-}; do
