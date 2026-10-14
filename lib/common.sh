@@ -55,6 +55,7 @@ runsafe()
       SHELL="${SHELL:-}" \
       HOME="${HOME:-}" \
       ${TERM:+TERM="$TERM"} \
+      ${XDG_RUNTIME_DIR:+XDG_RUNTIME_DIR="$XDG_RUNTIME_DIR"} \
       ${PYTHONPATH:+PYTHONPATH="$PYTHONPATH"} \
       ${NS_SETUP:+NS_SETUP="$NS_SETUP"} \
       ${_NS_APT_ARCHIVES:+_NS_APT_ARCHIVES="$_NS_APT_ARCHIVES"} \
