@@ -3,6 +3,7 @@
 set -eu
 
 echo "${SOURCE_DATE_EPOCH:?}" > "${IGconf_target_dir}/SOURCE_DATE_EPOCH"
+echo "${IG_BUILD_ID:?}" > "${IGconf_target_dir}/BUILD_ID"
 
 # Ensure epoch is always published to build env
 env="${IGconf_sys_bootstrapdir}/final.env"
